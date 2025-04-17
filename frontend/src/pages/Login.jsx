@@ -1,53 +1,100 @@
-import React, { useState } from 'react';
-import api from '/utils/api';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Box, Card, CardContent } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // ✅ Add this
+import Navbar from '@/components/organisms/Navbar';
+import LoginForm from '@/components/molecules/LoginForm';
+import api from 'utils/api';
+
 
 const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
+    const handleLogin = async ({ email, password }) => {
         try {
-            const response = await api.post('/login', { email, password });
-            localStorage.setItem('token', response.data.token); // Save token to localStorage
-            localStorage.setItem('role', role);
-            alert('Login successful!');
+            const response = await api.post('/login', {
+                email,
+                password,
+            });
 
-            if (role === 'admin') {
+            // Save token and role to localStorage
+            localStorage.setItem('token', response.data.token);
+            localStorage.setItem('role', response.data.user.role);
+
+            // Redirect based on role
+            const userRole = response.data.user.role;
+            if (userRole === 'admin') {
                 navigate('/admin/dashboard'); // Redirect to admin dashboard
-            } else if (role === 'user') {
-                navigate('/student/dashboard'); // Redirect to user dashboard
+            } else {
+                navigate('/dashboard'); // Redirect to user dashboard
             }
-        } catch (err) {
-            setError('Invalid email or password');
+        } catch (error) {
+            console.error('Login failed:', error);
+            alert('Invalid email or password');
         }
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-        </div>
+        <Box
+            sx={{
+                position: 'relative',
+                minHeight: '100vh',
+                backgroundImage: 'url(/img/main-entrance.png)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
+            {/* Navbar */}
+            <Box
+                sx={{
+                    position: 'relative', // Ensure Navbar is positioned relative to the parent
+                    zIndex: 3, // Higher zIndex than the overlay
+                }}
+            >
+                <Navbar />
+            </Box>
+
+            {/* Overlay */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    zIndex: 1, // Lower zIndex than the Navbar
+                }}
+            />
+
+            {/* Login Form Section */}
+            <Box
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    padding: 3,
+                    zIndex: 2, // Ensure content appears above the overlay
+                }}
+            >
+                <Card
+                    sx={{
+                        width: '100%',
+                        maxWidth: '400px',
+                        backgroundColor: '#0d1b2a',
+                        color: '#000',
+                        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                    }}
+                >
+                    <CardContent>
+                        <LoginForm onSubmit={handleLogin} />
+                    </CardContent>
+                </Card>
+            </Box>
+        </Box>
     );
 };
 

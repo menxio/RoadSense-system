@@ -1,16 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import api from './utils/api';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import StudentDashboard from './pages/StudentDashboard';
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import AppRoutes from '@/routes/index';
 
 const App = () => {
     return (
-        <Router>
-            <Routes>
-                <Route path="/user/dashboard" element={<StudentDashboard />} />
-                {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
-            </Routes>
-        </Router>
+        <BrowserRouter>
+            <AppRoutes />
+        </BrowserRouter>
     );
 };
 
