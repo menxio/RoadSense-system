@@ -1,48 +1,29 @@
-import React, { useState } from 'react';
-import api from '/utils/api';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import LoginForm from '@/components/molecules/LoginForm';
+import api from 'utils/api';
 
-const Login = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const navigate = useNavigate();
-
-    const handleLogin = async (e) => {
-        e.preventDefault();
+const Login = ({ onLogin }) => {
+    const handleLogin = async ({ email, password }) => {
         try {
-            const response = await api.post('/login', { email, password });
-            localStorage.setItem('token', response.data.token); // Save token to localStorage
+            const response = await api.post('/login', {
+                email,
+                password,
+            });
+
+            // Save token to localStorage
+            localStorage.setItem('token', response.data.token);
+
+            // Pass user data to parent component
+            onLogin(response.data.user);
+
             alert('Login successful!');
-            navigate('/dashboard'); // Redirect to dashboard after login
-        } catch (err) {
-            setError('Invalid email or password');
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw new Error('Invalid email or password');
         }
     };
 
-    return (
-        <div>
-            <h2>Login</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleLogin}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit">Login</button>
-            </form>
-        </div>
-    );
+    return <LoginForm onSubmit={handleLogin} />;
 };
 
 export default Login;
