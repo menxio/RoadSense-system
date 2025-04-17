@@ -15,11 +15,11 @@ const Login = () => {
                 email,
                 password,
             });
-
+    
             // Save token and role to localStorage
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('role', response.data.user.role);
-
+    
             // Redirect based on role
             const userRole = response.data.user.role;
             if (userRole === 'admin') {
@@ -29,7 +29,13 @@ const Login = () => {
             }
         } catch (error) {
             console.error('Login failed:', error);
-            alert('Invalid email or password');
+    
+            // Display a more specific error message
+            if (error.response && error.response.status === 401) {
+                alert('Invalid email or password');
+            } else {
+                alert('An error occurred. Please try again later.');
+            }
         }
     };
 
