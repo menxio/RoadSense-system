@@ -1,13 +1,21 @@
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
-import Navbar from '@/components/organisms/Navbar'; // Import the Navbar component
+import Navbar from '@/components/organisms/Navbar';
+import { useNavigate } from 'react-router-dom';
 
 const Landing = () => {
+    const navigate = useNavigate();
+
+    const handleGetStarted = () => {
+        navigate('/login');
+    };
+
     return (
         <Box
             sx={{
+                position: 'relative',
                 minHeight: '100vh',
-                backgroundImage: 'url(/img/main-entrance.png)', // Ensure the image path is correct
+                backgroundImage: 'url(/img/main-entrance.png)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
@@ -16,7 +24,27 @@ const Landing = () => {
             }}
         >
             {/* Navbar */}
-            <Navbar />
+            <Box
+                sx={{
+                    position: 'relative', // Ensure Navbar is positioned relative to the parent
+                    zIndex: 3, // Higher zIndex than the overlay
+                }}
+            >
+                <Navbar />
+            </Box>
+
+            {/* Overlay */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    zIndex: 1, // Lower zIndex than the Navbar
+                }}
+            />
 
             {/* Hero Section */}
             <Box
@@ -29,6 +57,7 @@ const Landing = () => {
                     textAlign: 'center',
                     color: '#fff',
                     padding: 3,
+                    zIndex: 2, // Ensure content appears above the overlay
                 }}
             >
                 <Typography variant="h2" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
@@ -39,6 +68,7 @@ const Landing = () => {
                 </Typography>
                 <Button
                     variant="contained"
+                    onClick={handleGetStarted}
                     sx={{
                         backgroundColor: '#FF0000',
                         padding: '10px 20px',

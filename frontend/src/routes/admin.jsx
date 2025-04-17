@@ -1,23 +1,27 @@
-import React from 'react';
-import { Route, Navigate } from 'react-router-dom';
-import Dashboard from '@/pages/admin/Dashboard';
-// import ManageUsers from '@/pages/admin/ManageUsers';
+import React, { lazy } from 'react';
+import { Route } from 'react-router-dom';
 
-const isAdmin = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    return user?.role === 'admin';
-};
+const Dashboard = lazy(() => import('@/pages/admin/Dashboard'));
+const Users = lazy(() => import('@/pages/admin/Users'));
 
 const adminRoutes = [
     <Route
         key="admin-dashboard"
         path="/admin/dashboard"
-        element={isAdmin() ? <Dashboard /> : <Navigate to="/" />}
+        element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+                <Dashboard />
+            </React.Suspense>
+        }
     />,
     <Route
         key="admin-manage-users"
         path="/admin/manage-users"
-        element={isAdmin() ? <ManageUsers /> : <Navigate to="/" />}
+        element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+                <Users />
+            </React.Suspense>
+        }
     />,
 ];
 

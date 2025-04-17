@@ -1,12 +1,13 @@
 import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 
 const Navbar = () => {
     return (
         <AppBar
             position="static"
             sx={{
-                backgroundColor: '#0d1b2a', // Dark blue color
+                backgroundColor: '#0d1b2a',
                 boxShadow: 'none',
                 padding: '10px 20px',
             }}
@@ -14,20 +15,22 @@ const Navbar = () => {
             <Toolbar sx={{ justifyContent: 'space-between' }}>
                 {/* Logo */}
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <img
-                        src="/images/logo.png" // Replace with your logo path
-                        alt="RoadSense Logo"
-                        style={{ height: '40px', marginRight: '10px' }}
-                    />
-                    <Typography
-                        variant="h6"
-                        sx={{
-                            fontWeight: 'bold',
-                            color: '#fff',
-                        }}
-                    >
-                        RoadSense
-                    </Typography>
+                    <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                        <img
+                            src="/img/logo.png" // Replace with the correct logo path
+                            alt="RoadSense Logo"
+                            style={{ height: '40px', marginRight: '10px' }}
+                        />
+                        <Typography
+                            variant="h6"
+                            sx={{
+                                fontWeight: 'bold',
+                                color: '#fff',
+                            }}
+                        >
+                            RoadSense
+                        </Typography>
+                    </Link>
                 </Box>
 
                 {/* Navigation Links */}
