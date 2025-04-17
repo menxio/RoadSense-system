@@ -1,40 +1,22 @@
 import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
+import { Box, Typography, Button } from '@mui/material';
+import Navbar from '@/components/organisms/Navbar'; // Import the Navbar component
 
 const Landing = () => {
     return (
         <Box
             sx={{
                 minHeight: '100vh',
-                backgroundImage: 'url(/images/main-entrance.png)', // Replace with your image path
+                backgroundImage: 'url(/img/main-entrance.png)', // Ensure the image path is correct
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
                 display: 'flex',
                 flexDirection: 'column',
             }}
         >
-            {/* Navigation Bar */}
-            <AppBar position="static" sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
-                <Toolbar sx={{ justifyContent: 'space-between' }}>
-                    <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#fff' }}>
-                        RoadSense
-                    </Typography>
-                    <Box>
-                        <Button color="inherit" sx={{ color: '#fff', marginRight: 2 }}>
-                            About Us
-                        </Button>
-                        <Button color="inherit" sx={{ color: '#fff', marginRight: 2 }}>
-                            Services
-                        </Button>
-                        <Button color="inherit" sx={{ color: '#fff', marginRight: 2 }}>
-                            Login
-                        </Button>
-                        <Button variant="contained" sx={{ backgroundColor: '#6C63FF' }}>
-                            Sign Up
-                        </Button>
-                    </Box>
-                </Toolbar>
-            </AppBar>
+            {/* Navbar */}
+            <Navbar />
 
             {/* Hero Section */}
             <Box
@@ -62,6 +44,7 @@ const Landing = () => {
                         padding: '10px 20px',
                         fontSize: '16px',
                         fontWeight: 'bold',
+                        '&:hover': { backgroundColor: '#cc0000' },
                     }}
                 >
                     Get Started
