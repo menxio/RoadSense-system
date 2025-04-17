@@ -13,8 +13,14 @@ const Login = () => {
         try {
             const response = await api.post('/login', { email, password });
             localStorage.setItem('token', response.data.token); // Save token to localStorage
+            localStorage.setItem('role', role);
             alert('Login successful!');
-            navigate('/dashboard'); // Redirect to dashboard after login
+
+            if (role === 'admin') {
+                navigate('/admin/dashboard'); // Redirect to admin dashboard
+            } else if (role === 'user') {
+                navigate('/student/dashboard'); // Redirect to user dashboard
+            }
         } catch (err) {
             setError('Invalid email or password');
         }

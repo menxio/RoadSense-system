@@ -1,24 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import api from './utils/api';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import StudentDashboard from './pages/StudentDashboard';
 
 const App = () => {
-    const [data, setData] = useState(null);
-
-    useEffect(() => {
-        api.get('/example-endpoint')
-            .then((response) => {
-                setData(response.data);
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-            });
-    }, []);
-
     return (
-        <div>
-            <h1>Data from Backend</h1>
-            <pre>{JSON.stringify(data, null, 2)}</pre>
-        </div>
+        <Router>
+            <Routes>
+                <Route path="/user/dashboard" element={<StudentDashboard />} />
+                {/* <Route path="/admin/dashboard" element={<AdminDashboard />} /> */}
+            </Routes>
+        </Router>
     );
 };
 

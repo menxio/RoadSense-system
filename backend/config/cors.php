@@ -21,7 +21,6 @@ return [
 
     'allowed_origins' => [
     'http://localhost:5173', // Frontend development server
-    'http://127.0.0.1:5173', // Alternative localhost
     'http://backend.test',   // Backend custom domain
     ],
 
