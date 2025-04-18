@@ -3,6 +3,7 @@ import { Route } from 'react-router-dom';
 
 const Dashboard = lazy(() => import('@/pages/admin/Dashboard'));
 const Users = lazy(() => import('@/pages/admin/Users'));
+const Vehicles = lazy(() => import('@/pages/admin/Vehicles/Vehicles'));
 
 const adminRoutes = [
     <Route
@@ -20,6 +21,15 @@ const adminRoutes = [
         element={
             <React.Suspense fallback={<div>Loading...</div>}>
                 <Users />
+            </React.Suspense>
+        }
+    />,
+    <Route
+        key="admin-manage-vehicles"
+        path="/admin/vehicles"
+        element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+                <Vehicles />
             </React.Suspense>
         }
     />,

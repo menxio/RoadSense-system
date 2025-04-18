@@ -9,6 +9,7 @@ Route::post('/login', [AuthController::class, 'login']); // Login route
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::post('/logout', [AuthController::class, 'logout']); // Logout route
 
     // Admin Routes
