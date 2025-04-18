@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import { Route } from 'react-router-dom';
-// import Dashboard from '@/pages/user/Dashboard';
 // import Profile from '@/pages/user/Profile';
 
+const Dashboard = lazy(() => import('@/pages/student/Dashboard'));
+
 const userRoutes = [
-    // <Route key="user-dashboard" path="/dashboard" element={<Dashboard />} />,
+    <Route key="student-dashboard" path="/student/dashboard" element={<Dashboard />} />,
     // <Route key="user-profile" path="/profile" element={<Profile />} />,
 ];
 

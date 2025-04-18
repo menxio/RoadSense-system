@@ -8,11 +8,11 @@ import {
   AlertCircleIcon,
   InfoIcon,
 } from 'lucide-react';
-import { DashboardLayout } from '../components/DashboardLayout';
-import { StatsCard } from '../components/StatsCard';
-import { ViolationsTable } from '../components/ViolationsTable';
+import { DashboardLayout } from '../../components/DashboardLayout';
+import { StatsCard } from '../../components/StatsCard';
+import { ViolationsTable } from '../../components/ViolationsTable';
 
-const StudentDashboard = () => {
+const Dashboard = () => {
   const sidebarItems = [
     {
       icon: <LayoutDashboardIcon size={20} />,
@@ -107,4 +107,4 @@ const StudentDashboard = () => {
   );
 };
 
-export default StudentDashboard;
+export default Dashboard;
