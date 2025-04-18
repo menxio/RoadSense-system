@@ -10,7 +10,6 @@ class ViolationController extends Controller
 {
     public function store(Request $request)
     {
-        // Validate only the required fields
         $validated = $request->validate([
             'plate_number' => 'required|string',
             'detected_at' => 'required|date',
@@ -25,7 +24,6 @@ class ViolationController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        // Create the violation
         $violation = Violation::create([
             'custom_user_id' => $user->custom_id,
             'plate_number' => $validated['plate_number'],
