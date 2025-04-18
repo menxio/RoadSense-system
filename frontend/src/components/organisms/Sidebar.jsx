@@ -77,7 +77,7 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/manage-violations')}>
+          <ListItemButton onClick={() => navigate('/admin/violations')}>
             <ListItemIcon sx={{ color: 'white' }}>
               <WarningIcon />
             </ListItemIcon>
@@ -100,7 +100,6 @@ const Sidebar = () => {
             <ListItemText primary="Reports" />
           </ListItemButton>
         </ListItem>
-        {/* Add Manage Vehicles */}
         <ListItem disablePadding>
           <ListItemButton onClick={() => navigate('/admin/vehicles')}>
             <ListItemIcon sx={{ color: 'white' }}>

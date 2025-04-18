@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 const Dashboard = lazy(() => import('@/pages/admin/Dashboard'));
 const Users = lazy(() => import('@/pages/admin/Users'));
 const Vehicles = lazy(() => import('@/pages/admin/Vehicles/Vehicles'));
+const Violations = lazy(() => import('@/pages/admin/Violations/Violations'));
 
 const adminRoutes = [
     <Route
@@ -30,6 +31,15 @@ const adminRoutes = [
         element={
             <React.Suspense fallback={<div>Loading...</div>}>
                 <Vehicles />
+            </React.Suspense>
+        }
+    />,
+    <Route
+        key="admin-manage-violations"
+        path="/admin/violations"
+        element={
+            <React.Suspense fallback={<div>Loading...</div>}>
+                <Violations />
             </React.Suspense>
         }
     />,

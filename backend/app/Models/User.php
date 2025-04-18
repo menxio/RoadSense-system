@@ -15,8 +15,10 @@ class User extends Model implements AuthenticatableContract
     protected $collection = 'users';
 
     protected $fillable = [
+        'custom_id',
         'name',
         'email',
+        'plate_number',
         'password',
         'role',
     ];
