@@ -1,17 +1,25 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 
+// Public Routes
 Route::post('/register', [AuthController::class, 'register']); // Register route
 Route::post('/login', [AuthController::class, 'login']); // Login route
-Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum'); // Logout route
 
-Route::prefix('user')->middleware('auth:sanctum')->group(function () {
-    Route::get('/', [UserController::class, 'index']);
-    Route::post('/', [UserController::class, 'create']);
-    Route::get('/{id}', [UserController::class, 'read']);
-    Route::put('/{id}', [UserController::class, 'update']);
-    Route::delete('/{id}', [UserController::class, 'delete']);
+// Protected Routes
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']); // Logout route
+
+    // Admin Routes
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/dashboard', [UserController::class, 'adminDashboard']);
+        Route::get('/manage-users', [UserController::class, 'manageUsers']);
+    });
+
+    // User Routes
+    Route::middleware('role:user')->prefix('user')->group(function () {
+        Route::get('/dashboard', [UserController::class, 'userDashboard']);
+        Route::get('/profile', [UserController::class, 'profile']);
+    });
 });

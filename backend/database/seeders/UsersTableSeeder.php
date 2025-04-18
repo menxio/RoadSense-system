@@ -9,18 +9,17 @@ class UsersTableSeeder extends Seeder
 {
     public function run()
     {
-        // 1 admin
-        $admin = User::factory()->create([
+        // Create admin user
+        User::create([
             'name' => 'Admin User',
-            'email' => 'admin@example.com',
-            'password' => bcrypt('password'),
+            'email' => 'admin@roadsense.com',
+            'password' => bcrypt('Password!123'),
+            'role' => 'admin',
         ]);
-        $admin->assignRole('admin'); 
 
-        // 10 users
-        $users = User::factory(10)->create();
-        foreach ($users as $user) {
-            $user->assignRole('user');
-        }
+        // // Create regular users
+        // User::factory(10)->create([
+        //     'role' => 'user',
+        // ]);
     }
 }
