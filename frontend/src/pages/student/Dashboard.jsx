@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Grid } from '@mui/material';
 import {
   LayoutDashboardIcon,
@@ -11,8 +11,14 @@ import {
 import { DashboardLayout } from '../../components/DashboardLayout';
 import { StatsCard } from '../../components/StatsCard';
 import { ViolationsTable } from '../../components/ViolationsTable';
+import api from 'utils/api'; // Replace with your API utility
 
 const Dashboard = () => {
+  const [user, setUser] = useState({
+    name: '',
+    role: '',
+  });
+
   const sidebarItems = [
     {
       icon: <LayoutDashboardIcon size={20} />,
@@ -41,14 +47,31 @@ const Dashboard = () => {
     console.log(`Action: ${action}`);
   };
 
+  // Fetch user data when the component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.get('/user'); // Replace with your API endpoint
+        setUser({
+          name: response.data.name,
+          role: response.data.role,
+        });
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <DashboardLayout
       logo="RoadSense"
       sidebarItems={sidebarItems}
       activePath="/dashboard"
       onNavigate={handleNavigate}
-      userName="Catherine Ledner"
-      userRole="Student"
+      userName={user.name}
+      userRole={user.role}
     >
       <Typography
         variant="h4"

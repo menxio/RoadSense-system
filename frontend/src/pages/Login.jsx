@@ -25,7 +25,7 @@ const Login = () => {
             if (userRole === 'admin') {
                 navigate('/admin/dashboard'); // Redirect to admin dashboard
             } else {
-                navigate('/dashboard'); // Redirect to user dashboard
+                navigate('/student/dashboard'); // Redirect to user dashboard
             }
         } catch (error) {
             console.error('Login failed:', error);

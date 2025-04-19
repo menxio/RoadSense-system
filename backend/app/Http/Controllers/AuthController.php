@@ -15,8 +15,10 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'plate_number' => 'required|string|unique:users,plate_number',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:admin,user',
         ]);
+
+        // Set default role as 'user' for student
+        $validated['role'] = 'user';
 
         // Get latest custom_id and increment
         $latestUser = User::orderByDesc('_id')->first(); // since you're using Mongo
