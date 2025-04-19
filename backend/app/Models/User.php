@@ -12,10 +12,13 @@ class User extends Model implements AuthenticatableContract
     use Authenticatable, Notifiable, HasMongoApiTokens;
 
     protected $connection = 'mongodb';
+    protected $collection = 'users';
 
     protected $fillable = [
+        'custom_id',
         'name',
         'email',
+        'plate_number',
         'password',
         'role',
     ];

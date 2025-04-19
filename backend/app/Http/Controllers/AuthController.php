@@ -8,25 +8,29 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
-
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed', // Ensure password confirmation
+            'plate_number' => 'required|string|unique:users,plate_number',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:admin,user',
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => bcrypt($validated['password']),
-        ]);
+        // Get latest custom_id and increment
+        $latestUser = User::orderByDesc('_id')->first(); // since you're using Mongo
+        $latestId = $latestUser?->custom_id ?? 'GP0000';
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user,
-        ], 201);
+        $number = (int) substr($latestId, 2);
+        $newCustomId = 'GP' . str_pad($number + 1, 4, '0', STR_PAD_LEFT);
+
+        $validated['custom_id'] = $newCustomId;
+        $validated['password'] = bcrypt($validated['password']);
+
+        $user = User::create($validated);
+
+        return response()->json($user, 201);
     }
 
     // Login method

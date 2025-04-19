@@ -1,117 +1,74 @@
 import React from 'react';
-import { Box, Typography, Card, CardContent, Grid, Button } from '@mui/material';
+import { Box, Container, Grid, Typography } from '@mui/material';
+import Sidebar from '@/components/organisms/Sidebar';
+import Header from '@/components/organisms/Header';
+import StatCard from '@/components/molecules/StatCard';
+import ChartCard from '@/components/molecules/ChartCard';
+import { 
+  CalendarMonth as CalendarIcon, 
+  Group as GroupIcon,
+  Warning as WarningIcon
+} from '@mui/icons-material';
 
 const Dashboard = () => {
-    return (
-        <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-            {/* Sidebar */}
-            <Box
-                sx={{
-                    width: '250px',
-                    backgroundColor: '#1a202c',
-                    color: '#fff',
-                    padding: 2,
-                }}
-            >
-                <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 3 }}>
-                    RoadSense
-                </Typography>
-                <Box sx={{ marginBottom: 2 }}>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Dashboard
-                    </Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Violation Types
-                    </Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Live Cam
-                    </Typography>
-                </Box>
-                <Typography variant="body2" sx={{ marginTop: 3, color: '#aaa' }}>
-                    MAINTENANCE
-                </Typography>
-                <Box sx={{ marginTop: 1 }}>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Manage Violations
-                    </Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Manage Users
-                    </Typography>
-                    <Typography variant="body1" sx={{ marginBottom: 1 }}>
-                        Reports
-                    </Typography>
-                </Box>
-                <Typography variant="body1" sx={{ marginTop: 3, color: '#aaa' }}>
-                    Logout
-                </Typography>
-            </Box>
+  const user = { firstName: 'Admin', lastName: 'User' }; // temp
 
-            {/* Main Content */}
-            <Box sx={{ flex: 1, padding: 3 }}>
-                {/* Welcome Message */}
-                <Typography variant="h4" sx={{ fontWeight: 'bold', marginBottom: 3 }}>
-                    Welcome Angel Admin!
-                </Typography>
-
-                {/* Statistics Cards */}
-                <Grid container spacing={3}>
-                    <Grid item xs={12} sm={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Today's Violations</Typography>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', marginY: 2 }}>
-                                    0
-                                </Typography>
-                                <Button variant="text">VIEW</Button>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Total Driver's Listed</Typography>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', marginY: 2 }}>
-                                    0
-                                </Typography>
-                                <Button variant="text">VIEW</Button>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Total Traffic Violations</Typography>
-                                <Typography variant="h4" sx={{ fontWeight: 'bold', marginY: 2 }}>
-                                    0
-                                </Typography>
-                                <Button variant="text">VIEW</Button>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-
-                {/* Charts Section */}
-                <Grid container spacing={3} sx={{ marginTop: 3 }}>
-                    <Grid item xs={12} sm={6}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Violation Distribution</Typography>
-                                {/* Add your chart or placeholder here */}
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Monthly Violations</Typography>
-                                {/* Add your chart or placeholder here */}
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-            </Box>
-        </Box>
-    );
+  return (
+    <>
+      <Sidebar />
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          bgcolor: 'background.default',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '100vh',
+        }}
+      >
+        <Header user={user} />
+        <Container maxWidth="xl" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
+          <Typography variant="h3" sx={{ mb: 4, color: '#5a6a7a' }}>
+            Welcome {user.firstName} {user.lastName}!
+          </Typography>
+          <Grid container spacing={3} sx={{ mb: 4 }}>
+            <Grid item xs={12} md={4}>
+              <StatCard 
+                title="Today's Violations" 
+                value="0" 
+                icon={<CalendarIcon fontSize="large" />}
+                buttonColor="primary"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <StatCard 
+                title="Total Driver's Listed" 
+                value="0" 
+                icon={<GroupIcon fontSize="large" />}
+                buttonColor="success"
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
+              <StatCard 
+                title="Total Traffic Violations" 
+                value="0" 
+                icon={<WarningIcon fontSize="large" />}
+                buttonColor="warning"
+              />
+            </Grid>
+          </Grid>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={7}>
+              <ChartCard title="Violation Distribution" />
+            </Grid>
+            <Grid item xs={12} md={5}>
+              <ChartCard title="Monthly Violations" />
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    </>
+  );
 };
 
 export default Dashboard;
