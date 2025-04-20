@@ -1,7 +1,9 @@
 # PROJECT ROADSENSE
-*items enclosed in `` are commands.
-*to copy and paste, do: `cat` <fle_name> and CTRL+SHIFT+C on the terminal text output.
-*the scripts are silent, logs are written in .log files.
+*items enclosed in  are commands.*
+
+*to copy and paste, do: `cat` <file_name> and CTRL+SHIFT+C on the terminal text output.*
+
+*the scripts are silent, logs are written in .log files.*
 
 ## setup
 `source` ~.bashrc
