@@ -1,0 +1,4 @@
+*.mp4
+violation_logging/node_modules/
+violation_logging/*.env
+*.log
