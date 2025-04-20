@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Kill processes using saved PIDs
 if [ -f run_predictions.pid ]; then
     kill $(cat run_predictions.pid) && echo "Stopped run_predictions.py"
     rm run_predictions.pid
