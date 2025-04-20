@@ -1,11 +1,11 @@
-import api from '@/utils/api';
+import api from "@/utils/api";
 
-export const getUser = async () => {
+export const getUsers = async () => {
   try {
-    const response = await api.get('/user');
-    return response.data; 
+    const response = await api.get("/users");
+    return response.data;
   } catch (error) {
-    console.error('Error fetching user data:', error);
-    throw error; 
+    console.error("Error fetching user data:", error);
+    throw error;
   }
 };
