@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Box,
   Drawer,
@@ -8,7 +8,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Dashboard as DashboardIcon,
   List as ListIcon,
@@ -17,19 +17,18 @@ import {
   People as PeopleIcon,
   Assessment as AssessmentIcon,
   Logout as LogoutIcon,
-  DirectionsCar as DirectionsCarIcon, // Import vehicle icon
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom'; // Import navigation hook
+  DirectionsCar as DirectionsCarIcon,
+} from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
 const Sidebar = () => {
-  const navigate = useNavigate(); // Initialize navigation
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Clear user session (e.g., token) and redirect to login
-    localStorage.removeItem('token');
-    navigate('/login');
+    localStorage.removeItem("token");
+    navigate("/login");
   };
 
   return (
@@ -38,11 +37,11 @@ const Sidebar = () => {
       sx={{
         width: drawerWidth,
         flexShrink: 0,
-        '& .MuiDrawer-paper': {
+        "& .MuiDrawer-paper": {
           width: drawerWidth,
-          boxSizing: 'border-box',
-          backgroundColor: '#0d1b2a',
-          color: 'white',
+          boxSizing: "border-box",
+          backgroundColor: "#0d1b2a",
+          color: "white",
         },
       }}
     >
@@ -53,65 +52,49 @@ const Sidebar = () => {
       </Box>
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/dashboard')}>
-            <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemButton onClick={() => navigate("/admin/dashboard")}>
+            <ListItemIcon sx={{ color: "white" }}>
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText primary="Dashboard" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/violation-types')}>
-            <ListItemIcon sx={{ color: 'white' }}>
-              <ListIcon />
-            </ListItemIcon>
-            <ListItemText primary="Violation Types" />
-          </ListItemButton>
-        </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/live-cam')}>
-            <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemButton onClick={() => navigate("/admin/camera1")}>
+            <ListItemIcon sx={{ color: "white" }}>
               <VideocamIcon />
             </ListItemIcon>
             <ListItemText primary="Live Cam" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/violations')}>
-            <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemButton onClick={() => navigate("/admin/violations")}>
+            <ListItemIcon sx={{ color: "white" }}>
               <WarningIcon />
             </ListItemIcon>
             <ListItemText primary="Manage Violations" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/manage-users')}>
-            <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemButton onClick={() => navigate("/admin/users")}>
+            <ListItemIcon sx={{ color: "white" }}>
               <PeopleIcon />
             </ListItemIcon>
             <ListItemText primary="Manage Users" />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/reports')}>
-            <ListItemIcon sx={{ color: 'white' }}>
+          <ListItemButton onClick={() => navigate("/admin/reports")}>
+            <ListItemIcon sx={{ color: "white" }}>
               <AssessmentIcon />
             </ListItemIcon>
             <ListItemText primary="Reports" />
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/admin/vehicles')}>
-            <ListItemIcon sx={{ color: 'white' }}>
-              <DirectionsCarIcon />
-            </ListItemIcon>
-            <ListItemText primary="Manage Vehicles" />
-          </ListItemButton>
-        </ListItem>
         {/* Logout */}
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
-            <ListItemIcon sx={{ color: 'white' }}>
+            <ListItemIcon sx={{ color: "white" }}>
               <LogoutIcon />
             </ListItemIcon>
             <ListItemText primary="Logout" />

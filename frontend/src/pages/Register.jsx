@@ -1,84 +1,48 @@
 import React from 'react';
-import { Box, TextField, Button, Typography } from '@mui/material';
-import api from 'utils/api';
+import { Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import RegisterForm from '@/components/molecules/RegisterForm';
+import api from 'utils/api';
 
 const Register = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleRegister = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+  const handleRegister = async (values, { setSubmitting, setErrors, resetForm }) => {
+    try {
+      const response = await api.post('/register', {
+        name: values.username,
+        email: values.email,
+        plate_number: values.plate_number,
+        password: values.password,
+      });
 
-        try {
-            const response = await api.post('/register', {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                password: formData.get('password'),
-            });
+      alert('Registration successful! Redirecting to login...');
+      resetForm();
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err) {
+      if (err.response?.data?.errors) {
+        setErrors({ apiError: Object.values(err.response.data.errors).join(', ') });
+      } else {
+        setErrors({ apiError: err.response?.data?.message || 'An error occurred during registration' });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-            alert('Registration successful! Please log in.');
-            navigate('/login');
-        } catch (error) {
-            console.error('Registration failed:', error);
-            alert('Registration failed. Please try again.');
-        }
-    };
-
-    return (
-        <Box
-            sx={{
-                minHeight: '100vh',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: '#f5f5f5',
-            }}
-        >
-            <Box
-                component="form"
-                onSubmit={handleRegister}
-                sx={{
-                    width: '100%',
-                    maxWidth: '400px',
-                    padding: 3,
-                    backgroundColor: '#fff',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-                    borderRadius: 2,
-                }}
-            >
-                <Typography variant="h5" sx={{ fontWeight: 'bold', marginBottom: 2 }}>
-                    Register
-                </Typography>
-                <TextField
-                    label="Name"
-                    name="name"
-                    fullWidth
-                    required
-                    sx={{ marginBottom: 2 }}
-                />
-                <TextField
-                    label="Email"
-                    name="email"
-                    type="email"
-                    fullWidth
-                    required
-                    sx={{ marginBottom: 2 }}
-                />
-                <TextField
-                    label="Password"
-                    name="password"
-                    type="password"
-                    fullWidth
-                    required
-                    sx={{ marginBottom: 2 }}
-                />
-                <Button type="submit" variant="contained" fullWidth>
-                    Register
-                </Button>
-            </Box>
-        </Box>
-    );
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        backgroundColor: '#0d1b2a',
+      }}
+    >
+      <RegisterForm onSubmit={handleRegister} />
+    </Box>
+  );
 };
 
 export default Register;

@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\PersonalAccessToken;
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -83,22 +81,41 @@ class UserController extends Controller
 
         return response()->json(['message' => 'User deleted successfully']);
     }
+
     public function getCurrentUser(Request $request)
     {
         try {
-            $token = $request->bearerToken();
-            if (!$token) {
-                return response()->json(['error' => 'Token not provided'], 401);
-            }
+            // Use the authenticated user provided by Sanctum
+            $user = $request->user();
 
-            $personalAccessToken = PersonalAccessToken::findToken($token);
-            if (!$personalAccessToken) {
-                return response()->json(['error' => 'Invalid token'], 401);
-            }
 
-            $user = $personalAccessToken->tokenable; // Retrieve the associated user
+            \Log::info('Hello world');
+
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
+            }
+
+            // Return the user's details
+            return response()->json([
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'plate_number' => $user->plate_number,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching user', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function getUserById($id)
+    {
+        try {
+            // Fetch user by ID
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
             }
 
             return response()->json($user);

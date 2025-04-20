@@ -5,9 +5,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Violation;
+use Carbon\Carbon;
 
 class ViolationController extends Controller
 {
+    public function index()
+    {
+        return response()->json(Violation::all());
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -34,5 +40,36 @@ class ViolationController extends Controller
         ]);
 
         return response()->json($violation, 201);
+    }
+    
+    public function show($customUserId)
+    {
+        $violations = Violation::where('custom_user_id', $customUserId)->get();
+
+        if ($violations->isEmpty()) {
+            return response()->json(['message' => 'No violations found for this user'], 404);
+        }
+
+        // Get the start and end of today in ISO 8601 format
+        $startOfToday = Carbon::now()->startOfDay()->toIso8601String();
+        $endOfToday = Carbon::now()->endOfDay()->toIso8601String();
+
+        // Log the start and end of today for debugging
+        \Log::info('Start of Today: ' . $startOfToday);
+        \Log::info('End of Today: ' . $endOfToday);
+
+        // Count today's violations for this custom_user_id
+        $todaysViolationsCount = Violation::where('custom_user_id', $customUserId)
+            ->where('detected_at', '>=', $startOfToday) // Start of today
+            ->where('detected_at', '<=', $endOfToday)   // End of today
+            ->count();
+
+        $totalViolationsCount = Violation::where('custom_user_id', $customUserId)->count();
+
+        return response()->json([
+            'violations' => $violations,
+            'todays_violations_count' => $todaysViolationsCount,
+            'total_violations_count' => $totalViolationsCount,
+        ]);
     }
 }

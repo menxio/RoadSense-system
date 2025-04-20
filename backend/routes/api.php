@@ -14,11 +14,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // Admin Routes
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
-        Route::get('/dashboard', [UserController::class, 'adminDashboard']);
-        Route::get('/manage-users', [UserController::class, 'manageUsers']);
-    });
+    // // Admin Routes
+    // Route::middleware('role:admin')->prefix('admin')->group(function () {
+    //     Route::get('/dashboard', [UserController::class, 'adminDashboard']);
+    //     Route::get('/user', [UserController::class, 'index']);
+    // });
 
     // User Routes
     Route::middleware('role:user')->prefix('user')->group(function () {
@@ -27,7 +27,14 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-// Violations Routes (for both roles)
+// User Routes
+
+Route::prefix('users')->group(function() {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/user', [UserController::class, 'getCurrentUser']);
+});
+
+// Violations Routes
 Route::prefix('violations')->group(function () {
     Route::get('/', [ViolationController::class, 'index']);
     Route::post('/', [ViolationController::class, 'store']);

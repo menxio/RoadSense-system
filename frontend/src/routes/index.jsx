@@ -4,6 +4,7 @@ import Landing from '@/pages/Landing';
 import adminRoutes from './admin';
 import userRoutes from './user';
 import Login from '@/pages/Login';
+import Register from '@/pages/Register';
 
 const AppRoutes = () => {
     return (
@@ -14,6 +15,8 @@ const AppRoutes = () => {
             {/* Unauthenticated Routes */}
             <Route path="/login" element={<Login />} />
             {/* <Route path="/register" element={<Register />} /> */}
+
+            <Route path="/register" element={<Register />} />
 
             {/* Admin Routes */}
             {adminRoutes}
