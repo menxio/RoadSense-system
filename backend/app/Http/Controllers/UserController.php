@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Models\PersonalAccessToken;
-use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -104,6 +102,23 @@ class UserController extends Controller
                 'role' => $user->role,
                 'plate_number' => $user->plate_number,
             ]);
+        } catch (\Exception $e) {
+            \Log::error('Error fetching user', ['error' => $e->getMessage()]);
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function getUserById($id)
+    {
+        try {
+            // Fetch user by ID
+            $user = User::find($id);
+
+            if (!$user) {
+                return response()->json(['message' => 'User not found'], 404);
+            }
+
+            return response()->json($user);
         } catch (\Exception $e) {
             \Log::error('Error fetching user', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Internal Server Error'], 500);
