@@ -8,6 +8,11 @@ use App\Models\Violation;
 
 class ViolationController extends Controller
 {
+    public function index()
+    {
+        return response()->json(Violation::all());
+    }
+    
     public function store(Request $request)
     {
         $validated = $request->validate([
