@@ -50,8 +50,8 @@ const Violations = () => {
         }}
       >
         <Header />
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-          <Typography variant="h4" sx={{ mb: 4 }}>
+        <Container maxWidth="xl" sx={{ mt: 4, mb: 1 }}>
+          <Typography variant="h4" sx={{ mb: 1, color: "#5a6a7a" }}>
             Manage Violations
           </Typography>
           {message && (

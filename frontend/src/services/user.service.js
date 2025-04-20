@@ -9,3 +9,22 @@ export const getUsers = async () => {
     throw error;
   }
 };
+
+export const deleteUser = async (id) => {
+  try {
+    await api.delete(`/users/${id}`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    throw error;
+  }
+};
+
+export const updateUser = async (id, updatedData) => {
+  try {
+    const response = await api.post(`/users/${id}`, updatedData);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
+  }
+};

@@ -32,6 +32,8 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::prefix('users')->group(function() {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/user', [UserController::class, 'getCurrentUser']);
+    Route::post('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'delete']);
 });
 
 // Violations Routes

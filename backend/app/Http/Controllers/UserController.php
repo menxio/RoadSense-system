@@ -11,7 +11,9 @@ class UserController extends Controller
     // List all users
     public function index()
     {
-        return response()->json(User::all());
+        $users = User::where('role', 'user')->get();
+
+        return response()->json($users);
     }
 
     // Create a new user
@@ -44,34 +46,43 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // Update a user
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
-
+        // Find user by custom_id
+        $user = User::where('custom_id', $id)->first();
+    
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
-
+    
+        // Validate the input data
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $id,
             'password' => 'sometimes|string|min:8',
+            'plate_number' => 'sometimes|string|max:20',
+            'role' => 'sometimes|string|in:user,admin',
         ]);
-
+    
+        // Only update fields if provided
         $user->update([
             'name' => $validated['name'] ?? $user->name,
             'email' => $validated['email'] ?? $user->email,
             'password' => isset($validated['password']) ? bcrypt($validated['password']) : $user->password,
+            'plate_number' => $validated['plate_number'] ?? $user->plate_number,
+            'role' => $validated['role'] ?? $user->role,
         ]);
-
+    
         return response()->json($user);
     }
+    
+    
 
     // Delete a user
     public function delete($id)
     {
-        $user = User::find($id);
+        // Find user by custom_id
+        $user = User::where('custom_id', $id)->first();
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
