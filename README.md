@@ -1,5 +1,5 @@
 # PROJECT ROADSENSE
-*items enclosed in  are commands.*
+*items enclosed in ``  are commands.*
 
 *to copy and paste, do: `cat` <file_name> and CTRL+SHIFT+C on the terminal text output.*
 
