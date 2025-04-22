@@ -6,16 +6,23 @@ import * as Yup from 'yup';
 const RegisterForm = ({ onSubmit, loading }) => {
   // Yup validation schema
   const validationSchema = Yup.object().shape({
-    username: Yup.string()
-      .required('Name is required'),
-    email: Yup.string()
-      .email('Invalid email address')
-      .required('Email is required'),
-    plate_number: Yup.string()
-      .required('Plate number is required'),
-    password: Yup.string()
-      .min(6, 'Password must be at least 6 characters')
-      .required('Password is required'),
+    username: Yup.string().required('Name is required'),
+    email: Yup.string().email('Invalid email address').required('Email is required'),
+    plate_number: Yup.string().required('Plate number is required'),
+    school_id: Yup.string().required('School ID is required'),
+    license_id_image: Yup.mixed()
+      .required('License ID image is required')
+      .test(
+        'fileType',
+        'Only JPEG, PNG, JPG, and GIF files are allowed',
+        (value) => value && ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'].includes(value.type)
+      )
+      .test(
+        'fileSize',
+        'File size must be less than 2MB',
+        (value) => value && value.size <= 2048 * 1024
+      ),
+    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Passwords must match')
       .required('Confirm Password is required'),
@@ -27,13 +34,15 @@ const RegisterForm = ({ onSubmit, loading }) => {
         username: '',
         email: '',
         plate_number: '',
+        school_id: '',
+        license_id_image: null,
         password: '',
         confirmPassword: '',
       }}
       validationSchema={validationSchema}
       onSubmit={onSubmit}
     >
-      {({ errors, touched, isSubmitting }) => (
+      {({ errors, touched, isSubmitting, setFieldValue }) => (
         <Form>
           <Box
             sx={{
@@ -101,6 +110,39 @@ const RegisterForm = ({ onSubmit, loading }) => {
                 },
               }}
             />
+
+            <Field
+              as={TextField}
+              name="school_id"
+              label="School ID"
+              fullWidth
+              margin="normal"
+              error={touched.school_id && Boolean(errors.school_id)}
+              helperText={touched.school_id && errors.school_id}
+              InputLabelProps={{ style: { color: '#ccc' } }}
+              InputProps={{ style: { color: '#fff' } }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': { borderColor: '#6C63FF' },
+                  '&:hover fieldset': { borderColor: '#5a52d6' },
+                },
+              }}
+            />
+
+            <input
+              type="file"
+              name="license_id_image"
+              accept="image/*"
+              onChange={(event) => {
+                setFieldValue('license_id_image', event.currentTarget.files[0]);
+              }}
+              style={{ marginTop: '16px', color: '#fff' }}
+            />
+            {touched.license_id_image && errors.license_id_image && (
+              <Typography variant="body2" color="error">
+                {errors.license_id_image}
+              </Typography>
+            )}
 
             <Field
               as={TextField}

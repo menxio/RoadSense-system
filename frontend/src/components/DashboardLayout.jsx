@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Box, AppBar, Toolbar, Container } from '@mui/material'
-import { Sidebar } from './Sidebar'
+import Sidebar from './Sidebar'
 import { UserProfile } from './UserProfile'
 
 export const DashboardLayout = ({

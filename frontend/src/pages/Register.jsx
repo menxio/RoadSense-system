@@ -9,11 +9,20 @@ const Register = () => {
 
   const handleRegister = async (values, { setSubmitting, setErrors, resetForm }) => {
     try {
-      const response = await api.post('/register', {
-        name: values.username,
-        email: values.email,
-        plate_number: values.plate_number,
-        password: values.password,
+      // Prepare form data for submission
+      const formData = new FormData();
+      formData.append('name', values.username);
+      formData.append('email', values.email);
+      formData.append('plate_number', values.plate_number);
+      formData.append('password', values.password);
+      formData.append('school_id', values.school_id);
+      formData.append('license_id_image', values.license_id_image);
+
+      // Send the form data to the backend
+      const response = await api.post('/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
       });
 
       alert('Registration successful! Redirecting to login...');
