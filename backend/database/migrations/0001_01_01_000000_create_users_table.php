@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('license_id_image');
             $table->string('school_id')->unique();
             $table->string('role')->default('user'); // Default role is 'user'
-            $table->string('status')->default('pending');
+            $table->enum('status', ['pending', 'denied', 'accepted'])->default('pending');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
