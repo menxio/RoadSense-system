@@ -60,7 +60,7 @@ python3 run_predictions.py
 
 ### 4. Node.js Violation Logger
 ```bash
-cd roadsense/
+cd violation_logging/
 node upload_report.js
 ```
 
