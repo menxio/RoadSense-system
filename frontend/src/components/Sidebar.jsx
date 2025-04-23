@@ -1,68 +1,90 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
+  Box,
   Drawer,
   List,
   ListItem,
+  ListItemButton,
   ListItemIcon,
   ListItemText,
   Typography,
-  Box,
-} from "@mui/material";
-export const Sidebar = ({ logo, items, activePath, onNavigate }) => {
+} from '@mui/material';
+import {
+  Dashboard as DashboardIcon,
+  Warning as WarningIcon,
+  Logout as LogoutIcon,
+  Info as InfoIcon,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+
+const drawerWidth = 240;
+
+const Sidebar = () => {
+  const navigate = useNavigate(); // Initialize navigation
+
+  const handleLogout = () => {
+    // Clear user session (e.g., token) and redirect to login
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
     <Drawer
       variant="permanent"
       sx={{
-        width: 240,
+        width: drawerWidth,
         flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: 240,
-          boxSizing: "border-box",
-          backgroundColor: "#0a192f",
-          color: "white",
+        '& .MuiDrawer-paper': {
+          width: drawerWidth,
+          boxSizing: 'border-box',
+          backgroundColor: '#0d1b2a',
+          color: 'white',
         },
       }}
     >
-      <Box sx={{ p: 3 }}>
-        <Typography variant="h6" component="div" sx={{ fontWeight: "bold" }}>
-          {logo}
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h5" fontWeight="bold">
+          RoadSense
         </Typography>
       </Box>
       <List>
-        {items.map((item, index) => (
-          <ListItem
-            key={index}
-            button
-            onClick={() => onNavigate(item.path)}
-            sx={{
-              backgroundColor:
-                activePath === item.path ? "#112240" : "transparent",
-              "&:hover": {
-                backgroundColor: "#112240",
-              },
-              py: 1.5,
-            }}
-          >
-            <ListItemIcon sx={{ color: "white", minWidth: 40 }}>
-              {item.icon}
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/student/dashboard')}>
+            <ListItemIcon sx={{ color: 'white' }}>
+              <DashboardIcon />
             </ListItemIcon>
-            <ListItemText primary={item.label} />
-          </ListItem>
-        ))}
+            <ListItemText primary="Dashboard" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/student/violations')}>
+            <ListItemIcon sx={{ color: 'white' }}>
+              <WarningIcon />
+            </ListItemIcon>
+            <ListItemText primary="Violations" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/student/profile')}>
+            <ListItemIcon sx={{ color: 'white' }}>
+              <InfoIcon />
+            </ListItemIcon>
+            <ListItemText primary="Profile" />
+          </ListItemButton>
+        </ListItem>
+        {/* Logout */}
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon sx={{ color: 'white' }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </Drawer>
   );
 };
-Sidebar.propTypes = {
-  logo: PropTypes.string.isRequired,
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      icon: PropTypes.node.isRequired,
-      label: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  activePath: PropTypes.string.isRequired,
-  onNavigate: PropTypes.func.isRequired,
-};
+
+export default Sidebar;

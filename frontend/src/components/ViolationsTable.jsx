@@ -18,13 +18,14 @@ export const ViolationsTable = ({ violations }) => {
       </Typography>
       <TableContainer>
         <Table>
-          <TableHead>
+          <TableHead sx={{ backgroundColor: 'grey.200' }}>
             <TableRow>
-              <TableCell>Date</TableCell>
-              <TableCell>Violation Type</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Penalty Level</TableCell>
-              <TableCell>Status</TableCell>
+              <TableCell>LICENSE PLATE</TableCell>
+              <TableCell>DATE & TIME</TableCell>
+              <TableCell>SPEED (MPH)</TableCell>
+              <TableCell>NOISE LEVEL (DB)</TableCell>
+              <TableCell>VIOLATION TYPE</TableCell>
+              <TableCell>STATUS</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
