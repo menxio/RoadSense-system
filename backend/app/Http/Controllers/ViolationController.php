@@ -54,10 +54,6 @@ class ViolationController extends Controller
         $startOfToday = Carbon::now()->startOfDay()->toIso8601String();
         $endOfToday = Carbon::now()->endOfDay()->toIso8601String();
 
-        // Log the start and end of today for debugging
-        \Log::info('Start of Today: ' . $startOfToday);
-        \Log::info('End of Today: ' . $endOfToday);
-
         // Count today's violations for this custom_user_id
         $todaysViolationsCount = Violation::where('custom_user_id', $customUserId)
             ->where('detected_at', '>=', $startOfToday) // Start of today

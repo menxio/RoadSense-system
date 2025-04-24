@@ -50,7 +50,7 @@ const Sidebar = () => {
       </Box>
       <List>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/student/dashboard')}>
+          <ListItemButton onClick={() => navigate('/user/dashboard')}>
             <ListItemIcon sx={{ color: 'white' }}>
               <DashboardIcon />
             </ListItemIcon>
@@ -58,21 +58,21 @@ const Sidebar = () => {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/student/violations')}>
+          <ListItemButton onClick={() => navigate('/user/violations')}>
             <ListItemIcon sx={{ color: 'white' }}>
               <WarningIcon />
             </ListItemIcon>
             <ListItemText primary="Violations" />
           </ListItemButton>
         </ListItem>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => navigate('/student/profile')}>
+        {/* <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate('/user/profile')}>
             <ListItemIcon sx={{ color: 'white' }}>
               <InfoIcon />
             </ListItemIcon>
             <ListItemText primary="Profile" />
           </ListItemButton>
-        </ListItem>
+        </ListItem> */}
         {/* Logout */}
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>

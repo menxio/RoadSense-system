@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/utils/api";
 
 const initialState = {
+  custom_id: "",
   name: "",
   email: "",
   role: "",
@@ -57,6 +58,7 @@ const userSlice = createSlice({
         state.name = action.payload.name;
         state.email = action.payload.email;
         state.role = action.payload.role;
+        state.custom_id = action.payload.custom_id; 
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { Typography, Grid } from '@mui/material';
 import {
   LayoutDashboardIcon,
@@ -13,16 +14,17 @@ import { StatsCard } from '../../components/StatsCard';
 import { ViolationsTable } from '../../components/ViolationsTable';
 import api from 'utils/api'; 
 import { getViolationById } from '@/services/violation.service';
+import { fetchUserProfile } from '../../redux/slices/userSlice';
 
 const Dashboard = () => {
-  const [user, setUser] = useState({
-    name: 'Rosmar',
-    role: 'Student',
-  });
-
-  const [violations, setViolations] = useState([]); // State to store violations
-  const [todaysViolationsCount, setTodaysViolationsCount] = useState(0); // State for today's violations count
-  const [totalViolationsCount, setTotalViolationsCount] = useState(0); // State for total violations count
+   const dispatch = useDispatch();
+  const user = useSelector((state) => state.user); // Get user data from Redux store
+;
+  const [violations, setViolations] = useState({
+    todaysViolationsCount: 0,
+    totalViolationsCount: 0,
+  }); // State to hold violations data
+ 
 
   const sidebarItems = [
     {
@@ -52,33 +54,27 @@ const Dashboard = () => {
 
   // Fetch user data and violations when the component mounts
   useEffect(() => {
-    const fetchUserDataAndViolations = async () => {
+    if(!user.name) {
+      dispatch(fetchUserProfile);
+    }
+
+    const fetchUserViolations = async () => {
       try {
-        // Fetch user data
-        // const userResponse = await api.get('/user'); // Replace with your API endpoint
-        // const userData = userResponse.data;
-        // setUser({
-        //   name: userData.name,
-        //   role: userData.role,
-        // });
+        const violationsResponse = await getViolationById(user.custom_id); 
 
-        // Fetch violations for the user's custom_user_id
-        const violationsResponse = await getViolationById('GP0003'); // Replace with the actual custom_user_id
+        setViolations({
+          todaysViolationsCount: violationsResponse.todays_violations_count,
+          totalViolationsCount: violationsResponse.total_violations_count,
+          violations: violationsResponse.violations,
+        });
 
-        console.log('Violations Response:', violationsResponse); // Log the response for debugging
-
-        // setViolations(violationsData.violations); // Set violations
-        setTodaysViolationsCount(violationsResponse.todays_violations_count);
-        console.log(todaysViolationsCount);
-        setTotalViolationsCount(violationsResponse.total_violations_count); 
-        console.log(totalViolationsCount);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
     };
 
-    fetchUserDataAndViolations();
-  }, []);
+    fetchUserViolations();
+  }, [dispatch, user.name]);
 
   return (
     <DashboardLayout
@@ -97,7 +93,7 @@ const Dashboard = () => {
           mb: 4,
         }}
       >
-        Student Dashboard
+        Welcome, {user.name || 'User...'}!
       </Typography>
       <Grid
         container
@@ -110,7 +106,7 @@ const Dashboard = () => {
           <StatsCard
             icon={<CalendarIcon size={24} />}
             title="Today's Violations"
-            value={todaysViolationsCount} // Display today's violations count
+            value= {violations?.todaysViolationsCount | "0"}// Display today's violations count
             actionText="VIEW"
             iconBgColor="#1a73e8"
             actionTextColor="#1a73e8"
@@ -121,7 +117,7 @@ const Dashboard = () => {
           <StatsCard
             icon={<AlertCircleIcon size={24} />}
             title="Total Violations"
-            value={totalViolationsCount} // Display total violations count
+            value={violations?.totalViolationsCount | "0"} // Display total violations count
             actionText="VIEW"
             iconBgColor="#e74c3c"
             actionTextColor="#e74c3c"
@@ -140,7 +136,7 @@ const Dashboard = () => {
           />
         </Grid>
       </Grid>
-      <ViolationsTable violations={violations} /> {/* Pass violations to the table */}
+      <ViolationsTable violations={violations.violations || []} /> {/* Pass violations to the table */}
     </DashboardLayout>
   );
 };

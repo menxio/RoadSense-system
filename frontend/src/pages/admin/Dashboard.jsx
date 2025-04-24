@@ -28,6 +28,8 @@ const Dashboard = () => {
       dispatch(fetchUserProfile());
     }
 
+    console.log(user);
+
     const fetchStats = async () => {
       try {
         const [violationData, userData] = await Promise.all([
