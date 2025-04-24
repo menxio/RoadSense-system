@@ -24,6 +24,7 @@ class User extends Model implements AuthenticatableContract
         'license_id_image',
         'school_id',
         'status',
+        'token',
     ];
 
     protected $hidden = [

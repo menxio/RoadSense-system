@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -46,32 +47,25 @@ class AuthController extends Controller
             'license_id_image_url' => asset('storage/' . $user->license_id_image),
         ]);
     }
-
-    // Login method
+    
     public function login(Request $request)
     {
         try {
             $credentials = $request->only('email', 'password');
-
+    
             if (!Auth::attempt($credentials)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
-
+    
             $user = Auth::user();
-
-            // Check if the user's status is approved
-            if ($user->role !== 'admin' && $user->status !== 'approved') {
-                return response()->json(['message' => 'Your account is pending approval. Please wait for admin verification.'], 403);
-            }
-
-            // Debugging: Log the authenticated user
-            \Log::info('User authenticated:', ['user' => $user]);
-
-            // Debugging: Check if createToken is called
-            \Log::info('Attempting to create token for user:', ['user_id' => $user->id]);
-
-            $token = $user->createToken('auth_token')->plainTextToken;
-
+    
+            // Generate a unique token for the user
+            $token = Str::random(60);
+    
+            // Save the token to the database
+            $user->token = $token;
+            $user->save();
+    
             return response()->json([
                 'user' => $user,
                 'token' => $token,

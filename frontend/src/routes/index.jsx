@@ -1,33 +1,30 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Landing from '@/pages/Landing';
-import adminRoutes from './admin';
-import userRoutes from './user';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Landing from "@/pages/Landing";
+import adminRoutes from "./admin";
+import userRoutes from "./user";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import ProtectedRoute from "@/routes/ProtectedRoute";
 
 const AppRoutes = () => {
-    return (
-        <Routes>
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-            <Route path="/" element={<Landing />} />
+      {/* Admin Routes */}
+      <Route element={<ProtectedRoute />}>{adminRoutes}</Route>
 
-            {/* Unauthenticated Routes */}
-            <Route path="/login" element={<Login />} />
-            {/* <Route path="/register" element={<Register />} /> */}
+      {/* User Routes */}
+      <Route element={<ProtectedRoute />}>{userRoutes}</Route>
 
-            <Route path="/register" element={<Register />} />
-
-            {/* Admin Routes */}
-            {adminRoutes}
-
-            {/* User Routes */}
-            {userRoutes}
-
-            {/* Catch-All Route */}
-            {/* <Route path="*" element={<NotFound />} /> */}
-        </Routes>
-    );
+      {/* Catch-All Route */}
+      <Route path="*" element={<div>404 Not Found</div>} />
+    </Routes>
+  );
 };
 
 export default AppRoutes;

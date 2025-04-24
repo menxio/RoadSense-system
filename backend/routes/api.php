@@ -4,10 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViolationController;
+use App\Http\Controllers\ProfileController;
 
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/profile', [ProfileController::class, 'getProfile']);
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
