@@ -50,15 +50,9 @@ class ViolationController extends Controller
             return response()->json(['message' => 'No violations found for this user'], 404);
         }
 
-        // Get the start and end of today in ISO 8601 format
         $startOfToday = Carbon::now()->startOfDay()->toIso8601String();
         $endOfToday = Carbon::now()->endOfDay()->toIso8601String();
 
-        // Log the start and end of today for debugging
-        \Log::info('Start of Today: ' . $startOfToday);
-        \Log::info('End of Today: ' . $endOfToday);
-
-        // Count today's violations for this custom_user_id
         $todaysViolationsCount = Violation::where('custom_user_id', $customUserId)
             ->where('detected_at', '>=', $startOfToday) // Start of today
             ->where('detected_at', '<=', $endOfToday)   // End of today
@@ -70,6 +64,36 @@ class ViolationController extends Controller
             'violations' => $violations,
             'todays_violations_count' => $todaysViolationsCount,
             'total_violations_count' => $totalViolationsCount,
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $violation = Violation::find($id);
+
+        if (!$violation) {
+            return response()->json(['message' => 'Violation not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'plate_number' => 'sometimes|string',
+            'detected_at' => 'sometimes|date',
+            'speed' => 'sometimes|numeric',
+            'decibel_level' => 'sometimes|numeric',
+            'status' => 'sometimes|string|in:flagged,reviewed,cleared',
+        ]);
+
+        $violation->update([
+            'plate_number' => $validated['plate_number'] ?? $violation->plate_number,
+            'detected_at' => $validated['detected_at'] ?? $violation->detected_at,
+            'speed' => $validated['speed'] ?? $violation->speed,
+            'decibel_level' => $validated['decibel_level'] ?? $violation->decibel_level,
+            'status' => $validated['status'] ?? $violation->status,
+        ]);
+
+        return response()->json([
+            'message' => 'Violation updated successfully',
+            'violation' => $violation,
         ]);
     }
 }

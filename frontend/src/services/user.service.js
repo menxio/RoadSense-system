@@ -10,6 +10,16 @@ export const getUsers = async () => {
   }
 };
 
+export const showUser = async (id) => {
+  try {
+    const response = await api.get(`/users/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+};
+
 export const deleteUser = async (id) => {
   try {
     await api.delete(`/users/${id}`);

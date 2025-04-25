@@ -6,6 +6,17 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\ProfileController;
 
+// License ID
+Route::get('/license_id_images/{filename}', function ($filename) {
+    $path = storage_path('app/public/license_id_images/' . $filename);
+
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    return response()->file($path);
+});
+
 // Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -33,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::prefix('users')->group(function() {
     Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::post('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'delete']);
