@@ -54,8 +54,8 @@ class ViolationController extends Controller
         $endOfToday = Carbon::now()->endOfDay()->toIso8601String();
 
         $todaysViolationsCount = Violation::where('custom_user_id', $customUserId)
-            ->where('detected_at', '>=', $startOfToday) // Start of today
-            ->where('detected_at', '<=', $endOfToday)   // End of today
+            ->where('detected_at', '>=', $startOfToday) 
+            ->where('detected_at', '<=', $endOfToday)   
             ->count();
 
         $totalViolationsCount = Violation::where('custom_user_id', $customUserId)->count();

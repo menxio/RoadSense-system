@@ -24,6 +24,7 @@ class ProfileController extends Controller
     
             // Find the user by token
             $user = User::where('token', $token)->first();
+            \Log::info('User found:', ['user' => $user]);
             if (!$user) {
                 \Log::info('No user found for token:', ['token' => $token]);
                 return response()->json(['message' => 'User not authenticated'], 401);

@@ -22,7 +22,6 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
 
   if (!user) return null;
 
-  // Function to determine status color
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "active":
@@ -36,13 +35,12 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
     }
   };
 
-  // Format field labels and values for consistent display
   const userFields = [
     { label: "User ID", value: user.custom_id },
+    { label: "School ID", value: user.school_id },
     { label: "Name", value: user.name },
     { label: "Email", value: user.email },
     { label: "Plate Number", value: user.plate_number },
-    { label: "Role", value: user.role },
   ];
 
   return (
@@ -58,7 +56,6 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
         },
       }}
     >
-      {/* Modal Header */}
       <Box
         sx={{
           display: "flex",
@@ -83,8 +80,6 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
           <CloseIcon />
         </IconButton>
       </Box>
-
-      {/* Modal Content */}
       <DialogContent sx={{ p: 3 }}>
         <Box
           sx={{
@@ -93,7 +88,6 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
             gap: 3,
           }}
         >
-          {/* License ID Image Section */}
           <Box sx={{ flex: "0 0 auto", width: isMobile ? "100%" : "250px" }}>
             <Paper
               elevation={3}

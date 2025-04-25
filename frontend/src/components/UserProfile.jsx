@@ -1,12 +1,16 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { Box, Avatar, Typography } from '@mui/material'
+
 export const UserProfile = ({ name, role, avatarUrl }) => {
+  console.log('UserProfile Props:', { name, role, avatarUrl });
+
   const initials = name
     .split(' ')
     .map((n) => n[0])
     .join('')
-    .toUpperCase()
+    .toUpperCase();
+
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Box
@@ -33,8 +37,9 @@ export const UserProfile = ({ name, role, avatarUrl }) => {
         {!avatarUrl && initials}
       </Avatar>
     </Box>
-  )
-}
+  );
+};
+
 UserProfile.propTypes = {
   name: PropTypes.string.isRequired,
   role: PropTypes.string.isRequired,
