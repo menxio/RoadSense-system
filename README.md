@@ -34,10 +34,14 @@ roadsense/
 
 **update these files:**
 backend/config/cors.php -> add raspberry pi IP to allowed_origins
+
 mediamtx.yml -> add camera IP to paths:cam:source
+
 prediction_model/run_full_predictions.py -> add camera IP as cv2.videoCapture() parameter
+
 frontend/src/utils/api.js -> add raspi IP to BASEURL
 
+frontend/src/components/CamViewer.jsx -> add raspi IP to iframe's src attribute
 ### 1. Laravel Backend
 ```bash
 cd backend

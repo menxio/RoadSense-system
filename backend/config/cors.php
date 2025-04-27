@@ -17,14 +17,15 @@ return [
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
+    // 'allowed_origins' => ['*'],
     'allowed_origins' => [
         'http://localhost:5173', // Frontend development server
         'http://backend.test',   // Backend custom domain
-        'http://0.0.0.0:5173',        
-		'http://192.168.1.22:5173',
-		'http://192.168.1.27:5173',
+        'http://0.0.0.0:5173',
+		'http://172.20.10.2:5173',
+		'http://172.20.10.3:5173',
     ],
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => ['*'],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],
     'max_age' => 0,
