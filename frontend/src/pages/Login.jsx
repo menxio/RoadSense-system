@@ -15,15 +15,20 @@ const Login = () => {
     try {
       const response = await api.post("/login", { email, password });
 
-      // Save token and role to localStorage
       const { token, user } = response.data;
+
+      if (user.status !== "active") {
+        alert(
+          "Your account is not approved. Please contact the administrator."
+        );
+        return;
+      }
+
       localStorage.setItem("token", token);
       localStorage.setItem("role", user.role);
 
-      // Fetch user profile after login
       dispatch(fetchUserProfile());
 
-      // Redirect based on role
       if (user.role === "admin") {
         navigate("/admin/dashboard");
       } else if (user.role === "user") {

@@ -59,25 +59,25 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
     
-        // Validate the input data
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8',
             'plate_number' => 'sometimes|string|max:20',
             'role' => 'sometimes|string|in:user,admin',
+            'status' => 'sometimes|string|in:pending,active,suspended',
         ]);
-    
-        // Only update fields if provided
+
         $user->update([
             'name' => $validated['name'] ?? $user->name,
             'email' => $validated['email'] ?? $user->email,
             'password' => isset($validated['password']) ? bcrypt($validated['password']) : $user->password,
             'plate_number' => $validated['plate_number'] ?? $user->plate_number,
             'role' => $validated['role'] ?? $user->role,
+            'status' => $validated['status'] ?? $user->status,
         ]);
     
-        return response()->json($user);
+        return response()->json(['message' => 'User updated successfully', 'user' => $user]);
     }
     
     

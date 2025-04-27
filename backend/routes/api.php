@@ -27,13 +27,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-    // // Admin Routes
-    // Route::middleware('role:admin')->prefix('admin')->group(function () {
-    //     Route::get('/dashboard', [UserController::class, 'adminDashboard']);
-    //     Route::get('/user', [UserController::class, 'index']);
-    // });
-
-    // User Routes
     Route::middleware('role:user')->prefix('user')->group(function () {
         Route::get('/dashboard', [UserController::class, 'userDashboard']);
         Route::get('/profile', [UserController::class, 'profile']);

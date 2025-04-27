@@ -20,18 +20,16 @@ class AuthController extends Controller
             'school_id' => 'required|string:unique:users,school_id',
         ]);
 
-        // Handle file upload for license_id_image
         if ($request->hasFile('license_id_image')) {
             $file = $request->file('license_id_image');
-            $filePath = $file->store('license_id_images', 'public'); // Store in 'storage/app/public/license_id_images'
+            $filePath = $file->store('license_id_images', 'public');
             $validated['license_id_image'] = $filePath;
         }
 
-        $validated['status'] = 'pending'; // Set default status to 'pending'
+        $validated['status'] = 'pending';
         $validated['role'] = 'user';
 
-        // Get latest custom_id and increment
-        $latestUser = User::orderByDesc('_id')->first(); // since you're using Mongo
+        $latestUser = User::orderByDesc('_id')->first();
         $latestId = $latestUser?->custom_id ?? 'GP0000';
 
         $number = (int) substr($latestId, 2);
@@ -53,16 +51,23 @@ class AuthController extends Controller
         try {
             $credentials = $request->only('email', 'password');
     
+            // Check if the credentials are valid
             if (!Auth::attempt($credentials)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
     
             $user = Auth::user();
     
-            // Generate a unique token for the user
+            // Check if the user's status is active
+            if ($user->status !== 'active') {
+                return response()->json([
+                    'message' => 'Your account is not approved. Please contact the administrator.'
+                ], 403);
+            }
+    
+            // Generate a token for the user
             $token = Str::random(60);
     
-            // Save the token to the database
             $user->token = $token;
             $user->save();
     

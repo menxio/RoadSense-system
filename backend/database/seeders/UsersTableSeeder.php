@@ -13,6 +13,7 @@ class UsersTableSeeder extends Seeder
         User::create([
             'name' => 'Admin User',
             'email' => 'admin@roadsense.com',
+            'status' => 'active',
             'password' => bcrypt('Password!123'),
             'role' => 'admin',
         ]);

@@ -62,7 +62,7 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
 
   const handleOpenUserModal = async (userId) => {
     try {
-      const userData = await showUser(userId); // Fetch user details
+      const userData = await showUser(userId);
       setSelectedUser(userData);
       setIsUserModalOpen(true);
     } catch (error) {
