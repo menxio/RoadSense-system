@@ -20,8 +20,10 @@ return [
     'allowed_origins' => [
         'http://localhost:5173', // Frontend development server
         'http://backend.test',   // Backend custom domain
+        'http://0.0.0.0:5173',        
+		'http://192.168.1.22:5173',
+		'http://192.168.1.27:5173',
     ],
-
     'allowed_origins_patterns' => [],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

@@ -7,6 +7,10 @@ import { fileURLToPath } from "url"; // Import fileURLToPath
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  server: {
+  	host: true,
+  	port: 5173
+  },
   plugins: [react()],
   resolve: {
     alias: {

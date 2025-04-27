@@ -3,53 +3,57 @@ import { Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
 
 const Dashboard = lazy(() => import("@/pages/admin/Dashboard"));
+const Live = lazy(() => import("../pages/admin/Live/Live.jsx"));
 const Users = lazy(() => import("@/pages/admin/Users/Users"));
 const Vehicles = lazy(() => import("@/pages/admin/Vehicles/Vehicles"));
 const Violations = lazy(() => import("@/pages/admin/Violations/Violations"));
 
 const adminRoutes = [
-  <Route element={<ProtectedRoute />} key="admin-protected">
-    <Route
-      key="admin-dashboard"
-      path="/admin/dashboard"
-      element={
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Dashboard />
-        </React.Suspense>
-      }
-    />
-    ,
-    <Route
-      key="admin-users"
-      path="/admin/users"
-      element={
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Users />
-        </React.Suspense>
-      }
-    />
-    ,
-    <Route
-      key="admin-manage-vehicles"
-      path="/admin/vehicles"
-      element={
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Vehicles />
-        </React.Suspense>
-      }
-    />
-    ,
-    <Route
-      key="admin-manage-violations"
-      path="/admin/violations"
-      element={
-        <React.Suspense fallback={<div>Loading...</div>}>
-          <Violations />
-        </React.Suspense>
-      }
-    />
-    ,
-  </Route>,
+  <Route
+    key="admin-dashboard"
+    path="/admin/dashboard"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Dashboard />
+      </React.Suspense>
+    }
+  />,
+  <Route
+    key="admin-Live"
+    path="/admin/live"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Live />
+      </React.Suspense>
+    }
+  />,
+  <Route
+    key="admin-users"
+    path="/admin/users"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Users />
+      </React.Suspense>
+    }
+  />,
+  <Route
+    key="admin-manage-vehicles"
+    path="/admin/vehicles"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Vehicles />
+      </React.Suspense>
+    }
+  />,
+  <Route
+    key="admin-manage-violations"
+    path="/admin/violations"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Violations />
+      </React.Suspense>
+    }
+  />,
 ];
 
 export default adminRoutes;

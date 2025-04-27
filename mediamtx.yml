@@ -708,9 +708,10 @@ pathDefaults:
 # It's possible to use regular expressions by using a tilde as prefix,
 # for example "~^(test1|test2)$" will match both "test1" and "test2",
 # for example "~^prefix" will match all n that start with "prefix".
+# ip dapat sa camera. check via tapo app
 paths:
   cam:
-    source: rtsp://RoadsenseAdmin:RoadSense@192.168.1.15:554/stream1
+    source: rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1
 
 
   # Settings under path "all_others" are applied to all paths that

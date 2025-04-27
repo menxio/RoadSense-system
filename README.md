@@ -32,6 +32,12 @@ roadsense/
 
 ## ⚙️ Setup
 
+**update these files:**
+backend/config/cors.php -> add raspberry pi IP to allowed_origins
+mediamtx.yml -> add camera IP to paths:cam:source
+prediction_model/run_full_predictions.py -> add camera IP as cv2.videoCapture() parameter
+frontend/src/utils/api.js -> add raspi IP to BASEURL
+
 ### 1. Laravel Backend
 ```bash
 cd backend
@@ -39,7 +45,7 @@ cp .env.example .env
 composer install
 php artisan key:generate
 php artisan migrate
-php artisan serve  # or use Herd if installed
+php artisan serve --host=0.0.0.0 --port=8000  # or use Herd if installed
 ```
 
 > Note: Ensure MongoDB credentials are correctly set in `.env`.

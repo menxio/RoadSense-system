@@ -2,7 +2,7 @@
 
 # Activate Python environment and run Python script
 source ~/yolov11-env/bin/activate
-nohup python3 prediction_model/run_predictions.py > run_predictions.log 2>&1 &
+nohup python3 prediction_model/run_full_predictions.py > run_predictions.log 2>&1 &
 echo $! > run_predictions.pid
 
 # Run Node.js script

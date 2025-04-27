@@ -40,7 +40,7 @@ const Sidebar = () => {
 
   const navItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/camera1" },
+    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/live" },
     {
       text: "Manage Violations",
       icon: <WarningIcon />,
