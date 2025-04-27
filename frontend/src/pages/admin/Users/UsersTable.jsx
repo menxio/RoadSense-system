@@ -27,7 +27,6 @@ const UsersTable = ({ users, onEdit, onDelete }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [userData, setUserData] = useState(users);
 
-  // Update userData when users prop changes
   useEffect(() => {
     setUserData(users);
   }, [users]);

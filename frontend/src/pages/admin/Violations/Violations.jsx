@@ -14,7 +14,6 @@ const Violations = () => {
     const fetchData = async () => {
       try {
         const violationData = await getViolations();
-        console.log("Fetched Violations:", violationData); // Debugging
         setViolations(violationData);
       } catch (error) {
         console.error("Error fetching violations:", error);

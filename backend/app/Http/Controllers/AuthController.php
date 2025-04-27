@@ -50,15 +50,13 @@ class AuthController extends Controller
     {
         try {
             $credentials = $request->only('email', 'password');
-    
-            // Check if the credentials are valid
+
             if (!Auth::attempt($credentials)) {
                 return response()->json(['message' => 'Invalid credentials'], 401);
             }
     
             $user = Auth::user();
-    
-            // Check if the user's status is active
+
             if ($user->status !== 'active') {
                 return response()->json([
                     'message' => 'Your account is not approved. Please contact the administrator.'
