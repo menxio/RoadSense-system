@@ -1,53 +1,100 @@
-import React from 'react';
-import { Box, Typography, Button, Paper } from '@mui/material';
+import { Box, Card, CardContent, Typography, useTheme } from "@mui/material";
 
-const StatCard = ({ title, value, icon, buttonColor = 'primary' }) => {
+const StatCard = ({ title, value, icon, color = "primary", onClick }) => {
+  const theme = useTheme();
+
   const colorMap = {
-    primary: '#1976d2',
-    success: '#4caf50',
-    warning: '#ff9800',
+    primary: {
+      light: "#e3f2fd",
+      main: "#2196f3",
+      dark: "#1565c0",
+    },
+    success: {
+      light: "#e8f5e9",
+      main: "#4caf50",
+      dark: "#2e7d32",
+    },
+    warning: {
+      light: "#fff8e1",
+      main: "#ff9800",
+      dark: "#f57c00",
+    },
+    error: {
+      light: "#ffebee",
+      main: "#f44336",
+      dark: "#c62828",
+    },
+    info: {
+      light: "#e1f5fe",
+      main: "#03a9f4",
+      dark: "#0277bd",
+    },
   };
-  const color = colorMap[buttonColor] || colorMap.primary;
+
+  const selectedColor = colorMap[color];
 
   return (
-    <Paper 
-      elevation={0}
-      sx={{ 
-        p: 3, 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        height: '100%',
-        borderRadius: 2
+    <Card
+      sx={{
+        height: "100%",
+        boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+        transition: "transform 0.3s, box-shadow 0.3s",
+        "&:hover": {
+          transform: "translateY(-5px)",
+          boxShadow: "0 8px 25px 0 rgba(0,0,0,0.15)",
+        },
+        cursor: onClick ? "pointer" : "default",
+        borderRadius: 2,
+        overflow: "hidden",
       }}
+      onClick={onClick}
     >
-      <Box sx={{ display: 'flex', width: '100%', justifyContent: 'space-between', mb: 2 }}>
-        <Box>
-          <Typography color="text.secondary" variant="body1" gutterBottom>
-            {title}
-          </Typography>
-          <Typography variant="h3" component="div" fontWeight="bold">
-            {value}
-          </Typography>
-        </Box>
-        <Box sx={{ color }}>
-          {icon}
-        </Box>
-      </Box>
-      <Button 
-        variant="text" 
-        sx={{ 
-          mt: 'auto', 
-          color, 
-          p: 0,
-          '&:hover': {
-            backgroundColor: 'transparent',
-          }
+      <Box
+        sx={{
+          height: 8,
+          backgroundColor: selectedColor.main,
         }}
-      >
-        VIEW
-      </Button>
-    </Paper>
+      />
+      <CardContent sx={{ p: 3 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Box>
+            <Typography
+              variant="subtitle2"
+              color="text.secondary"
+              sx={{ mb: 0.5, fontWeight: 500 }}
+            >
+              {title}
+            </Typography>
+            <Typography
+              variant="h3"
+              sx={{ fontWeight: "bold", color: selectedColor.dark }}
+            >
+              {value}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: selectedColor.light,
+              borderRadius: "50%",
+              width: 56,
+              height: 56,
+              color: selectedColor.main,
+            }}
+          >
+            {icon}
+          </Box>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };
 

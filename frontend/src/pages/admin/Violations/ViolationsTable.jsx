@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -108,10 +108,10 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 2,
+          mb: 3,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#0d1b2a" }}>
           Traffic Violations
         </Typography>
         <TextField
@@ -120,12 +120,21 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
           size="small"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ width: { xs: "100%", sm: "auto", minWidth: "300px" } }}
         />
       </Box>
 
-      <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+          borderRadius: 2,
+          overflow: "hidden",
+          mb: 2,
+        }}
+      >
         <Table>
-          <TableHead>
+          <TableHead sx={{ bgcolor: "#f5f7fa" }}>
             <TableRow>
               <TableCell sx={{ fontWeight: "bold" }}>User ID</TableCell>
               <TableCell sx={{ fontWeight: "bold" }}>Plate Number</TableCell>
@@ -140,7 +149,7 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
             {filteredViolations
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .map((violation) => (
-                <TableRow key={violation.id}>
+                <TableRow key={violation.id} hover>
                   <TableCell>
                     <Box
                       sx={{
@@ -150,6 +159,12 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
                         borderRadius: "8px",
                         cursor: "pointer",
                         textAlign: "center",
+                        fontWeight: "medium",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          backgroundColor: "#1565c0",
+                          color: "#fff",
+                        },
                       }}
                       onClick={() =>
                         handleOpenUserModal(violation.custom_user_id)
@@ -174,6 +189,14 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
                         textAlign: "center",
                         display: "inline-block",
                         textTransform: "uppercase",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                        letterSpacing: "0.5px",
+                        transition: "all 0.2s",
+                        "&:hover": {
+                          opacity: 0.9,
+                          transform: "translateY(-1px)",
+                        },
                       }}
                       onClick={() => handleOpenDialog(violation)}
                     >
@@ -202,13 +225,22 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
                       )}
                       {violation.status === "flagged" && (
                         <Tooltip title="Violation Flagged">
-                          <WarningIcon color="warning" sx={{ ml: 1 }} />
+                          <WarningIcon color="error" sx={{ ml: 1 }} />
                         </Tooltip>
                       )}
                     </Box>
                   </TableCell>
                 </TableRow>
               ))}
+            {filteredViolations.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No violations found
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -230,20 +262,26 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
           <DialogContentText>
             Are you sure you want to change the status of this violation?
           </DialogContentText>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
             <Button
               variant="contained"
               color="error"
-              sx={{ mr: 1 }}
               onClick={() => setNewStatus("flagged")}
+              sx={{
+                bgcolor: newStatus === "flagged" ? "#d32f2f" : undefined,
+                "&:hover": { bgcolor: "#b71c1c" },
+              }}
             >
               Flagged
             </Button>
             <Button
               variant="contained"
               color="warning"
-              sx={{ mr: 1 }}
               onClick={() => setNewStatus("reviewed")}
+              sx={{
+                bgcolor: newStatus === "reviewed" ? "#ed6c02" : undefined,
+                "&:hover": { bgcolor: "#e65100" },
+              }}
             >
               Reviewed
             </Button>
@@ -251,19 +289,24 @@ const ViolationsTable = ({ violations, onUpdateStatus, onDelete }) => {
               variant="contained"
               color="success"
               onClick={() => setNewStatus("cleared")}
+              sx={{
+                bgcolor: newStatus === "cleared" ? "#2e7d32" : undefined,
+                "&:hover": { bgcolor: "#1b5e20" },
+              }}
             >
               Cleared
             </Button>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
+          <Button onClick={handleCloseDialog} color="inherit">
             Cancel
           </Button>
           <Button
             onClick={handleConfirmStatusChange}
             color="primary"
             disabled={!newStatus}
+            variant="contained"
           >
             Confirm
           </Button>

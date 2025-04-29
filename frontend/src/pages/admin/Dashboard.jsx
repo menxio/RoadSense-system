@@ -1,15 +1,24 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { Box, Container, Grid, Typography } from "@mui/material";
-import Sidebar from "@/components/organisms/Sidebar";
-import Header from "@/components/organisms/Header";
-import StatCard from "@/components/molecules/StatCard";
-import ChartCard from "@/components/molecules/ChartCard";
+import {
+  Box,
+  Grid,
+  Typography,
+  Paper,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
 import {
   CalendarMonth as CalendarIcon,
   Group as GroupIcon,
   Warning as WarningIcon,
+  Speed as SpeedIcon,
+  VolumeUp as VolumeUpIcon,
 } from "@mui/icons-material";
+import Sidebar from "@/components/organisms/Sidebar";
+import Header from "@/components/organisms/Header";
+import StatCard from "@/components/molecules/StatCard";
+import ChartCard from "@/components/molecules/ChartCard";
 import { getViolations } from "@/services/violation.service";
 import { getUsers } from "@/services/user.service";
 import { fetchUserProfile } from "@/redux/slices/userSlice";
@@ -17,20 +26,29 @@ import { fetchUserProfile } from "@/redux/slices/userSlice";
 const Dashboard = () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.user);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [stats, setStats] = useState({
     todayViolations: 0,
     totalUsers: 0,
     totalViolations: 0,
+    speedViolations: 0,
+    noiseViolations: 0,
   });
+  const [loading, setLoading] = useState(true);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   useEffect(() => {
     if (!user.name) {
       dispatch(fetchUserProfile());
     }
 
-    console.log(user);
-
     const fetchStats = async () => {
+      setLoading(true);
       try {
         const [violationData, userData] = await Promise.all([
           getViolations(),
@@ -42,13 +60,24 @@ const Dashboard = () => {
           v.detected_at.startsWith(today)
         ).length;
 
+        const speedViolations = violationData.filter(
+          (v) => v.speed && v.speed > 30
+        ).length;
+        const noiseViolations = violationData.filter(
+          (v) => v.decibel_level && v.decibel_level > 85
+        ).length;
+
         setStats({
           todayViolations,
           totalUsers: userData.length,
           totalViolations: violationData.length,
+          speedViolations,
+          noiseViolations,
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -56,51 +85,73 @@ const Dashboard = () => {
   }, [dispatch, user.name]);
 
   return (
-    <>
-      <Sidebar />
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+
       <Box
         component="main"
         sx={{
-          ml: "240px",
           flexGrow: 1,
-          bgcolor: "background.default",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
+          mt: "64px",
+          transition: theme.transitions.create(["margin", "width"], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
-        <Header user={user} />
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4, flexGrow: 1 }}>
-          <Typography variant="h3" sx={{ mb: 4, color: "#5a6a7a" }}>
-            Welcome {user.name || "User"}!
-          </Typography>
+        <Header user={user} onToggleSidebar={handleDrawerToggle} />
+
+        <Box
+          sx={{
+            py: 4,
+            px: { xs: 2, sm: 3, md: 4 },
+            maxWidth: "100%",
+          }}
+        >
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontWeight: "bold",
+                color: "#0d1b2a",
+                mb: 1,
+              }}
+            >
+              Welcome {user.firstName || user.name || "User"}!
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Here's what's happening with your traffic monitoring system today.
+            </Typography>
+          </Box>
+
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} sm={6} lg={2.4}>
               <StatCard
                 title="Today's Violations"
                 value={stats.todayViolations}
                 icon={<CalendarIcon fontSize="large" />}
-                buttonColor="primary"
+                color="primary"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} sm={6} lg={2.4}>
               <StatCard
                 title="Total Driver's Listed"
                 value={stats.totalUsers}
                 icon={<GroupIcon fontSize="large" />}
-                buttonColor="success"
+                color="success"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} sm={6} lg={2.4}>
               <StatCard
                 title="Total Traffic Violations"
                 value={stats.totalViolations}
                 icon={<WarningIcon fontSize="large" />}
-                buttonColor="warning"
+                color="warning"
               />
             </Grid>
           </Grid>
-          <Grid container spacing={3}>
+
+          <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={7}>
               <ChartCard title="Violation Distribution" />
             </Grid>
@@ -108,9 +159,37 @@ const Dashboard = () => {
               <ChartCard title="Monthly Violations" />
             </Grid>
           </Grid>
-        </Container>
+
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <Paper
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                  Recent Activity
+                </Typography>
+                <Box
+                  sx={{
+                    height: 200,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    Recent activity data will be displayed here
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
       </Box>
-    </>
+    </Box>
   );
 };
 

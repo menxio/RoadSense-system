@@ -1,29 +1,51 @@
-import React from 'react';
-import { Box, Typography, Paper } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  useTheme,
+} from "@mui/material";
 
 const ChartCard = ({ title, children }) => {
+  const theme = useTheme();
+
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        p: 3, 
-        height: '100%', 
+    <Card
+      sx={{
+        height: "100%",
+        boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
         borderRadius: 2,
-        display: 'flex',
-        flexDirection: 'column'
+        overflow: "hidden",
       }}
     >
-      <Typography variant="h6" color="primary" fontWeight="medium" gutterBottom>
-        {title}
-      </Typography>
-      <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <CardHeader
+        title={
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            {title}
+          </Typography>
+        }
+        sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundColor: theme.palette.background.default,
+          p: 2,
+        }}
+      />
+      <CardContent
+        sx={{
+          p: 2,
+          height: 300,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {children || (
-          <Typography color="text.secondary">
+          <Typography variant="body2" color="text.secondary">
             Chart data will be displayed here
           </Typography>
         )}
-      </Box>
-    </Paper>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import Sidebar from "@/components/organisms/Sidebar";
 import Header from "@/components/organisms/Header";
 import ViolationsTable from "./ViolationsTable";
@@ -9,6 +9,11 @@ const Violations = () => {
   const [violations, setViolations] = useState([]);
   const [message, setMessage] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,29 +56,37 @@ const Violations = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <Sidebar />
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+      <Header onToggleSidebar={handleDrawerToggle} />
+
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          bgcolor: "background.default",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: "100vh",
+          width: { xs: "100%", md: `calc(100% - 240px)` },
+          mt: { xs: "64px", md: "64px" },
+          p: { xs: 2, sm: 3, md: 4 },
+          transition: "margin 0.2s, width 0.2s",
         }}
       >
-        <Header />
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 1 }}>
-          <Typography variant="h4" sx={{ mb: 1, color: "#5a6a7a" }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            sx={{ mb: 1, fontWeight: "bold", color: "#0d1b2a" }}
+          >
             Manage Violations
           </Typography>
-          <ViolationsTable
-            violations={violations}
-            onUpdateStatus={handleUpdateStatus}
-            onDelete={handleDelete}
-          />
-        </Container>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            View and manage all traffic violations in the system
+          </Typography>
+        </Box>
+
+        <ViolationsTable
+          violations={violations}
+          onUpdateStatus={handleUpdateStatus}
+          onDelete={handleDelete}
+        />
       </Box>
 
       {/* Snackbar for feedback messages */}

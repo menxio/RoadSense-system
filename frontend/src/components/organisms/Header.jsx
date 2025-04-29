@@ -1,37 +1,51 @@
-import React from "react";
-import { Box, Typography, Avatar, Stack } from "@mui/material";
+"use client";
+import {
+  Box,
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton,
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import NotificationBell from "@/components/atoms/NotificationBell";
+import AvatarNavDropdown from "@/components/molecules/AvatarNavDropdown";
 
-const Header = ({ user }) => {
-  const getInitials = (firstName, lastName) => {
-    if (!firstName || !lastName) return "";
-    return `${firstName[0]}${lastName[0]}`.toUpperCase();
-  };
+const Header = ({ user, onToggleSidebar }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   return (
-    <Box
+    <AppBar
+      position="fixed"
       sx={{
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        p: 2,
-        backgroundColor: "white",
-        borderBottom: "1px solid #eaeaea",
+        backgroundColor: "#0d1b2a",
+        boxShadow: "0 1px 10px rgba(0,0,0,0.2)",
+        // zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Box textAlign="right">
-          <Typography variant="subtitle1" fontWeight="bold">
-            {user?.firstName} {user?.lastName}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {user?.role || "User"}
-          </Typography>
+      <Toolbar sx={{ justifyContent: "space-between", height: 64 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={onToggleSidebar}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
         </Box>
-        <Avatar sx={{ bgcolor: "#0d1b2a" }}>
-          {getInitials(user?.firstName, user?.lastName)}
-        </Avatar>
-      </Stack>
-    </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <NotificationBell />
+          <AvatarNavDropdown user={user} />
+        </Box>
+      </Toolbar>
+    </AppBar>
   );
 };
 

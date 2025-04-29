@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
-  Container,
   Typography,
   Dialog,
   DialogTitle,
@@ -20,6 +19,11 @@ const Users = () => {
   const [message, setMessage] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [openEdit, setOpenEdit] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -74,63 +78,74 @@ const Users = () => {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <Sidebar />
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+      <Header onToggleSidebar={handleDrawerToggle} />
+
       <Box
         component="main"
-        sx={{ flexGrow: 1, bgcolor: "background.default", minHeight: "100vh" }}
+        sx={{
+          flexGrow: 1,
+          width: { xs: "100%", md: `calc(100% - 240px)` },
+          mt: { xs: "64px", md: "64px" },
+          p: { xs: 2, sm: 3, md: 4 },
+          transition: "margin 0.2s, width 0.2s",
+        }}
       >
-        <Header />
-        <Container maxWidth="xl" sx={{ mt: 1 }}>
-          <Typography variant="h4" sx={{ mb: 2, color: "#5a6a7a" }}>
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            sx={{ mb: 1, fontWeight: "bold", color: "#0d1b2a" }}
+          >
             Manage Users
           </Typography>
-          {message && (
-            <Typography color="error" sx={{ mb: 2 }}>
-              {message}
-            </Typography>
-          )}
-          <UsersTable
-            users={users}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </Container>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            View and manage all users in the system
+          </Typography>
+        </Box>
 
-        {/* Edit Dialog */}
-        <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth>
-          <DialogTitle>Edit User</DialogTitle>
-          <DialogContent
-            sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
-          >
-            <TextField
-              label="Name"
-              value={selectedUser?.name || ""}
-              onChange={(e) =>
-                setSelectedUser({ ...selectedUser, name: e.target.value })
-              }
-              fullWidth
-            />
-            <TextField
-              label="Plate Number"
-              value={selectedUser?.plate_number || ""}
-              onChange={(e) =>
-                setSelectedUser({
-                  ...selectedUser,
-                  plate_number: e.target.value,
-                })
-              }
-              fullWidth
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
-            <Button onClick={handleEditSubmit} variant="contained">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+        {message && (
+          <Typography color="error" sx={{ mb: 2 }}>
+            {message}
+          </Typography>
+        )}
+
+        <UsersTable users={users} onEdit={handleEdit} onDelete={handleDelete} />
       </Box>
+
+      {/* Edit Dialog */}
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)} fullWidth>
+        <DialogTitle>Edit User</DialogTitle>
+        <DialogContent
+          sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}
+        >
+          <TextField
+            label="Name"
+            value={selectedUser?.name || ""}
+            onChange={(e) =>
+              setSelectedUser({ ...selectedUser, name: e.target.value })
+            }
+            fullWidth
+          />
+          <TextField
+            label="Plate Number"
+            value={selectedUser?.plate_number || ""}
+            onChange={(e) =>
+              setSelectedUser({
+                ...selectedUser,
+                plate_number: e.target.value,
+              })
+            }
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEdit(false)}>Cancel</Button>
+          <Button onClick={handleEditSubmit} variant="contained">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

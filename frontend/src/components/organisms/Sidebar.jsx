@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Drawer,
@@ -11,6 +11,8 @@ import {
   IconButton,
   Divider,
   Tooltip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
@@ -18,29 +20,27 @@ import {
   Warning as WarningIcon,
   People as PeopleIcon,
   Assessment as AssessmentIcon,
-  Logout as LogoutIcon,
-  Menu as MenuIcon,
   ChevronLeft as ChevronLeftIcon,
+  Menu as MenuIcon,
 } from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar = ({ open = true, onClose }) => {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(true);
-  const drawerWidth = open ? 240 : 70;
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [collapsed, setCollapsed] = useState(false);
+
+  const drawerWidth = collapsed ? 70 : 240;
 
   const toggleDrawer = () => {
-    setOpen((prev) => !prev);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    setCollapsed((prev) => !prev);
   };
 
   const navItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/live" },
+    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/camera1" },
     {
       text: "Manage Violations",
       icon: <WarningIcon />,
@@ -50,49 +50,57 @@ const Sidebar = () => {
     { text: "Reports", icon: <AssessmentIcon />, path: "/admin/reports" },
   ];
 
-  return (
-    <Drawer
-      variant="permanent"
-      sx={{
-        width: drawerWidth,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth,
-          transition: "width 0.3s",
-          overflowX: "hidden",
-          boxSizing: "border-box",
-          backgroundColor: "#0d1b2a",
-          color: "white",
-        },
-      }}
-    >
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  const drawerContent = (
+    <>
       <Box
         sx={{
           display: "flex",
           alignItems: "center",
-          justifyContent: open ? "space-between" : "center",
+          justifyContent: collapsed ? "center" : "space-between",
           p: 2,
+          minHeight: "64px", // Match the height of the AppBar
         }}
       >
-        {open && (
+        {!collapsed && (
           <Typography variant="h6" fontWeight="bold">
+            <img
+              src="/img/logo.png"
+              alt=""
+              style={{ height: "32px", width: "auto", marginRight: "8px" }}
+            />
             RoadSense
           </Typography>
         )}
         <IconButton onClick={toggleDrawer} sx={{ color: "white" }}>
-          {open ? <ChevronLeftIcon /> : <MenuIcon />}
+          {collapsed ? <MenuIcon /> : <ChevronLeftIcon />}
         </IconButton>
       </Box>
       <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
-      <List>
+      <List sx={{ px: 1, py: 2 }}>
         {navItems.map((item) => (
-          <ListItem disablePadding key={item.text} sx={{ display: "block" }}>
-            <Tooltip title={!open ? item.text : ""} placement="right">
+          <ListItem
+            disablePadding
+            key={item.text}
+            sx={{ display: "block", mb: 1 }}
+          >
+            <Tooltip title={collapsed ? item.text : ""} placement="right">
               <ListItemButton
                 sx={{
                   minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
+                  justifyContent: collapsed ? "center" : "initial",
                   px: 2.5,
+                  py: 1.5,
+                  borderRadius: 1.5,
+                  backgroundColor: isActive(item.path)
+                    ? "rgba(255, 255, 255, 0.1)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
                 }}
                 onClick={() => navigate(item.path)}
               >
@@ -100,7 +108,7 @@ const Sidebar = () => {
                   sx={{
                     color: "white",
                     minWidth: 0,
-                    mr: open ? 2 : "auto",
+                    mr: collapsed ? "auto" : 2,
                     justifyContent: "center",
                   }}
                 >
@@ -108,38 +116,64 @@ const Sidebar = () => {
                 </ListItemIcon>
                 <ListItemText
                   primary={item.text}
-                  sx={{ opacity: open ? 1 : 0 }}
+                  sx={{
+                    opacity: collapsed ? 0 : 1,
+                    "& .MuiTypography-root": {
+                      fontWeight: isActive(item.path) ? "bold" : "normal",
+                    },
+                  }}
                 />
               </ListItemButton>
             </Tooltip>
           </ListItem>
         ))}
-        <ListItem disablePadding sx={{ display: "block" }}>
-          <Tooltip title={!open ? "Logout" : ""} placement="right">
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? "initial" : "center",
-                px: 2.5,
-              }}
-              onClick={handleLogout}
-            >
-              <ListItemIcon
-                sx={{
-                  color: "white",
-                  minWidth: 0,
-                  mr: open ? 2 : "auto",
-                  justifyContent: "center",
-                }}
-              >
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText primary="Logout" sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          </Tooltip>
-        </ListItem>
       </List>
-    </Drawer>
+    </>
+  );
+
+  return (
+    <>
+      {isMobile ? (
+        <Drawer
+          variant="temporary"
+          open={open}
+          onClose={onClose}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile
+          }}
+          sx={{
+            display: { xs: "block", md: "none" },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: 240,
+              backgroundColor: "#0d1b2a",
+              color: "white",
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      ) : (
+        <Drawer
+          variant="permanent"
+          sx={{
+            width: drawerWidth,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth,
+              transition: "width 0.3s",
+              overflowX: "hidden",
+              boxSizing: "border-box",
+              backgroundColor: "#0d1b2a",
+              color: "white",
+              borderRight: "none",
+            },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+      )}
+    </>
   );
 };
 

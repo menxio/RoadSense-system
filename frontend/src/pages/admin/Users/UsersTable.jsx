@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -10,7 +10,6 @@ import {
   IconButton,
   TextField,
   TablePagination,
-  Box,
   Chip,
 } from "@mui/material";
 import { Edit, Delete } from "@mui/icons-material";
@@ -80,9 +79,16 @@ const UsersTable = ({ users, onEdit, onDelete }) => {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
-      <TableContainer component={Paper}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}
+      >
         <Table>
-          <TableHead>
+          <TableHead sx={{ bgcolor: "#f5f7fa" }}>
             <TableRow>
               <TableCell>User ID</TableCell>
               <TableCell>Name</TableCell>
@@ -98,7 +104,7 @@ const UsersTable = ({ users, onEdit, onDelete }) => {
               filteredUsers
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((user) => (
-                  <TableRow key={user._id}>
+                  <TableRow key={user._id} hover>
                     <TableCell>{user.custom_id}</TableCell>
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.plate_number}</TableCell>
