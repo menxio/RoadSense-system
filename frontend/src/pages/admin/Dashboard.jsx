@@ -92,6 +92,7 @@ const Dashboard = () => {
         component="main"
         sx={{
           flexGrow: 1,
+          ml: { xs: 0, md: "240px" },
           mt: "64px",
           transition: theme.transitions.create(["margin", "width"], {
             easing: theme.transitions.easing.sharp,
@@ -103,12 +104,13 @@ const Dashboard = () => {
 
         <Box
           sx={{
-            py: 4,
+            py: 3,
             px: { xs: 2, sm: 3, md: 4 },
             maxWidth: "100%",
           }}
         >
-          <Box sx={{ mb: 4 }}>
+          {/* Welcome Section */}
+          <Box sx={{ mb: 4, textAlign: "center" }}>
             <Typography
               variant="h4"
               sx={{
@@ -124,8 +126,9 @@ const Dashboard = () => {
             </Typography>
           </Box>
 
+          {/* Statistics Section */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} lg={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Today's Violations"
                 value={stats.todayViolations}
@@ -133,7 +136,7 @@ const Dashboard = () => {
                 color="primary"
               />
             </Grid>
-            <Grid item xs={12} sm={6} lg={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Total Driver's Listed"
                 value={stats.totalUsers}
@@ -141,7 +144,7 @@ const Dashboard = () => {
                 color="success"
               />
             </Grid>
-            <Grid item xs={12} sm={6} lg={2.4}>
+            <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Total Traffic Violations"
                 value={stats.totalViolations}
@@ -149,17 +152,35 @@ const Dashboard = () => {
                 color="warning"
               />
             </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Speed Violations"
+                value={stats.speedViolations}
+                icon={<SpeedIcon fontSize="large" />}
+                color="error"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <StatCard
+                title="Noise Violations"
+                value={stats.noiseViolations}
+                icon={<VolumeUpIcon fontSize="large" />}
+                color="info"
+              />
+            </Grid>
           </Grid>
 
+          {/* Charts Section */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} md={7}>
+            <Grid item xs={12} md={6}>
               <ChartCard title="Violation Distribution" />
             </Grid>
-            <Grid item xs={12} md={5}>
+            <Grid item xs={12} md={6}>
               <ChartCard title="Monthly Violations" />
             </Grid>
           </Grid>
 
+          {/* Recent Activity Section */}
           <Grid container spacing={3}>
             <Grid item xs={12}>
               <Paper
@@ -167,14 +188,18 @@ const Dashboard = () => {
                   p: 3,
                   borderRadius: 2,
                   boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
+                  height: "300px",
                 }}
               >
-                <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ mb: 2, fontWeight: "bold", textAlign: "center" }}
+                >
                   Recent Activity
                 </Typography>
                 <Box
                   sx={{
-                    height: 200,
+                    height: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

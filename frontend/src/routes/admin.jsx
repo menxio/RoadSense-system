@@ -7,6 +7,7 @@ const Live = lazy(() => import("../pages/admin/Live/Live.jsx"));
 const Users = lazy(() => import("@/pages/admin/Users/Users"));
 const Vehicles = lazy(() => import("@/pages/admin/Vehicles/Vehicles"));
 const Violations = lazy(() => import("@/pages/admin/Violations/Violations"));
+const ProfileEdit = lazy(() => import("@/pages/ProfileEdit"));
 
 const adminRoutes = [
   <Route
@@ -51,6 +52,15 @@ const adminRoutes = [
     element={
       <React.Suspense fallback={<div>Loading...</div>}>
         <Violations />
+      </React.Suspense>
+    }
+  />,
+  <Route
+    key="admin-profile"
+    path="/admin/profile"
+    element={
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <ProfileEdit />
       </React.Suspense>
     }
   />,
