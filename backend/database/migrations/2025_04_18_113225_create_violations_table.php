@@ -17,7 +17,8 @@ return new class extends Migration {
             $table->timestamp('detected_at');
             $table->float('speed')->nullable();
             $table->float('decibel_level')->nullable();
-            $table->enum('status', ['flagged', 'reviewed', 'cleared'])->default('flagged');
+            $table->string('letter_path')->nullable();
+            $table->enum('status', ['flagged', 'under_review', 'cleared'])->default('flagged');
             $table->timestamps();
         });
     }

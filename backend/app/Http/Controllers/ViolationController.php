@@ -76,24 +76,28 @@ class ViolationController extends Controller
         }
 
         $validated = $request->validate([
-            'plate_number' => 'sometimes|string',
-            'detected_at' => 'sometimes|date',
-            'speed' => 'sometimes|numeric',
-            'decibel_level' => 'sometimes|numeric',
-            'status' => 'sometimes|string|in:flagged,reviewed,cleared',
+            'status' => 'required|string|in:flagged,under review,cleared,rejected',
+            'letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        $violation->update([
-            'plate_number' => $validated['plate_number'] ?? $violation->plate_number,
-            'detected_at' => $validated['detected_at'] ?? $violation->detected_at,
-            'speed' => $validated['speed'] ?? $violation->speed,
-            'decibel_level' => $validated['decibel_level'] ?? $violation->decibel_level,
-            'status' => $validated['status'] ?? $violation->status,
-        ]);
+        if ($violation->status === 'flagged' && $validated['status'] !== 'under review') {
+            return response()->json(['message' => 'Cannot change status from Flagged directly'], 403);
+        }
 
-        return response()->json([
-            'message' => 'Violation updated successfully',
-            'violation' => $violation,
-        ]);
+        if ($violation->status === 'under review' && !in_array($validated['status'], ['cleared', 'rejected'])) {
+            return response()->json(['message' => 'Invalid status transition'], 403);
+        }
+
+        if ($request->hasFile('letter')) {
+            $path = $request->file('letter')->store('letters', 'public');
+            $violation->letter_path = $path;
+            $violation->status = 'under review';
+        } else {
+            $violation->status = $validated['status'];
+        }
+
+        $violation->save();
+
+        return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);
     }
 }
