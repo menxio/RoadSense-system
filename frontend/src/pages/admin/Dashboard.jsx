@@ -92,7 +92,6 @@ const Dashboard = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          ml: { xs: 0, md: "240px" },
           mt: "64px",
           transition: theme.transitions.create(["margin", "width"], {
             easing: theme.transitions.easing.sharp,
