@@ -223,12 +223,6 @@ const ViolationsTable = () => {
               <RefreshIcon />
             </IconButton>
           </Tooltip>
-
-          <Tooltip title="Export data">
-            <IconButton color="primary">
-              <DownloadIcon />
-            </IconButton>
-          </Tooltip>
         </Box>
       </Box>
 
