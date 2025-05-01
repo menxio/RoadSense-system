@@ -22,6 +22,7 @@ class ViolationController extends Controller
             'speed' => 'nullable|numeric',
             'decibel_level' => 'nullable|numeric',
             'status' => 'nullable|string|in:flagged,reviewed,cleared',
+            'letter' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
         $user = User::where('plate_number', $validated['plate_number'])->first();
@@ -30,12 +31,18 @@ class ViolationController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
+        $letterPath = null;
+        if ($request->hasFile('letter')) {
+            $letterPath = $request->file('letter')->store('letters', 'public');
+        }
+
         $violation = Violation::create([
             'custom_user_id' => $user->custom_id,
             'plate_number' => $validated['plate_number'],
             'detected_at' => $validated['detected_at'],
             'speed' => $validated['speed'],
             'decibel_level' => $validated['decibel_level'],
+            'letter_path' => $letterPath,
             'status' => $validated['status'] ?? 'flagged',
         ]);
 
@@ -76,6 +83,10 @@ class ViolationController extends Controller
         }
 
         $validated = $request->validate([
+            'plate_number' => 'sometimes|string',
+            'detected_at' => 'sometimes|date',
+            'speed' => 'sometimes|numeric',
+            'decibel_level' => 'sometimes|numeric',
             'status' => 'required|string|in:flagged,under review,cleared,rejected',
             'letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
@@ -95,6 +106,12 @@ class ViolationController extends Controller
         } else {
             $violation->status = $validated['status'];
         }
+
+        $violation->plate_number = $violation->plate_number;
+        $violation->detected_at = $violation->detected_at;
+        $violation->speed = $violation->speed;
+        $violation->decibel_level = $violation->decibel_level;
+        $violation->status = $validated['status'] ?? $violation->status;
 
         $violation->save();
 

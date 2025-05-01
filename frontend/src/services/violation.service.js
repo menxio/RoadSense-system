@@ -20,12 +20,30 @@ export const getViolationById = async (id) => {
   }
 };
 
-export const updateViolation = async (id, status) => {
+export const updateViolation = async (id, data) => {
   try {
-    const response = await api.put(`/violations/${id}`, status);
+    const response = await api.post(`/violations/${id}?_method=PUT`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     return response.data;
   } catch (error) {
     console.error("Error updating violation:", error);
+    throw error;
+  }
+};
+
+export const submitViolationAppeal = async (formData) => {
+  try {
+    const response = await api.post("/violations", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting violation appeal:", error);
     throw error;
   }
 };

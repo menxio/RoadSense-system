@@ -16,6 +16,7 @@ class Violation extends Model
         'decibel_level',
         'letter_path',
         'status',
+        'letter_path',
     ];
 
 
