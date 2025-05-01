@@ -56,21 +56,26 @@ const Dashboard = () => {
         ]);
 
         const today = new Date().toISOString().slice(0, 10); // 'YYYY-MM-DD'
-        const todayViolations = violationData.filter((v) =>
+        const filteredViolations = violationData.filter(
+          (v) => v.status !== "cleared" // Exclude cleared violations
+        );
+
+        const todayViolations = filteredViolations.filter((v) =>
           v.detected_at.startsWith(today)
         ).length;
 
-        const speedViolations = violationData.filter(
+        const speedViolations = filteredViolations.filter(
           (v) => v.speed && v.speed > 30
         ).length;
-        const noiseViolations = violationData.filter(
+
+        const noiseViolations = filteredViolations.filter(
           (v) => v.decibel_level && v.decibel_level > 85
         ).length;
 
         setStats({
           todayViolations,
           totalUsers: userData.length,
-          totalViolations: violationData.length,
+          totalViolations: filteredViolations.length,
           speedViolations,
           noiseViolations,
         });

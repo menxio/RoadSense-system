@@ -75,44 +75,48 @@ class ViolationController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $violation = Violation::find($id);
+{
+    $violation = Violation::find($id);
 
-        if (!$violation) {
-            return response()->json(['message' => 'Violation not found'], 404);
-        }
-
-        $validated = $request->validate([
-            'plate_number' => 'sometimes|string',
-            'detected_at' => 'sometimes|date',
-            'speed' => 'sometimes|numeric',
-            'decibel_level' => 'sometimes|numeric',
-            'status' => 'sometimes|string|in:flagged,reviewed,cleared',
-            'letter' => 'nullable|file|mimes:pdf|max:2048',
-        ]);
-
-        // Handle letter file upload if present
-        if ($request->hasFile('letter')) {
-            $letterPath = $request->file('letter')->store('letters', 'public');
-            $violation->letter_path = $letterPath;
-            // Automatically set status to 'under review' when a letter is uploaded
-            $violation->status = 'under review';
-        }
-
-        // Update other fields only if they are present in the request
-        $violation->plate_number = $violation->plate_number;
-        $violation->detected_at = $violation->detected_at;
-        $violation->speed = $violation->speed;
-        $violation->decibel_level = $violation->decibel_level;
-
-        // If the status is not overridden by the letter upload, keep the original status
-        $violation->status = $validated['status'] ?? $violation->status;
-
-        $violation->save();
-
-        return response()->json([
-            'message' => 'Violation updated successfully',
-            'violation' => $violation,
-        ]);
+    if (!$violation) {
+        return response()->json(['message' => 'Violation not found'], 404);
     }
+
+    // Validate the incoming request
+    $validated = $request->validate([
+        'status' => 'required|string|in:flagged,under review,cleared,rejected', 
+        'letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+    ]);
+
+    // Prevent status transition from 'flagged' to 'under review' directly
+    if ($violation->status === 'flagged' && $validated['status'] === 'under review') {
+        return response()->json(['message' => 'Cannot change status from Flagged directly to Under Review'], 403);
+    }
+
+    // If the status is 'under review', only allow transitioning to 'cleared' or 'rejected'
+    if ($violation->status === 'under review' && !in_array($validated['status'], ['cleared', 'rejected'])) {
+        return response()->json(['message' => 'Invalid status transition from Under Review'], 403);
+    }
+
+    // Handle file upload if present
+    if ($request->hasFile('letter')) {
+        $path = $request->file('letter')->store('letters', 'public');
+        $violation->letter_path = $path;
+        // Automatically set the status to 'under review' if a letter is uploaded
+        $violation->status = 'under review';
+    } else {
+        // Otherwise, keep the status provided in the request
+        $violation->status = $validated['status'];
+    }
+
+    // Optionally update other violation fields as necessary, for example:
+    // $violation->plate_number = $validated['plate_number'] ?? $violation->plate_number;
+    // $violation->detected_at = $validated['detected_at'] ?? $violation->detected_at;
+    // $violation->speed = $validated['speed'] ?? $violation->speed;
+    // $violation->decibel_level = $validated['decibel_level'] ?? $violation->decibel_level;
+
+    $violation->save();
+
+    return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);
+}
 }
