@@ -45,7 +45,7 @@ import {
   DirectionsCar as DirectionsCarIcon,
 } from "@mui/icons-material";
 import UserDetailsModal from "@/components/molecules/UserDetailsModal";
-import { getViolations } from "@/services/violation.service";
+import { getViolations, updateViolation } from "@/services/violation.service";
 import { showUser } from "@/services/user.service";
 
 const ViolationsTable = () => {
@@ -56,6 +56,7 @@ const ViolationsTable = () => {
   const [selectedViolation, setSelectedViolation] = useState(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isClearConfirmationOpen, setIsClearConfirmationOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
@@ -101,6 +102,35 @@ const ViolationsTable = () => {
   const handleCloseDialog = () => {
     setSelectedViolation(null);
     setIsDialogOpen(false);
+  };
+
+  const handleOpenClearConfirmation = (violation) => {
+    setSelectedViolation(violation);
+    setIsClearConfirmationOpen(true);
+  };
+
+  const handleCloseClearConfirmation = () => {
+    setIsClearConfirmationOpen(false);
+  };
+
+  const handleClearViolation = async (violation) => {
+    try {
+      await updateViolation(violation.id, { status: "cleared" });
+      setViolations((prev) =>
+        prev.map((v) =>
+          v.id === violation.id ? { ...v, status: "cleared" } : v
+        )
+      );
+      setAlertMessage("Violation marked as cleared successfully!");
+      setAlertSeverity("success");
+    } catch (error) {
+      console.error("Error clearing violation:", error);
+      setAlertMessage("Failed to clear the violation.");
+      setAlertSeverity("error");
+    } finally {
+      setIsClearConfirmationOpen(false);
+      setShowAlert(true);
+    }
   };
 
   const handleOpenUserModal = async (userId) => {
@@ -762,11 +792,67 @@ const ViolationsTable = () => {
         </DialogContent>
         <DialogActions sx={{ p: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
           <Button
+            variant="contained"
+            color="success"
+            size="small"
+            sx={{ ml: 2 }}
+            onClick={() => handleOpenClearConfirmation(selectedViolation)}
+          >
+            Clear Violation
+          </Button>
+          <Button
             onClick={handleCloseDialog}
             variant="outlined"
             color="primary"
           >
             Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Modal */}
+      <Dialog
+        open={isClearConfirmationOpen}
+        onClose={handleCloseClearConfirmation}
+        maxWidth="xs"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            bgcolor: "#f5f7fa",
+            borderBottom: "1px solid rgba(0,0,0,0.1)",
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
+          Confirm Action
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <Typography variant="body1" color="text.secondary">
+            Are you sure you want to mark this violation as{" "}
+            <strong>cleared</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+          <Button
+            onClick={handleCloseClearConfirmation}
+            variant="outlined"
+            color="primary"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleClearViolation(selectedViolation)}
+            variant="contained"
+            color="success"
+          >
+            Confirm
           </Button>
         </DialogActions>
       </Dialog>

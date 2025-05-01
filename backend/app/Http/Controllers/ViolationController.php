@@ -91,10 +91,6 @@ class ViolationController extends Controller
             'letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
         ]);
 
-        if ($violation->status === 'flagged' && $validated['status'] !== 'under review') {
-            return response()->json(['message' => 'Cannot change status from Flagged directly'], 403);
-        }
-
         if ($violation->status === 'under review' && !in_array($validated['status'], ['cleared', 'rejected'])) {
             return response()->json(['message' => 'Invalid status transition'], 403);
         }
@@ -111,7 +107,6 @@ class ViolationController extends Controller
         $violation->detected_at = $violation->detected_at;
         $violation->speed = $violation->speed;
         $violation->decibel_level = $violation->decibel_level;
-        $violation->status = $validated['status'] ?? $violation->status;
 
         $violation->save();
 
