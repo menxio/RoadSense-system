@@ -14,7 +14,9 @@ class Violation extends Model
         'detected_at',
         'speed',
         'decibel_level',
+        'letter_path',
         'status',
+        'letter_path',
     ];
 
 
