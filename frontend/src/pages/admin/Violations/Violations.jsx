@@ -4,6 +4,7 @@ import Sidebar from "@/components/organisms/Sidebar";
 import Header from "@/components/organisms/Header";
 import ViolationsTable from "./ViolationsTable";
 import { getViolations, updateViolation } from "@/services/violation.service";
+import { fetchUserProfile } from "@/redux/slices/userSlice";
 
 const Violations = () => {
   const [violations, setViolations] = useState([]);

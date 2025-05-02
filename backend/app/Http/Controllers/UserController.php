@@ -8,7 +8,6 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-    // List all users
     public function index()
     {
         $users = User::where('role', 'user')->get();
@@ -16,7 +15,6 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    // Create a new user
     public function create(Request $request)
     {
         $validated = $request->validate([
@@ -52,7 +50,6 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Find user by custom_id
         $user = User::where('custom_id', $id)->first();
     
         if (!$user) {
@@ -79,13 +76,9 @@ class UserController extends Controller
     
         return response()->json(['message' => 'User updated successfully', 'user' => $user]);
     }
-    
-    
 
-    // Delete a user
     public function delete($id)
     {
-        // Find user by custom_id
         $user = User::where('custom_id', $id)->first();
 
         if (!$user) {
@@ -100,7 +93,6 @@ class UserController extends Controller
     public function getCurrentUser(Request $request)
     {
         try {
-            // Use the authenticated user provided by Sanctum
             $user = $request->user();
 
 
