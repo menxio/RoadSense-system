@@ -71,10 +71,7 @@ const UserViolations = () => {
     setCurrentViolationId(id);
     setSelectedFile(null); // Reset the file input
     setFormData({
-      plate_number: selectedViolation.plate_number,
-      detected_at: selectedViolation.detected_at,
-      speed: selectedViolation.speed,
-      decibel_level: selectedViolation.decibel_level,
+      status: selectedViolation.status,
     });
     setIsModalOpen(true);
   };
@@ -83,12 +80,7 @@ const UserViolations = () => {
     if (selectedFile && currentViolationId) {
       const uploadData = new FormData();
       uploadData.append("letter", selectedFile);
-      uploadData.append("plate_number", formData.plate_number);
-  
-      const detectedAtISO = new Date(formData.detected_at).toISOString();
-      uploadData.append("detected_at", detectedAtISO);
-      uploadData.append("speed", formData.speed.toString());
-      uploadData.append("decibel_level", formData.decibel_level.toString());
+      uploadData.append("status", formData.status);
       try {
         const response = await updateViolation(currentViolationId, uploadData);
         console.log("Violation updated successfully:", response);
