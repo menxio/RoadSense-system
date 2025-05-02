@@ -57,21 +57,6 @@ import Header from "@/components/organisms/Header";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const monthlyData = [
-  { month: "Jan", violations: 12 },
-  { month: "Feb", violations: 19 },
-  { month: "Mar", violations: 15 },
-  { month: "Apr", violations: 8 },
-  { month: "May", violations: 22 },
-  { month: "Jun", violations: 16 },
-  { month: "Jul", violations: 10 },
-  { month: "Aug", violations: 14 },
-  { month: "Sep", violations: 18 },
-  { month: "Oct", violations: 20 },
-  { month: "Nov", violations: 17 },
-  { month: "Dec", violations: 13 },
-];
-
 const Reports = () => {
   const [violations, setViolations] = useState([]);
   const [filteredViolations, setFilteredViolations] = useState([]);
