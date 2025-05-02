@@ -22,6 +22,7 @@ import {
   Assessment as AssessmentIcon,
   ChevronLeft as ChevronLeftIcon,
   Menu as MenuIcon,
+  Help as HelpIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -48,6 +49,7 @@ const Sidebar = ({ open = true, onClose }) => {
     },
     { text: "Manage Users", icon: <PeopleIcon />, path: "/admin/users" },
     { text: "Reports", icon: <AssessmentIcon />, path: "/admin/reports" },
+    { text: "Help", icon: <HelpIcon />, path: "/admin/help" },
   ];
 
   const isActive = (path) => {
