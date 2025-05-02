@@ -104,7 +104,7 @@ const Dashboard = () => {
           }),
         }}
       >
-        <Header user={user} onToggleSidebar={handleDrawerToggle} />
+        <Header onToggleSidebar={handleDrawerToggle} />
 
         <Box
           sx={{

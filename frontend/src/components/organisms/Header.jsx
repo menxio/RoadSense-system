@@ -1,4 +1,5 @@
-"use client";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -11,10 +12,19 @@ import {
 import { Menu as MenuIcon } from "@mui/icons-material";
 import NotificationBell from "@/components/atoms/NotificationBell";
 import AvatarNavDropdown from "@/components/molecules/AvatarNavDropdown";
+import { fetchUserProfile } from "@/redux/slices/userSlice";
 
-const Header = ({ user, onToggleSidebar }) => {
+const Header = ({ onToggleSidebar }) => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  useEffect(() => {
+    if (!user.name) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, user.name]);
 
   return (
     <AppBar

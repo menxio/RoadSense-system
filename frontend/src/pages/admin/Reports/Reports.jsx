@@ -2,58 +2,34 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Paper,
-  Table,
-  TableBody,
   TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
-  Button,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Card,
   CardContent,
   Grid,
-  Chip,
-  Tooltip,
-  IconButton,
-  Skeleton,
-  Alert,
-  Collapse,
-  TextField,
-  InputAdornment,
-  Menu,
-  ListItemIcon,
-  ListItemText,
-  Tab,
-  Tabs,
 } from "@mui/material";
 import {
-  PictureAsPdf as PdfIcon,
-  InsertDriveFile as CsvIcon,
-  Print as PrintIcon,
   FilterList as FilterIcon,
+  BarChart as BarChartIcon,
+  Person as PersonIcon,
+  DirectionsCar as CarIcon,
   CalendarMonth as CalendarIcon,
   Speed as SpeedIcon,
   VolumeUp as VolumeUpIcon,
-  Warning as WarningIcon,
-  BarChart as BarChartIcon,
-  PieChart as PieChartIcon,
-  TableChart as TableChartIcon,
-  Refresh as RefreshIcon,
-  Search as SearchIcon,
-  Download as DownloadIcon,
-  Person as PersonIcon,
-  DirectionsCar as CarIcon,
-  CheckCircle as CheckCircleIcon,
-  WarningAmber as WarningAmberIcon,
 } from "@mui/icons-material";
-import { getViolations } from "@/services/violation.service";
+import CustomBadge from "@/components/atoms/CustomBadge";
+import StatusChip from "@/components/atoms/StatusChip";
+import TableHeaderCell from "@/components/atoms/TableHeaderCell";
+import AlertMessage from "@/components/molecules/AlertMessage";
+import FilterToolbar from "@/components/molecules/FilterToolbar";
+import ExportMenu from "@/components/molecules/ExportMenu";
+import ViewModeTabs from "@/components/molecules/ViewModeTabs";
+import SummaryFooter from "@/components/molecules/SummaryFooter";
+import SummaryCards from "@/components/organisms/SummaryCards";
+import DataTable from "@/components/organisms/DataTable";
 import Sidebar from "@/components/organisms/Sidebar";
 import Header from "@/components/organisms/Header";
+import { getViolations } from "@/services/violation.service";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
@@ -65,10 +41,11 @@ const Reports = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("table");
-  const [exportAnchorEl, setExportAnchorEl] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("info");
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -96,6 +73,10 @@ const Reports = () => {
   useEffect(() => {
     fetchViolations();
   }, []);
+
+  useEffect(() => {
+    setPage(1);
+  }, [filterMonth, searchQuery]);
 
   useEffect(() => {
     let result = violations;
@@ -136,12 +117,13 @@ const Reports = () => {
     setViewMode(newValue);
   };
 
-  const handleExportClick = (event) => {
-    setExportAnchorEl(event.currentTarget);
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
   };
 
-  const handleExportClose = () => {
-    setExportAnchorEl(null);
+  const handleRowsPerPageChange = (newRowsPerPage) => {
+    setRowsPerPage(newRowsPerPage);
+    setPage(1);
   };
 
   const handleExportPDF = () => {
@@ -207,7 +189,6 @@ const Reports = () => {
     });
 
     doc.save("Traffic_Violations_Report.pdf");
-    handleExportClose();
 
     setShowAlert(true);
     setAlertMessage("PDF report generated successfully");
@@ -247,8 +228,6 @@ const Reports = () => {
     link.click();
     document.body.removeChild(link);
 
-    handleExportClose();
-
     setShowAlert(true);
     setAlertMessage("CSV report generated successfully");
     setAlertSeverity("success");
@@ -256,7 +235,17 @@ const Reports = () => {
 
   const handlePrint = () => {
     window.print();
-    handleExportClose();
+  };
+
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const totalViolations = filteredViolations.length;
@@ -275,53 +264,95 @@ const Reports = () => {
   const clearedViolations = filteredViolations.filter(
     (v) => v.status === "cleared"
   ).length;
+  const monthlyAverage = Math.round(totalViolations / (filterMonth ? 1 : 12));
 
-  const formatDate = (dateString) => {
-    const options = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return new Date(dateString).toLocaleDateString("en-US", options);
-  };
+  const tableColumns = [
+    <TableHeaderCell
+      key="user-id"
+      icon={<PersonIcon fontSize="small" color="action" />}
+    >
+      User ID
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="plate-number"
+      icon={<CarIcon fontSize="small" color="action" />}
+    >
+      Plate Number
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="date"
+      icon={<CalendarIcon fontSize="small" color="action" />}
+    >
+      Date
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="speed"
+      icon={<SpeedIcon fontSize="small" color="action" />}
+    >
+      Speed (km/h)
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="decibel"
+      icon={<VolumeUpIcon fontSize="small" color="action" />}
+    >
+      Decibel Level (dB)
+    </TableHeaderCell>,
+    "Status",
+  ];
 
-  const getStatusChip = (status) => {
-    switch (status) {
-      case "flagged":
-        return (
-          <Chip
-            size="small"
-            icon={<WarningIcon fontSize="small" />}
-            label="FLAGGED"
-            color="error"
-            sx={{ fontWeight: "bold" }}
-          />
-        );
-      case "under review":
-        return (
-          <Chip
-            size="small"
-            icon={<WarningAmberIcon fontSize="small" />}
-            label="UNDER REVIEW"
-            color="warning"
-            sx={{ fontWeight: "bold" }}
-          />
-        );
-      case "cleared":
-        return (
-          <Chip
-            size="small"
-            icon={<CheckCircleIcon fontSize="small" />}
-            label="CLEARED"
-            color="success"
-            sx={{ fontWeight: "bold" }}
-          />
-        );
-      default:
-        return <Chip size="small" label={status.toUpperCase()} />;
-    }
+  const renderViolationRow = (violation) => (
+    <TableRow key={violation.id} hover>
+      <TableCell>
+        <CustomBadge>{violation.custom_user_id}</CustomBadge>
+      </TableCell>
+      <TableCell>
+        <Typography variant="body2" fontWeight="medium">
+          {violation.plate_number}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Typography variant="body2">
+          {formatDate(violation.detected_at)}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="body2"
+            fontWeight={violation.speed > 30 ? "bold" : "regular"}
+            color={violation.speed > 30 ? "error.main" : "text.primary"}
+          >
+            {violation.speed ?? "N/A"}
+          </Typography>
+        </Box>
+      </TableCell>
+      <TableCell>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="body2"
+            fontWeight={violation.decibel_level > 85 ? "bold" : "regular"}
+            color={violation.decibel_level > 85 ? "error.main" : "text.primary"}
+          >
+            {violation.decibel_level ?? "N/A"}
+          </Typography>
+        </Box>
+      </TableCell>
+      <TableCell>
+        <StatusChip status={violation.status} />
+      </TableCell>
+    </TableRow>
+  );
+
+  const emptyStateConfig = {
+    icon: <FilterIcon fontSize="large" color="action" />,
+    message: "No violations found for the selected filter.",
+    subMessage:
+      filterMonth || searchQuery ? "Try adjusting your filter criteria" : null,
+    onReset: () => {
+      setFilterMonth("");
+      setSearchQuery("");
+    },
+    colSpan: 6,
   };
 
   return (
@@ -340,15 +371,12 @@ const Reports = () => {
         }}
       >
         {/* Alert Message */}
-        <Collapse in={showAlert}>
-          <Alert
-            severity={alertSeverity}
-            onClose={() => setShowAlert(false)}
-            sx={{ mb: 3 }}
-          >
-            {alertMessage}
-          </Alert>
-        </Collapse>
+        <AlertMessage
+          open={showAlert}
+          message={alertMessage}
+          severity={alertSeverity}
+          onClose={() => setShowAlert(false)}
+        />
 
         {/* Page Header */}
         <Box sx={{ mb: 4 }}>
@@ -364,144 +392,17 @@ const Reports = () => {
         </Box>
 
         {/* Summary Cards */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                height: "100%",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                borderRadius: 2,
-              }}
-            >
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Total Violations
-                  </Typography>
-                  <WarningIcon color="primary" />
-                </Box>
-                <Typography variant="h3" sx={{ fontWeight: "bold", mb: 1 }}>
-                  {loading ? <Skeleton width={80} /> : totalViolations}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Chip
-                    size="small"
-                    icon={<SpeedIcon fontSize="small" />}
-                    label={`${speedViolations} Speed`}
-                    color="error"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    icon={<VolumeUpIcon fontSize="small" />}
-                    label={`${noiseViolations} Noise`}
-                    color="info"
-                    variant="outlined"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                height: "100%",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                borderRadius: 2,
-              }}
-            >
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Status Breakdown
-                  </Typography>
-                  <PieChartIcon color="primary" />
-                </Box>
-                <Typography variant="h3" sx={{ fontWeight: "bold", mb: 1 }}>
-                  {loading ? <Skeleton width={80} /> : `${totalViolations}`}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                  <Chip
-                    size="small"
-                    icon={<WarningIcon fontSize="small" />}
-                    label={`${flaggedViolations} Flagged`}
-                    color="error"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    icon={<WarningAmberIcon fontSize="small" />}
-                    label={`${reviewedViolations} Under Review`}
-                    color="warning"
-                    variant="outlined"
-                  />
-                  <Chip
-                    size="small"
-                    icon={<CheckCircleIcon fontSize="small" />}
-                    label={`${clearedViolations} Cleared`}
-                    color="success"
-                    variant="outlined"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <Card
-              sx={{
-                height: "100%",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-                borderRadius: 2,
-              }}
-            >
-              <CardContent>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 2,
-                  }}
-                >
-                  <Typography variant="subtitle1" color="text.secondary">
-                    Monthly Average
-                  </Typography>
-                  <BarChartIcon color="primary" />
-                </Box>
-                <Typography variant="h3" sx={{ fontWeight: "bold", mb: 1 }}>
-                  {loading ? (
-                    <Skeleton width={80} />
-                  ) : (
-                    Math.round(totalViolations / (filterMonth ? 1 : 12))
-                  )}
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Chip
-                    size="small"
-                    icon={<CalendarIcon fontSize="small" />}
-                    label={filterMonth ? "Filtered Month" : "All Months"}
-                    color="primary"
-                    variant="outlined"
-                  />
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+        <SummaryCards
+          loading={loading}
+          totalViolations={totalViolations}
+          speedViolations={speedViolations}
+          noiseViolations={noiseViolations}
+          flaggedViolations={flaggedViolations}
+          reviewedViolations={reviewedViolations}
+          clearedViolations={clearedViolations}
+          monthlyAverage={monthlyAverage}
+          isFiltered={!!filterMonth}
+        />
 
         {/* Filter and Export Section */}
         <Box
@@ -514,349 +415,42 @@ const Reports = () => {
             gap: 2,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "center",
-              flexWrap: "wrap",
-            }}
-          >
-            <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel>Filter by Month</InputLabel>
-              <Select
-                value={filterMonth}
-                onChange={handleFilterChange}
-                label="Filter by Month"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <CalendarIcon fontSize="small" />
-                  </InputAdornment>
-                }
-              >
-                <MenuItem value="">All Months</MenuItem>
-                <MenuItem value="1">January</MenuItem>
-                <MenuItem value="2">February</MenuItem>
-                <MenuItem value="3">March</MenuItem>
-                <MenuItem value="4">April</MenuItem>
-                <MenuItem value="5">May</MenuItem>
-                <MenuItem value="6">June</MenuItem>
-                <MenuItem value="7">July</MenuItem>
-                <MenuItem value="8">August</MenuItem>
-                <MenuItem value="9">September</MenuItem>
-                <MenuItem value="10">October</MenuItem>
-                <MenuItem value="11">November</MenuItem>
-                <MenuItem value="12">December</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              placeholder="Search by ID or plate"
-              size="small"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon fontSize="small" />
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ width: { xs: "100%", sm: "250px" } }}
-            />
-
-            <Tooltip title="Refresh data">
-              <IconButton
-                onClick={fetchViolations}
-                color="primary"
-                size="small"
-              >
-                <RefreshIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <FilterToolbar
+            filterMonth={filterMonth}
+            onFilterChange={handleFilterChange}
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            onRefresh={fetchViolations}
+          />
 
           <Box sx={{ display: "flex", gap: 2 }}>
-            <Tabs
-              value={viewMode}
-              onChange={handleViewModeChange}
-              sx={{ minHeight: 40 }}
-            >
-              <Tab
-                value="table"
-                icon={<TableChartIcon fontSize="small" />}
-                label="Table"
-                sx={{ minHeight: 40, textTransform: "none" }}
-              />
-              <Tab
-                value="chart"
-                icon={<BarChartIcon fontSize="small" />}
-                label="Charts"
-                sx={{ minHeight: 40, textTransform: "none" }}
-              />
-            </Tabs>
+            <ViewModeTabs value={viewMode} onChange={handleViewModeChange} />
 
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<DownloadIcon />}
-              onClick={handleExportClick}
+            <ExportMenu
+              onExportPDF={handleExportPDF}
+              onExportCSV={handleExportCSV}
+              onPrint={handlePrint}
               disabled={filteredViolations.length === 0}
-            >
-              Export
-            </Button>
-            <Menu
-              anchorEl={exportAnchorEl}
-              open={Boolean(exportAnchorEl)}
-              onClose={handleExportClose}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-            >
-              <MenuItem onClick={handleExportPDF}>
-                <ListItemIcon>
-                  <PdfIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Export as PDF</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handleExportCSV}>
-                <ListItemIcon>
-                  <CsvIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Export as CSV</ListItemText>
-              </MenuItem>
-              <MenuItem onClick={handlePrint}>
-                <ListItemIcon>
-                  <PrintIcon fontSize="small" />
-                </ListItemIcon>
-                <ListItemText>Print Report</ListItemText>
-              </MenuItem>
-            </Menu>
+            />
           </Box>
         </Box>
 
         {/* Content based on view mode */}
         {viewMode === "table" ? (
-          <>
-            {/* Violations Table */}
-            {loading ? (
-              <TableContainer
-                component={Paper}
-                sx={{
-                  boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
-                  borderRadius: 2,
-                }}
-              >
-                <Table>
-                  <TableHead sx={{ bgcolor: "#f5f7fa" }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>User ID</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Plate Number
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Date</TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Speed (km/h)
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        Decibel Level (dB)
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {[...Array(5)].map((_, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          <Skeleton width={100} />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton width={120} />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton width={150} />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton width={80} />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton width={80} />
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton width={100} height={32} />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <TableContainer
-                component={Paper}
-                sx={{
-                  boxShadow: "0 4px 20px 0 rgba(0,0,0,0.1)",
-                  borderRadius: 2,
-                  overflow: "hidden",
-                }}
-              >
-                <Table>
-                  <TableHead sx={{ bgcolor: "#f5f7fa" }}>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <PersonIcon fontSize="small" color="action" />
-                          User ID
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <CarIcon fontSize="small" color="action" />
-                          Plate Number
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <CalendarIcon fontSize="small" color="action" />
-                          Date
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <SpeedIcon fontSize="small" color="action" />
-                          Speed (km/h)
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          <VolumeUpIcon fontSize="small" color="action" />
-                          Decibel Level (dB)
-                        </Box>
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {filteredViolations.map((violation) => (
-                      <TableRow key={violation.id} hover>
-                        <TableCell>
-                          <Box
-                            sx={{
-                              backgroundColor: "#e3f2fd",
-                              color: "#1565c0",
-                              padding: "4px 12px",
-                              borderRadius: "16px",
-                              display: "inline-block",
-                              fontWeight: "medium",
-                              fontSize: "0.875rem",
-                            }}
-                          >
-                            {violation.custom_user_id}
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" fontWeight="medium">
-                            {violation.plate_number}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2">
-                            {formatDate(violation.detected_at)}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                              variant="body2"
-                              fontWeight={
-                                violation.speed > 30 ? "bold" : "regular"
-                              }
-                              color={
-                                violation.speed > 30
-                                  ? "error.main"
-                                  : "text.primary"
-                              }
-                            >
-                              {violation.speed ?? "N/A"}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>
-                          <Box sx={{ display: "flex", alignItems: "center" }}>
-                            <Typography
-                              variant="body2"
-                              fontWeight={
-                                violation.decibel_level > 85
-                                  ? "bold"
-                                  : "regular"
-                              }
-                              color={
-                                violation.decibel_level > 85
-                                  ? "error.main"
-                                  : "text.primary"
-                              }
-                            >
-                              {violation.decibel_level ?? "N/A"}
-                            </Typography>
-                          </Box>
-                        </TableCell>
-                        <TableCell>{getStatusChip(violation.status)}</TableCell>
-                      </TableRow>
-                    ))}
-                    {filteredViolations.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <FilterIcon fontSize="large" color="action" />
-                            <Typography variant="h6" color="text.secondary">
-                              No violations found for the selected filter.
-                            </Typography>
-                            {(filterMonth || searchQuery) && (
-                              <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<RefreshIcon />}
-                                onClick={() => {
-                                  setFilterMonth("");
-                                  setSearchQuery("");
-                                }}
-                                sx={{ mt: 1 }}
-                              >
-                                Clear Filters
-                              </Button>
-                            )}
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </>
+          <DataTable
+            columns={tableColumns}
+            data={filteredViolations}
+            loading={loading}
+            emptyState={emptyStateConfig}
+            renderRow={renderViolationRow}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+            paginationEnabled={true}
+          />
         ) : (
-          // Charts....nice to have
+          // Charts view (placeholder)
           <Box sx={{ mt: 2 }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
@@ -869,23 +463,29 @@ const Reports = () => {
                 >
                   <CardContent>
                     <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold" }}>
-                      Charts??? Under Development. Now if you may, please go
-                      back to the table. Thank you ^^
+                      Charts
                     </Typography>
                     <Box
                       sx={{
                         height: 300,
                         display: "flex",
-                        alignItems: "flex-end",
-                        justifyContent: "space-between",
-                        px: 2,
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <Box>
-                        <Typography variant="caption" sx={{ mt: 1 }}>
-                          Wala pa bitaw ang charts ehehehehe... We just wanted
-                          to try something out, plus, it's a nice to have
-                          feature so maybe puhon. In God's perfect time. Awyeah.
+                      <Box sx={{ textAlign: "center" }}>
+                        <BarChartIcon
+                          sx={{ fontSize: 60, color: "text.secondary", mb: 2 }}
+                        />
+                        <Typography variant="body1" color="text.secondary">
+                          Charts???... Under Development ^^
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mt: 1 }}
+                        >
+                          Bakit nga ba... you tell me.
                         </Typography>
                       </Box>
                     </Box>
@@ -897,25 +497,12 @@ const Reports = () => {
         )}
 
         {/* Footer with summary */}
-        <Box sx={{ mt: 4, pt: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
-          <Typography variant="body2" color="text.secondary">
-            Showing {filteredViolations.length} of {violations.length} total
-            violations
-            {filterMonth && (
-              <>
-                {" "}
-                filtered by{" "}
-                {new Date(
-                  2023,
-                  Number.parseInt(filterMonth, 10) - 1
-                ).toLocaleString("default", {
-                  month: "long",
-                })}
-              </>
-            )}
-            {searchQuery && <> with search term "{searchQuery}"</>}
-          </Typography>
-        </Box>
+        <SummaryFooter
+          filteredCount={filteredViolations.length}
+          totalCount={violations.length}
+          filterMonth={filterMonth}
+          searchQuery={searchQuery}
+        />
       </Box>
     </Box>
   );

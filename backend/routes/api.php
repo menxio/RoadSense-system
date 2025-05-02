@@ -6,7 +6,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\ProfileController;
 
-// License ID
 Route::get('/license_id_images/{filename}', function ($filename) {
     $path = storage_path('app/public/license_id_images/' . $filename);
 
@@ -17,12 +16,10 @@ Route::get('/license_id_images/{filename}', function ($filename) {
     return response()->file($path);
 });
 
-// Public Routes
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/profile', [ProfileController::class, 'getProfile']);
 
-// Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
     // Route::get('/user', [UserController::class, 'getCurrentUser']);
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -33,8 +30,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-// User Routes
-
 Route::prefix('users')->group(function() {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
@@ -43,7 +38,6 @@ Route::prefix('users')->group(function() {
     Route::delete('/{id}', [UserController::class, 'delete']);
 });
 
-// Violations Routes
 Route::prefix('violations')->group(function () {
     Route::get('/', [ViolationController::class, 'index']);
     Route::post('/', [ViolationController::class, 'store']);

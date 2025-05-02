@@ -11,7 +11,6 @@ class ProfileController extends Controller
     public function getProfile(Request $request)
     {
         try {
-            // Extract the token from the Authorization header
             $token = $request->header('Authorization');
             \Log::info('Token received:', ['token' => $token]);
     
@@ -21,8 +20,7 @@ class ProfileController extends Controller
     
             $token = str_replace('Bearer ', '', $token);
             \Log::info('Extracted token:', ['token' => $token]);
-    
-            // Find the user by token
+
             $user = User::where('token', $token)->first();
             \Log::info('User found:', ['user' => $user]);
             if (!$user) {
