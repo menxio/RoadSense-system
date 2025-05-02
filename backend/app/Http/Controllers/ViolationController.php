@@ -78,8 +78,44 @@ class ViolationController extends Controller
 {
     $violation = Violation::find($id);
 
+<<<<<<< HEAD
     if (!$violation) {
         return response()->json(['message' => 'Violation not found'], 404);
+=======
+        if (!$violation) {
+            return response()->json(['message' => 'Violation not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'plate_number' => 'sometimes|string',
+            'detected_at' => 'sometimes|date',
+            'speed' => 'sometimes|numeric',
+            'decibel_level' => 'sometimes|numeric',
+            'status' => 'required|string|in:flagged,under review,cleared,rejected',
+            'letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
+        ]);
+
+        if ($violation->status === 'under review' && !in_array($validated['status'], ['cleared', 'rejected'])) {
+            return response()->json(['message' => 'Invalid status transition'], 403);
+        }
+
+        if ($request->hasFile('letter')) {
+            $path = $request->file('letter')->store('letters', 'public');
+            $violation->letter_path = $path;
+            $violation->status = 'under review';
+        } else {
+            $violation->status = $validated['status'];
+        }
+
+        $violation->plate_number = $violation->plate_number;
+        $violation->detected_at = $violation->detected_at;
+        $violation->speed = $violation->speed;
+        $violation->decibel_level = $violation->decibel_level;
+
+        $violation->save();
+
+        return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);
+>>>>>>> b12129df5325cbf135b63f8451537127487f584e
     }
 
     // Validate the incoming request

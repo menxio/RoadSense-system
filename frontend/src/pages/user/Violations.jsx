@@ -20,7 +20,10 @@ import {
 } from "@mui/material";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchUserProfile } from "../../redux/slices/userSlice";
-import { getViolationById, updateViolation } from "../../services/violation.service";
+import {
+  getViolationById,
+  updateViolation,
+} from "../../services/violation.service";
 import DashboardLayout from "../../components/DashboardLayout";
 
 const UserViolations = () => {
@@ -38,6 +41,7 @@ const UserViolations = () => {
     detected_at: "",
     speed: 0,
     decibel_level: 0,
+    status: "",
   });
 
   useEffect(() => {
@@ -67,10 +71,19 @@ const UserViolations = () => {
   };
 
   const handleAppeal = (id) => {
-    const selectedViolation = violations.find((violation) => violation.id === id);
+    const selectedViolation = violations.find(
+      (violation) => violation.id === id
+    );
     setCurrentViolationId(id);
     setSelectedFile(null); // Reset the file input
     setFormData({
+<<<<<<< HEAD
+=======
+      plate_number: selectedViolation.plate_number,
+      detected_at: selectedViolation.detected_at,
+      speed: selectedViolation.speed,
+      decibel_level: selectedViolation.decibel_level,
+>>>>>>> b12129df5325cbf135b63f8451537127487f584e
       status: selectedViolation.status,
     });
     setIsModalOpen(true);
@@ -80,7 +93,16 @@ const UserViolations = () => {
     if (selectedFile && currentViolationId) {
       const uploadData = new FormData();
       uploadData.append("letter", selectedFile);
+<<<<<<< HEAD
       uploadData.append("status", formData.status);
+=======
+      uploadData.append("plate_number", formData.plate_number);
+      uploadData.append("status", formData.status);
+      const detectedAtISO = new Date(formData.detected_at).toISOString();
+      uploadData.append("detected_at", detectedAtISO);
+      uploadData.append("speed", formData.speed.toString());
+      uploadData.append("decibel_level", formData.decibel_level.toString());
+>>>>>>> b12129df5325cbf135b63f8451537127487f584e
       try {
         const response = await updateViolation(currentViolationId, uploadData);
         console.log("Violation updated successfully:", response);
@@ -91,7 +113,6 @@ const UserViolations = () => {
       }
     }
   };
-  
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -104,7 +125,8 @@ const UserViolations = () => {
 
   const filteredViolations = violations.filter((violation) => {
     if (activeTab === "Flagged") return violation.status === "flagged";
-    if (activeTab === "Under Review") return violation.status === "under review";
+    if (activeTab === "Under Review")
+      return violation.status === "under review";
     if (activeTab === "Cleared") return violation.status === "cleared";
     return true;
   });
@@ -127,14 +149,25 @@ const UserViolations = () => {
           User Current Violations
         </Typography>
 
-        <Tabs value={activeTab} onChange={handleTabChange} sx={{ marginBottom: 2 }}>
+        <Tabs
+          value={activeTab}
+          onChange={handleTabChange}
+          sx={{ marginBottom: 2 }}
+        >
           <Tab label="Flagged" value="Flagged" />
           <Tab label="Under Review" value="Under Review" />
           <Tab label="Cleared" value="Cleared" />
         </Tabs>
 
         {isLoading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "200px",
+            }}
+          >
             <CircularProgress />
           </Box>
         ) : (
@@ -142,12 +175,24 @@ const UserViolations = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Plate Number</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Speed</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Noise Level</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Violation Type</TableCell>
-                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>Action</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Plate Number
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Date
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Speed
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Noise Level
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Violation Type
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold", color: "#2c3e50" }}>
+                    Action
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -166,7 +211,9 @@ const UserViolations = () => {
                   return (
                     <TableRow key={row.id}>
                       <TableCell>{row.plate_number}</TableCell>
-                      <TableCell>{new Date(row.detected_at).toLocaleString()}</TableCell>
+                      <TableCell>
+                        {new Date(row.detected_at).toLocaleString()}
+                      </TableCell>
                       <TableCell>
                         <Typography
                           sx={{
@@ -191,8 +238,14 @@ const UserViolations = () => {
                         <Chip
                           label={violationType}
                           sx={{
-                            backgroundColor: isSpeedViolation || isNoiseViolation ? "#f8d7da" : "#d4edda",
-                            color: isSpeedViolation || isNoiseViolation ? "#721c24" : "#155724",
+                            backgroundColor:
+                              isSpeedViolation || isNoiseViolation
+                                ? "#f8d7da"
+                                : "#d4edda",
+                            color:
+                              isSpeedViolation || isNoiseViolation
+                                ? "#721c24"
+                                : "#155724",
                             fontWeight: "bold",
                           }}
                         />
@@ -233,7 +286,8 @@ const UserViolations = () => {
               Upload PDF for Violation ID: {currentViolationId}
             </Typography>
             <Typography variant="body2" gutterBottom color="textSecondary">
-              Please upload your apology letter in PDF format to appeal this violation.
+              Please upload your apology letter in PDF format to appeal this
+              violation.
             </Typography>
             <TextField
               type="file"
