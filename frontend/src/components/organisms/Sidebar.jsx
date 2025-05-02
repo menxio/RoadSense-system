@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Drawer,
@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ open = true, onClose }) => {
+const Sidebar = ({ open = true, onClose, role, title = "App", logo = "/img/logo.png" }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -38,21 +38,26 @@ const Sidebar = ({ open = true, onClose }) => {
     setCollapsed((prev) => !prev);
   };
 
-  const navItems = [
-    { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/camera1" },
-    {
-      text: "Manage Violations",
-      icon: <WarningIcon />,
-      path: "/admin/violations",
-    },
-    { text: "Manage Users", icon: <PeopleIcon />, path: "/admin/users" },
-    { text: "Reports", icon: <AssessmentIcon />, path: "/admin/reports" },
-  ];
-
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  // Define nav items based on the role (admin or user)
+  const adminNavItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
+    { text: 'Live Cam', icon: <VideocamIcon />, path: '/admin/camera' },
+    { text: 'Manage Violations', icon: <WarningIcon />, path: '/admin/violations' },
+    { text: 'Manage Users', icon: <PeopleIcon />, path: '/admin/users' },
+    { text: 'Reports', icon: <AssessmentIcon />, path: '/admin/reports' },
+  ];
+
+  const userNavItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/user/dashboard' },
+    { text: 'Violations', icon: <WarningIcon />, path: '/user/violations' },
+    { text: 'Profile', icon: <PeopleIcon />, path: '/user/profile' },
+  ];
+
+  const navItems = role === "admin" ? adminNavItems : userNavItems;
 
   const drawerContent = (
     <>
@@ -62,17 +67,12 @@ const Sidebar = ({ open = true, onClose }) => {
           alignItems: "center",
           justifyContent: collapsed ? "center" : "space-between",
           p: 2,
-          minHeight: "64px", // Match the height of the AppBar
+          minHeight: "64px",
         }}
       >
         {!collapsed && (
-          <Typography variant="h6" fontWeight="bold">
-            <img
-              src="/img/logo.png"
-              alt=""
-              style={{ height: "32px", width: "auto", marginRight: "8px" }}
-            />
-            RoadSense
+          <Typography variant="h6" fontWeight="bold" sx={{ display: "flex", alignItems: "center" }}>
+            Roadsense
           </Typography>
         )}
         <IconButton onClick={toggleDrawer} sx={{ color: "white" }}>
@@ -82,11 +82,7 @@ const Sidebar = ({ open = true, onClose }) => {
       <Divider sx={{ borderColor: "rgba(255,255,255,0.2)" }} />
       <List sx={{ px: 1, py: 2 }}>
         {navItems.map((item) => (
-          <ListItem
-            disablePadding
-            key={item.text}
-            sx={{ display: "block", mb: 1 }}
-          >
+          <ListItem disablePadding key={item.text} sx={{ display: "block", mb: 1 }}>
             <Tooltip title={collapsed ? item.text : ""} placement="right">
               <ListItemButton
                 sx={{
@@ -131,6 +127,10 @@ const Sidebar = ({ open = true, onClose }) => {
     </>
   );
 
+  useEffect(() => {
+    setCollapsed(false); // Reset collapse when mobile
+  }, [isMobile]);
+
   return (
     <>
       {isMobile ? (
@@ -139,7 +139,7 @@ const Sidebar = ({ open = true, onClose }) => {
           open={open}
           onClose={onClose}
           ModalProps={{
-            keepMounted: true, // Better open performance on mobile
+            keepMounted: true,
           }}
           sx={{
             display: { xs: "block", md: "none" },
@@ -161,14 +161,15 @@ const Sidebar = ({ open = true, onClose }) => {
             flexShrink: 0,
             "& .MuiDrawer-paper": {
               width: drawerWidth,
-              transition: "width 0.3s",
-              overflowX: "hidden",
-              boxSizing: "border-box",
+              transition: theme.transitions.create("width", {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
               backgroundColor: "#0d1b2a",
               color: "white",
-              borderRight: "none",
             },
           }}
+          open
         >
           {drawerContent}
         </Drawer>

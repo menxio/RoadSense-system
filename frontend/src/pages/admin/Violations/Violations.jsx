@@ -57,14 +57,13 @@ const Violations = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role='admin'/>
       <Header onToggleSidebar={handleDrawerToggle} />
 
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          width: { xs: "100%", md: `calc(100% - 240px)` },
           mt: { xs: "64px", md: "64px" },
           p: { xs: 2, sm: 3, md: 4 },
           transition: "margin 0.2s, width 0.2s",

@@ -91,7 +91,7 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role={user.role} />
 
       <Box
         component="main"

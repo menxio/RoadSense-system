@@ -3,7 +3,7 @@
 import { useState } from "react"
 import PropTypes from "prop-types"
 import { Box, useTheme, useMediaQuery } from "@mui/material"
-import Sidebar from "./Sidebar"
+import Sidebar from "./organisms/Sidebar"
 import Header from "./organisms/Header"
 
 export const DashboardLayout = ({
@@ -33,15 +33,8 @@ export const DashboardLayout = ({
   const drawerWidth = 240
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar
-        logo={logo}
-        items={sidebarItems}
-        activePath={activePath}
-        onNavigate={onNavigate}
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-      />
+    <>
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role={user.role} />
 
       <Box
         component="main"
@@ -60,7 +53,7 @@ export const DashboardLayout = ({
 
         <Box
           sx={{
-            pt: 10, // Increased padding top to account for fixed header
+            pt: 10,
             pb: 4,
             width: "100%",
             maxWidth: "100%",
@@ -71,7 +64,7 @@ export const DashboardLayout = ({
           {children}
         </Box>
       </Box>
-    </Box>
+    </>
   )
 }
 

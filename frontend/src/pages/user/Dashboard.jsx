@@ -8,11 +8,7 @@ import {
   Warning as WarningIcon,
   ExitToApp as LogOutIcon,
   CalendarMonth as CalendarIcon,
-  Error as AlertCircleIcon,
   Info as InfoIcon,
-  Group as GroupIcon,
-  Speed as SpeedIcon,
-  VolumeUp as VolumeUpIcon,
 } from "@mui/icons-material"
 import { DashboardLayout } from "../../components/DashboardLayout"
 import StatCard from "../../components/molecules/StatCard"
@@ -27,55 +23,35 @@ const Dashboard = () => {
   const [violations, setViolations] = useState({
     todaysViolationsCount: 0,
     totalViolationsCount: 0,
+    violations: [],
   })
 
   const sidebarItems = [
-    {
-      icon: <DashboardIcon fontSize="small" />,
-      label: "Dashboard",
-      path: "/dashboard",
-    },
-    {
-      icon: <WarningIcon fontSize="small" />,
-      label: "Violation List",
-      path: "/violations",
-    },
-    {
-      icon: <LogOutIcon fontSize="small" />,
-      label: "Logout",
-      path: "/logout",
-    },
+    { icon: <DashboardIcon fontSize="small" />, label: "Dashboard", path: "/dashboard" },
+    { icon: <WarningIcon fontSize="small" />, label: "Violation List", path: "/violations" },
+    { icon: <LogOutIcon fontSize="small" />, label: "Logout", path: "/logout" },
   ]
-
-  const handleNavigate = (path) => {
-    console.log(`Navigate to: ${path}`)
-  }
-
-  const handleAction = (action) => {
-    console.log(`Action: ${action}`)
-  }
 
   useEffect(() => {
     if (!user.name) {
       dispatch(fetchUserProfile())
     }
 
-    const fetchUserViolations = async () => {
+    const fetchViolations = async () => {
       try {
-        const violationsResponse = await getViolationById(user.custom_id)
-
+        const res = await getViolationById(user.custom_id)
         setViolations({
-          todaysViolationsCount: violationsResponse.todays_violations_count,
-          totalViolationsCount: violationsResponse.total_violations_count,
-          violations: violationsResponse.violations,
+          todaysViolationsCount: res.todays_violations_count,
+          totalViolationsCount: res.total_violations_count,
+          violations: res.violations,
         })
       } catch (error) {
-        console.error("Failed to fetch data:", error)
+        console.error("Failed to fetch violations:", error)
       }
     }
 
     if (user.custom_id) {
-      fetchUserViolations()
+      fetchViolations()
     }
   }, [dispatch, user.name, user.custom_id])
 
@@ -84,26 +60,14 @@ const Dashboard = () => {
       logo="RoadSense"
       sidebarItems={sidebarItems}
       activePath="/dashboard"
-      onNavigate={handleNavigate}
+      onNavigate={(path) => console.log(`Navigate to: ${path}`)}
       userName={user.name}
       userRole={user.role}
     >
-      <Box sx={{ 
-        width: "100%", 
-        maxWidth: "1200px", 
-        mx: "auto", 
-        px: { xs: 2, sm: 3, md: 4 } 
-      }}>
-        {/* Welcome Section */}
-        <Box sx={{ mb: 4, textAlign: "center" }}>
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: "bold",
-              color: "#0d1b2a",
-              mb: 1,
-            }}
-          >
+      <Box sx={{ maxWidth: "1200px", mx: "auto", px: { xs: 2, sm: 3, md: 4 }, py: 4 }}>
+        {/* Page Header */}
+        <Box sx={{ mb: 5, textAlign: "center" }}>
+          <Typography variant="h4" fontWeight="bold" color="primary.main" gutterBottom>
             Welcome, {user.name || "User"}!
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -111,19 +75,12 @@ const Dashboard = () => {
           </Typography>
         </Box>
 
-        {/* Statistics Section */}
-        <Grid
-          container
-          spacing={3}
-          sx={{
-            mb: 4,
-            justifyContent: "center",
-          }}
-        >
+        {/* Statistics */}
+        <Grid container spacing={3} mb={5}>
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
               title="Today's Violations"
-              value={violations?.todaysViolationsCount || "0"}
+              value={violations.todaysViolationsCount || "0"}
               icon={<CalendarIcon />}
               color="primary"
             />
@@ -131,7 +88,7 @@ const Dashboard = () => {
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
               title="Total Violations"
-              value={violations?.totalViolationsCount || "0"}
+              value={violations.totalViolationsCount || "0"}
               icon={<WarningIcon />}
               color="warning"
             />
@@ -146,9 +103,12 @@ const Dashboard = () => {
           </Grid>
         </Grid>
 
-        {/* Violations Table */}
-        <Box sx={{ mb: 4 }}>
-          <ViolationsTable violations={violations.violations || []} />
+        {/* Violations Table Section */}
+        <Box>
+          <Typography variant="h6" fontWeight="medium" color="text.primary" mb={2}>
+            Violation History
+          </Typography>
+          <ViolationsTable violations={violations.violations} />
         </Box>
       </Box>
     </DashboardLayout>

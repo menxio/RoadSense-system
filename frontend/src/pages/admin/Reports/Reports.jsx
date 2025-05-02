@@ -326,7 +326,7 @@ const Reports = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role='admin' />
       <Header onToggleSidebar={handleDrawerToggle} />
 
       <Box

@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 // import Profile from '@/pages/user/Profile';
 
 const Dashboard = lazy(() => import('@/pages/user/Dashboard'));
-const Violations = lazy(() => import('@/pages/user/Violations'));
+const Violations = lazy(() => import('@/pages/user/Violations/Violations'));
 
 const userRoutes = [
     <Route key="student-dashboard" path="/user/dashboard" element={<Dashboard />} />,
