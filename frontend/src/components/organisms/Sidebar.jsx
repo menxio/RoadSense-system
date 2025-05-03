@@ -50,12 +50,13 @@ const Sidebar = ({ open = true, onClose, role, title = "App", logo = "/img/logo.
     { text: 'Manage Violations', icon: <WarningIcon />, path: '/admin/violations' },
     { text: 'Manage Users', icon: <PeopleIcon />, path: '/admin/users' },
     { text: 'Reports', icon: <AssessmentIcon />, path: '/admin/reports' },
+    { text: 'Help', icon: <HelpIcon />, path: '/admin/help' },
   ];
 
   const userNavItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/user/dashboard' },
     { text: 'Violations', icon: <WarningIcon />, path: '/user/violations' },
-    { text: 'Profile', icon: <PeopleIcon />, path: '/user/profile' },
+    { text: 'Help', icon: <HelpIcon />, path: '/user/help' },
   ];
 
   const navItems = role === "admin" ? adminNavItems : userNavItems;
