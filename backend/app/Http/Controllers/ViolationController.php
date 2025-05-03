@@ -103,11 +103,6 @@ class ViolationController extends Controller
             $violation->status = $validated['status'];
         }
 
-        $violation->plate_number = $violation->plate_number;
-        $violation->detected_at = $violation->detected_at;
-        $violation->speed = $violation->speed;
-        $violation->decibel_level = $violation->decibel_level;
-
         $violation->save();
 
         return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);

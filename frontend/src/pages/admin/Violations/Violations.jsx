@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react";
 import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import Sidebar from "@/components/organisms/Sidebar";

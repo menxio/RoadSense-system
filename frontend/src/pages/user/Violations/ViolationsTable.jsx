@@ -1,581 +1,428 @@
-"use client"
+import { useState, useEffect } from "react";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
   TableRow,
-  Paper,
-  Box,
+  TableCell,
   Typography,
-  Button,
-  Modal,
-  TextField,
-  Chip,
-  CircularProgress,
+  Box,
   IconButton,
   Tooltip,
-  Card,
-} from "@mui/material"
+  Stack,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Divider,
+} from "@mui/material";
 import {
-  ErrorOutline as ErrorOutlineIcon,
+  CheckCircle as CheckCircleIcon,
+  Warning as WarningIcon,
   WarningAmber as WarningAmberIcon,
-  CheckCircleOutline as CheckCircleOutlineIcon,
   Visibility as VisibilityIcon,
-  Upload as UploadIcon,
+  CloudUpload as CloudUploadIcon,
+} from "@mui/icons-material";
+import CustomBadge from "@/components/atoms/CustomBadge";
+import StatusChip from "@/components/atoms/StatusChip";
+import TableHeaderCell from "@/components/atoms/TableHeaderCell";
+import AlertMessage from "@/components/molecules/AlertMessage";
+import TableHeader from "@/components/molecules/TableHeader";
+import StatusCards from "@/components/molecules/StatusCards";
+import StatusTabs from "@/components/molecules/StatusTabs";
+import DataTable from "@/components/organisms/DataTable";
+import {
   Person as PersonIcon,
-  DirectionsCar as DirectionsCarIcon,
   CalendarToday as CalendarTodayIcon,
   Speed as SpeedIcon,
   VolumeUp as VolumeUpIcon,
-} from "@mui/icons-material"
+  DirectionsCar as DirectionsCarIcon,
+} from "@mui/icons-material";
 
-const ViolationsTable = ({
-  violations,
-  violationCounts,
-  activeTab,
-  onTabChange,
-  onAppeal,
-  isLoading,
-  isModalOpen,
-  selectedFile,
-  handleFileChange,
-  handleUpload,
-  handleCloseModal,
-}) => {
-  // Get status color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "flagged":
-        return {
-          bg: "#ef4444",
-          text: "white",
-        }
-      case "under review":
-        return {
-          bg: "#f59e0b",
-          text: "white",
-        }
-      case "cleared":
-        return {
-          bg: "#10b981",
-          text: "white",
-        }
-      default:
-        return {
-          bg: "#6b7280",
-          text: "white",
-        }
+const ViolationsTable = ({ violations = [], onAppeal, isLoading = false }) => {
+  const [tabValue, setTabValue] = useState("flagged");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedViolation, setSelectedViolation] = useState(null);
+  const [isAppealDialogOpen, setIsAppealDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [showNotif, setShowNotif] = useState(false);
+  const [notifMessage, setNotifMessage] = useState("");
+  const [alertSeverity, setAlertSeverity] = useState("info");
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  useEffect(() => {
+    setPage(1);
+  }, [tabValue, searchQuery]);
+
+  useEffect(() => {
+    if (!isLoading && violations.length > 0) {
+      setNotifMessage("Violations loaded successfully!");
+      setAlertSeverity("success");
+      setShowNotif(true);
     }
-  }
+  }, [violations, isLoading]);
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const handleOpenAppealDialog = (violation) => {
+    setSelectedViolation(violation);
+    setSelectedFile(null);
+    setIsAppealDialogOpen(true);
+  };
+
+  const handleCloseAppealDialog = () => {
+    setSelectedViolation(null);
+    setIsAppealDialogOpen(false);
+  };
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleSubmitAppeal = async () => {
+    try {
+      if (selectedViolation && onAppeal) {
+
+        const formData = new FormData();
+
+        if (selectedFile) {
+          formData.append("letter", selectedFile);
+        }
+        formData.append("status", "under review");
+
+        await onAppeal(selectedViolation.id || selectedViolation._id, formData);
+        setAlertMessage("Appeal submitted successfully!");
+        setAlertSeverity("success");
+        setShowAlert(true);
+        setIsAppealDialogOpen(false);
+      }
+    } catch (error) {
+      console.error("Error submitting appeal:", error);
+      setAlertMessage("Failed to submit appeal.");
+      setAlertSeverity("error");
+      setShowAlert(true);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage) => {
+    setRowsPerPage(newRowsPerPage);
+    setPage(1);
+  };
+
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+  };
+
+  const filteredViolations = violations.filter(
+    (violation) =>
+      violation.status === tabValue &&
+      (searchQuery === "" ||
+        (violation.custom_user_id &&
+          violation.custom_user_id
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())) ||
+        (violation.plate_number &&
+          violation.plate_number
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase())))
+  );
+
+  const violationCounts = {
+    flagged: violations.filter((v) => v.status === "flagged").length,
+    "under review": violations.filter((v) => v.status === "under review").length,
+    cleared: violations.filter((v) => v.status === "cleared").length,
+  };
+
+  const tableColumns = [
+    <TableHeaderCell
+      key="user-id"
+      icon={<PersonIcon fontSize="small" color="action" />}
+    >
+      User ID
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="plate-number"
+      icon={<DirectionsCarIcon fontSize="small" color="action" />}
+    >
+      Plate Number
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="date"
+      icon={<CalendarTodayIcon fontSize="small" color="action" />}
+    >
+      Date
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="speed"
+      icon={<SpeedIcon fontSize="small" color="action" />}
+    >
+      Speed
+    </TableHeaderCell>,
+    <TableHeaderCell
+      key="decibel"
+      icon={<VolumeUpIcon fontSize="small" color="action" />}
+    >
+      Decibel Level
+    </TableHeaderCell>,
+    "Status",
+    "Actions",
+  ];
+
+  const renderViolationRow = (violation) => (
+    <TableRow
+      key={violation.id || violation._id}
+      hover
+      sx={{
+        "&:hover": {
+          backgroundColor: "rgba(0, 0, 0, 0.04)",
+        },
+      }}
+    >
+      <TableCell>
+        <CustomBadge>
+          {violation.custom_user_id || "GP0001"}
+        </CustomBadge>
+      </TableCell>
+      <TableCell>
+        <Typography variant="body2" fontWeight="medium">
+          {violation.plate_number || "LAB-3067"}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Typography variant="body2">
+          {formatDate(violation.detected_at || new Date())}
+        </Typography>
+      </TableCell>
+      <TableCell>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="body2"
+            fontWeight={(violation.speed || 0) > 30 ? "bold" : "regular"}
+            color={(violation.speed || 0) > 30 ? "error.main" : "text.primary"}
+          >
+            {violation.speed || "14.08"}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+            km/h
+          </Typography>
+        </Box>
+      </TableCell>
+      <TableCell>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Typography
+            variant="body2"
+            fontWeight={(violation.decibel_level || 0) > 85 ? "bold" : "regular"}
+            color={(violation.decibel_level || 0) > 85 ? "error.main" : "text.primary"}
+          >
+            {violation.decibel_level || "0"}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+            dB
+          </Typography>
+        </Box>
+      </TableCell>
+      <TableCell>
+        <StatusChip status={violation.status || "flagged"} />
+      </TableCell>
+      <TableCell>
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="View Details">
+            <IconButton size="small" color="primary">
+              <VisibilityIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          {violation.status === "flagged" && (
+            <Tooltip title="Appeal Violation">
+              <IconButton
+                size="small"
+                color="warning"
+                onClick={() => handleOpenAppealDialog(violation)}
+              >
+                <CloudUploadIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Stack>
+      </TableCell>
+    </TableRow>
+  );
+
+  const emptyStateConfig = {
+    icon:
+      tabValue === "flagged" ? (
+        <WarningIcon fontSize="large" color="error" />
+      ) : tabValue === "under review" ? (
+        <WarningAmberIcon fontSize="large" color="warning" />
+      ) : (
+        <CheckCircleIcon fontSize="large" color="success" />
+      ),
+    message: `No ${tabValue} violations found`,
+    subMessage: searchQuery ? "Try adjusting your search criteria" : null,
+    onReset: () => setSearchQuery(""),
+    colSpan: 7,
+  };
+
+  const tabsConfig = [
+    { value: "flagged", label: "Flagged", count: violationCounts.flagged },
+    {
+      value: "under review",
+      label: "Under Review",
+      count: violationCounts["under review"],
+    },
+    { value: "cleared", label: "Cleared", count: violationCounts.cleared },
+  ];
 
   return (
-    <>
+    <Box sx={{ width: "100%" }}>
+      {/* Alert Message */}
+      <AlertMessage
+        open={showAlert || showNotif}
+        message={alertMessage || notifMessage}
+        severity={alertSeverity}
+        onClose={() => setShowAlert(false) || setShowNotif(false)}
+      />
+
+      {/* Header Section */}
+      <TableHeader
+        title="Traffic Violations"
+        searchValue={searchQuery}
+        onSearchChange={handleSearchChange}
+        onRefresh={() => {}}
+        searchPlaceholder="Search by ID or plate"
+      />
+
       {/* Status Cards */}
-      <Box sx={{ display: "flex", gap: 3, mb: 3, flexWrap: { xs: "wrap", md: "nowrap" } }}>
-        {/* Flagged Card */}
-        <Card
-          sx={{
-            flex: { xs: "1 0 100%", sm: "1 0 30%", md: 1 },
-            borderLeft: "4px solid #ef4444",
-            cursor: "pointer",
-            bgcolor: "#ffffff",
-            "&:hover": {
-              bgcolor: "rgba(239, 68, 68, 0.05)",
-            },
-            position: "relative",
-            overflow: "visible",
-            p: 3,
-          }}
-          onClick={() => onTabChange("flagged")}
-        >
-          <Typography sx={{ color: "#6b7280" }}>Flagged</Typography>
-          <Typography variant="h3" sx={{ color: "#ef4444", fontWeight: "bold", mt: 1 }}>
-            {violationCounts.flagged}
-          </Typography>
-          <Box
-            sx={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-              color: "#ef4444",
-            }}
-          >
-            <ErrorOutlineIcon sx={{ fontSize: 32 }} />
-            <Box
-              sx={{
-                position: "absolute",
-                top: -8,
-                right: -8,
-                bgcolor: "#ef4444",
-                color: "white",
-                borderRadius: "50%",
-                width: 20,
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 10,
-                fontWeight: "bold",
-              }}
-            >
-              {violationCounts.flagged}
-            </Box>
-          </Box>
-        </Card>
-
-        {/* Under Review Card */}
-        <Card
-          sx={{
-            flex: { xs: "1 0 100%", sm: "1 0 30%", md: 1 },
-            borderLeft: "4px solid #f59e0b",
-            cursor: "pointer",
-            bgcolor: "#ffffff",
-            "&:hover": {
-              bgcolor: "rgba(245, 158, 11, 0.05)",
-            },
-            position: "relative",
-            overflow: "visible",
-            p: 3,
-          }}
-          onClick={() => onTabChange("under review")}
-        >
-          <Typography sx={{ color: "#6b7280" }}>Under Review</Typography>
-          <Typography variant="h3" sx={{ color: "#f59e0b", fontWeight: "bold", mt: 1 }}>
-            {violationCounts["under review"]}
-          </Typography>
-          <Box
-            sx={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-              color: "#f59e0b",
-            }}
-          >
-            <WarningAmberIcon sx={{ fontSize: 32 }} />
-            <Box
-              sx={{
-                position: "absolute",
-                top: -8,
-                right: -8,
-                bgcolor: "#f59e0b",
-                color: "white",
-                borderRadius: "50%",
-                width: 20,
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 10,
-                fontWeight: "bold",
-              }}
-            >
-              {violationCounts["under review"]}
-            </Box>
-          </Box>
-        </Card>
-
-        {/* Cleared Card */}
-        <Card
-          sx={{
-            flex: { xs: "1 0 100%", sm: "1 0 30%", md: 1 },
-            borderLeft: "4px solid #10b981",
-            cursor: "pointer",
-            bgcolor: "#ffffff",
-            "&:hover": {
-              bgcolor: "rgba(16, 185, 129, 0.05)",
-            },
-            position: "relative",
-            overflow: "visible",
-            p: 3,
-          }}
-          onClick={() => onTabChange("cleared")}
-        >
-          <Typography sx={{ color: "#6b7280" }}>Cleared</Typography>
-          <Typography variant="h3" sx={{ color: "#10b981", fontWeight: "bold", mt: 1 }}>
-            {violationCounts.cleared}
-          </Typography>
-          <Box
-            sx={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-              color: "#10b981",
-            }}
-          >
-            <CheckCircleOutlineIcon sx={{ fontSize: 32 }} />
-            <Box
-              sx={{
-                position: "absolute",
-                top: -8,
-                right: -8,
-                bgcolor: "#10b981",
-                color: "white",
-                borderRadius: "50%",
-                width: 20,
-                height: 20,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: 10,
-                fontWeight: "bold",
-              }}
-            >
-              {violationCounts.cleared}
-            </Box>
-          </Box>
-        </Card>
-      </Box>
+      <StatusCards
+        counts={violationCounts}
+        activeTab={tabValue}
+        onTabChange={(tab) => setTabValue(tab)}
+      />
 
       {/* Tabs */}
-      <Box
-        sx={{
-          display: "flex",
-          borderBottom: "1px solid #e5e7eb",
-          mb: 2,
+      <StatusTabs
+        value={tabValue}
+        onChange={handleTabChange}
+        tabsConfig={tabsConfig}
+      />
+
+      {/* Violations Table with Pagination */}
+      <DataTable
+        columns={tableColumns}
+        data={filteredViolations}
+        loading={isLoading}
+        emptyState={emptyStateConfig}
+        renderRow={renderViolationRow}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handlePageChange}
+        onRowsPerPageChange={handleRowsPerPageChange}
+        paginationEnabled={true}
+      />
+
+      {/* Appeal Dialog */}
+      <Dialog
+        open={isAppealDialogOpen}
+        onClose={handleCloseAppealDialog}
+        maxWidth="sm"
+        PaperProps={{
+          sx: {
+            borderRadius: 2,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          },
         }}
       >
-        <Box
+        <DialogTitle
           sx={{
+            bgcolor: "#f5f7fa",
+            borderBottom: "1px solid rgba(0,0,0,0.1)",
             display: "flex",
             alignItems: "center",
-            p: 1.5,
-            borderBottom: activeTab === "flagged" ? "2px solid #ef4444" : "none",
-            color: activeTab === "flagged" ? "#111827" : "#6b7280",
-            cursor: "pointer",
-            "&:hover": {
-              color: "#111827",
-            },
-          }}
-          onClick={() => onTabChange("flagged")}
-        >
-          <ErrorOutlineIcon sx={{ fontSize: 20, mr: 1, color: "#ef4444" }} />
-          <Typography>Flagged</Typography>
-          <Box
-            sx={{
-              ml: 1,
-              bgcolor: "#ef4444",
-              color: "white",
-              borderRadius: 10,
-              px: 1,
-              fontSize: 12,
-              minWidth: 24,
-              textAlign: "center",
-            }}
-          >
-            {violationCounts.flagged}
-          </Box>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            p: 1.5,
-            borderBottom: activeTab === "under review" ? "2px solid #f59e0b" : "none",
-            color: activeTab === "under review" ? "#111827" : "#6b7280",
-            cursor: "pointer",
-            "&:hover": {
-              color: "#111827",
-            },
-          }}
-          onClick={() => onTabChange("under review")}
-        >
-          <WarningAmberIcon sx={{ fontSize: 20, mr: 1, color: "#f59e0b" }} />
-          <Typography>Under Review</Typography>
-          <Box
-            sx={{
-              ml: 1,
-              bgcolor: "#f59e0b",
-              color: "white",
-              borderRadius: 10,
-              px: 1,
-              fontSize: 12,
-              minWidth: 24,
-              textAlign: "center",
-            }}
-          >
-            {violationCounts["under review"]}
-          </Box>
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            p: 1.5,
-            borderBottom: activeTab === "cleared" ? "2px solid #10b981" : "none",
-            color: activeTab === "cleared" ? "#111827" : "#6b7280",
-            cursor: "pointer",
-            "&:hover": {
-              color: "#111827",
-            },
-          }}
-          onClick={() => onTabChange("cleared")}
-        >
-          <CheckCircleOutlineIcon sx={{ fontSize: 20, mr: 1, color: "#10b981" }} />
-          <Typography>Cleared</Typography>
-          <Box
-            sx={{
-              ml: 1,
-              bgcolor: "#10b981",
-              color: "white",
-              borderRadius: 10,
-              px: 1,
-              fontSize: 12,
-              minWidth: 24,
-              textAlign: "center",
-            }}
-          >
-            {violationCounts.cleared}
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Violations Table */}
-      {isLoading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-          <CircularProgress sx={{ color: "#3b82f6" }} />
-        </Box>
-      ) : violations.length === 0 ? (
-        <Box
-          sx={{
-            p: 4,
-            textAlign: "center",
-            bgcolor: "#ffffff",
-            borderRadius: 1,
-            border: "1px solid #e5e7eb",
+            gap: 1,
           }}
         >
-          <Typography variant="h6" sx={{ color: "#6b7280", mb: 1 }}>
-            No {activeTab} violations found
-          </Typography>
-          <Typography variant="body2" sx={{ color: "#6b7280" }}>
-            When violations are {activeTab}, they will appear here.
-          </Typography>
-        </Box>
-      ) : (
-        <TableContainer
-          component={Paper}
-          sx={{
-            bgcolor: "#ffffff",
-            borderRadius: 1,
-            border: "1px solid #e5e7eb",
-            mb: 2,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-          }}
-        >
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <PersonIcon sx={{ fontSize: 18, mr: 1, color: "#6b7280" }} />
-                    User ID
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <DirectionsCarIcon sx={{ fontSize: 18, mr: 1, color: "#6b7280" }} />
-                    Plate Number
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <CalendarTodayIcon sx={{ fontSize: 18, mr: 1, color: "#6b7280" }} />
-                    Date
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <SpeedIcon sx={{ fontSize: 18, mr: 1, color: "#6b7280" }} />
-                    Speed
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  <Box sx={{ display: "flex", alignItems: "center" }}>
-                    <VolumeUpIcon sx={{ fontSize: 18, mr: 1, color: "#6b7280" }} />
-                    Decibel Level
-                  </Box>
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  Status
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", color: "#6b7280", borderBottom: "1px solid #e5e7eb" }}>
-                  Actions
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {violations.map((row) => {
-                const isSpeedViolation = row.speed > 10
-                const isNoiseViolation = row.decibel_level > 70
-                const statusColor = getStatusColor(row.status)
-
-                return (
-                  <TableRow
-                    key={row.id || row._id}
-                    hover
-                    sx={{
-                      "&:hover": {
-                        bgcolor: "#f9fafb",
-                      },
-                      "& td": {
-                        borderBottom: "1px solid #e5e7eb",
-                      },
-                    }}
-                  >
-                    <TableCell>
-                      <Box
-                        sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          bgcolor: "#f3f4f6",
-                          borderRadius: 1,
-                          px: 1,
-                          py: 0.5,
-                        }}
-                      >
-                        {row.custom_user_id || "GP0001"}
-                      </Box>
-                    </TableCell>
-                    <TableCell>{row.plate_number || "LAB-3067"}</TableCell>
-                    <TableCell>{new Date(row.detected_at || new Date()).toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography
-                          sx={{
-                            color: isSpeedViolation ? "#ef4444" : "#10b981",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {row.speed || 14.08}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                          km/h
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Typography
-                          sx={{
-                            color: isNoiseViolation ? "#ef4444" : "#10b981",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {row.decibel_level || 0}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                          dB
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={row.status?.toUpperCase() || "FLAGGED"}
-                        sx={{
-                          bgcolor: statusColor.bg,
-                          color: statusColor.text,
-                          fontWeight: "bold",
-                          textTransform: "uppercase",
-                          fontSize: "0.7rem",
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: "flex" }}>
-                        <Tooltip title="View Details">
-                          <IconButton
-                            size="small"
-                            sx={{
-                              color: "#3b82f6",
-                              "&:hover": {
-                                bgcolor: "rgba(59, 130, 246, 0.1)",
-                              },
-                            }}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        {row.status !== "cleared" && (
-                          <Tooltip title="Appeal Violation">
-                            <IconButton
-                              size="small"
-                              onClick={() => onAppeal(row.id || row._id)}
-                              sx={{
-                                color: "#f59e0b",
-                                "&:hover": {
-                                  bgcolor: "rgba(245, 158, 11, 0.1)",
-                                },
-                              }}
-                            >
-                              <UploadIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-
-      {/* Modal for Uploading PDF */}
-      <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Appeal Violation
-          </Typography>
-          <Typography variant="body2" gutterBottom color="textSecondary">
-            Please upload your apology letter in PDF format to appeal this violation.
-          </Typography>
-          <TextField
-            type="file"
-            inputProps={{ accept: ".pdf" }}
-            onChange={handleFileChange}
-            fullWidth
-            sx={{ marginBottom: 2 }}
-          />
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="outlined" onClick={handleCloseModal} sx={{ color: "#6b7280" }}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleUpload}
-              disabled={!selectedFile}
+          <CloudUploadIcon color="warning" />
+          Appeal Violation
+        </DialogTitle>
+        <DialogContent sx={{ p: 3, minWidth: { sm: "500px" } }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography variant="subtitle1" fontWeight="medium">
+              Submit Appeal for Violation #{selectedViolation?.id || selectedViolation?._id}
+            </Typography>
+            <Divider />
+            <Typography variant="body2" color="text.secondary">
+              Upload a letter explaining why this violation should be reviewed.
+            </Typography>
+            <Box
               sx={{
-                bgcolor: "#3b82f6",
-                "&:hover": {
-                  bgcolor: "#2563eb",
-                },
+                p: 3,
+                border: "1px dashed rgba(0,0,0,0.2)",
+                borderRadius: 1,
+                bgcolor: "rgba(0,0,0,0.02)",
+                textAlign: "center",
               }}
             >
-              Upload
-            </Button>
+              <input
+                accept=".pdf,.doc,.docx"
+                style={{ display: "none" }}
+                id="appeal-file-upload"
+                type="file"
+                onChange={handleFileChange}
+              />
+              <label htmlFor="appeal-file-upload">
+                <Button
+                  variant="outlined"
+                  component="span"
+                  startIcon={<CloudUploadIcon />}
+                  sx={{ mb: 2 }}
+                >
+                  Select File
+                </Button>
+              </label>
+              <Typography variant="body2" color="text.secondary">
+                {selectedFile ? `Selected: ${selectedFile.name}` : "No file selected"}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-      </Modal>
-    </>
-  )
-}
+        </DialogContent>
+        <DialogActions sx={{ p: 2, borderTop: "1px solid rgba(0,0,0,0.1)" }}>
+          <Button
+            onClick={handleCloseAppealDialog}
+            variant="outlined"
+            color="inherit"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmitAppeal}
+            variant="contained"
+            color="primary"
+            disabled={!selectedFile}
+          >
+            Submit Appeal
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
 
-export default ViolationsTable
+export default ViolationsTable;
