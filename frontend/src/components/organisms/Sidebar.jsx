@@ -22,6 +22,7 @@ import {
   Assessment as AssessmentIcon,
   ChevronLeft as ChevronLeftIcon,
   Menu as MenuIcon,
+  Help as HelpIcon,
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
