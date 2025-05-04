@@ -14,7 +14,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('custom_id')->unique();
             $table->string('email')->unique();
+            $table->string('plate_number')->unique();
+            $table->string('license_id_image');
+            $table->string('school_id')->unique();
+            $table->string('role')->default('user'); // Default role is 'user'
+            $table->enum('status', ['pending', 'denied', 'accepted'])->default('pending');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

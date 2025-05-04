@@ -1,0 +1,5 @@
+*.mp4
+violation_logging/node_modules/
+violation_logging/*.env
+violation_logging/speed_events
+*.log
