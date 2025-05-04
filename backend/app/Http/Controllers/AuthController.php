@@ -44,6 +44,7 @@ class AuthController extends Controller
             'user' => $user,
             'license_id_image_url' => asset('storage/' . $user->license_id_image),
         ]);
+        
     }
     
     public function login(Request $request)

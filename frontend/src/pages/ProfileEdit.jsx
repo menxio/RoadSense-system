@@ -67,6 +67,7 @@ const ProfileEdit = () => {
 
   const fileInputRef = useRef(null);
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleDrawerToggle = () => {
