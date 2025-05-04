@@ -138,7 +138,7 @@ const UsersTable = ({ users, onEdit, onDelete }) => {
 
   const handleConfirmDelete = () => {
     if (userToDelete) {
-      onDelete(userToDelete._id);
+      onDelete(userToDelete.custom_id);
 
       setShowAlert(true);
       setAlertMessage("User deleted successfully");
