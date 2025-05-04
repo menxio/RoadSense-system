@@ -1,124 +1,21 @@
-import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Typography,
-  IconButton,
-  Box,
-  Avatar,
-  Grid,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import express from 'express'
+import path, { dirname } from 'path';
+import fs from 'fs';
+import mongoose from 'mongoose';
+import chokidar from 'chokidar';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const UserDetailsModal = ({ open, onClose, user, apiUrl }) => {
-  if (!user) return null;
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      {/* Modal Header */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          p: 2,
-          borderBottom: "1px solid #ddd",
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.5rem" }}>
-          User Details
-        </DialogTitle>
-        <IconButton onClick={onClose}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
-
-      {/* Modal Content */}
-      <DialogContent>
-        <Box sx={{ mt: 2, p: 2 }}>
-          {/* License ID Image */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            {user.license_id_image && (
-              <Avatar
-                src={`${apiUrl}/${user.license_id_image}`}
-                alt="License ID"
-                sx={{
-                  width: 150,
-                  height: 150,
-                  border: "2px solid #ddd",
-                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                }}
-              />
-            )}
-          </Box>
-
-          {/* User Details in Two Columns */}
-          <Grid container spacing={3}>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                User ID:
-              </Typography>
-              <Typography variant="body2">{user.custom_id}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Name:
-              </Typography>
-              <Typography variant="body2">{user.name}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Email:
-              </Typography>
-              <Typography variant="body2">{user.email}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Plate Number:
-              </Typography>
-              <Typography variant="body2">{user.plate_number}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Role:
-              </Typography>
-              <Typography variant="body2">{user.role}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-                Status:
-              </Typography>
-              <Typography variant="body2">{user.status}</Typography>
-            </Grid>
-          </Grid>
-        </Box>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-console.error = function (message, ...optionalParams) {
-  logStream.write(`[ERROR] ${new Date().toISOString()} - ${message}\n`);
-  optionalParams.forEach(param => logStream.write(`${JSON.stringify(param)}\n`));
-};
-
-const app = express();
+const app = express()
 const PORT = 3000;
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 const EVENTS_DIR = path.join(__dirname, 'speed_events');
 const MAX_FILES = 10;
 
 const MONGO_URI = process.env.MONGODB_URI
 
 const violationSchema = new mongoose.Schema({
-  custom_user_id: Number,
+  custom_user_id: String,
   speed: Number,
   decibel_level: Number,
   status: String,
@@ -141,6 +38,23 @@ const eventImageSchema = new mongoose.Schema({
 
 const EventImage = mongoose.model('EventImage', eventImageSchema);
 
+const userSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  plate_number: String,
+  password: String,
+  license_id_image: String,
+  school_id: String,
+  status: String,
+  role: String,
+  custom_id: String,
+  updated_at: Date,
+  created_at: Date,
+  token: String
+});
+
+const User = mongoose.model('User', userSchema, 'users');
+
 if (!fs.existsSync(EVENTS_DIR)) {
   fs.mkdirSync(EVENTS_DIR);
 }
@@ -150,10 +64,26 @@ async function uploadEventToDatabase(filePath) {
   try {
     const raw = fs.readFileSync(filePath, 'utf8');
     const event = JSON.parse(raw);
-    
+
+    // Normalize the license plate
+    if (event.plate_number) {
+      const normalizedPlate = event.plate_number
+        .toUpperCase()
+        .replace(/\s+/g, '')                   
+        .replace(/^([A-Z]+)(\d+)$/, '$1-$2');  
+
+      event.plate_number = normalizedPlate;
+
+      // Lookup user
+      const user = await User.findOne({ plate_number: normalizedPlate });
+      event.custom_user_id = user ? user.custom_id : 0;
+    } else {
+      event.custom_user_id = 0;
+    }
+
     const basename = path.basename(filePath, '.json');
     const imagePath = path.join(EVENTS_DIR, `${basename}.jpg`);
-    
+
     let imageBuffer = null;
 
     if (fs.existsSync(imagePath)) {
@@ -180,6 +110,7 @@ async function uploadEventToDatabase(filePath) {
     console.error(`[ERROR] Failed to upload event: ${err.message}`);
   }
 }
+
 
 
 // Keep only the 10 most recent files
@@ -220,7 +151,7 @@ app.listen(PORT, async () => {
         await uploadEventToDatabase(filePath);
         trimOldFiles();
       }
-    });
+    })
 });
 
 app.get('/', (req, res) => {

@@ -711,7 +711,7 @@ pathDefaults:
 # ip dapat sa camera. check via tapo app
 paths:
   cam:
-    source: rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1
+    source: rtsp://RoadsenseAdmin:RoadSense@192.168.1.21:554/stream1
 
 
   # Settings under path "all_others" are applied to all paths that
