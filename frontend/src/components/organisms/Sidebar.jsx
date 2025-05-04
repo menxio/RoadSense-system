@@ -25,7 +25,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = ({ open = true, onClose }) => {
+const Sidebar = ({ open = true, onClose, collapsedProp, setCollapsedProp }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -35,12 +35,15 @@ const Sidebar = ({ open = true, onClose }) => {
   const drawerWidth = collapsed ? 70 : 240;
 
   const toggleDrawer = () => {
+    if (collapsedProp != undefined) {
+      setCollapsedProp((prev) => !prev)
+    }
     setCollapsed((prev) => !prev);
   };
 
   const navItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/admin/dashboard" },
-    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/camera1" },
+    { text: "Live Cam", icon: <VideocamIcon />, path: "/admin/live" },
     {
       text: "Manage Violations",
       icon: <WarningIcon />,
