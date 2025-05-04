@@ -5,28 +5,26 @@ import {
   Box,
   useTheme,
   useMediaQuery,
-  Grid,
   Container,
   Card,
   CardContent,
-} from "@mui/material";
+  Stack,
+} from "@mui/material"
 import {
   Warning as WarningIcon,
   CalendarMonth as CalendarIcon,
   Info as InfoIcon,
-} from "@mui/icons-material";
-
-import Sidebar from "@/components/organisms/Sidebar";
-import Header from "@/components/organisms/Header";
-import { getViolationById } from "@/services/violation.service";
-import { fetchUserProfile } from "@/redux/slices/userSlice";
+} from "@mui/icons-material"
+import Sidebar from "@/components/organisms/Sidebar"
+import Header from "@/components/organisms/Header"
+import { getViolationById } from "@/services/violation.service"
+import { fetchUserProfile } from "@/redux/slices/userSlice"
 
 const Dashboard = () => {
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.user);
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatch = useDispatch()
+  const user = useSelector((state) => state.user)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
 
   const [dashboardData, setDashboardData] = useState({
     todaysViolationsCount: 0,
@@ -42,18 +40,15 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!user.name) {
-      dispatch(fetchUserProfile());
-    }
+    if (!user.name) dispatch(fetchUserProfile())
 
     const fetchViolations = async () => {
       try {
-        const res = await getViolationById(user.custom_id);
-
+        const res = await getViolationById(user.custom_id)
         const flaggedCount = res.violations.filter(
           (v) => v.status === "flagged" || v.status === "under review"
-        ).length;
-        const offenseLevel = calculateOffenseLevel(flaggedCount);
+        ).length
+        const offenseLevel = calculateOffenseLevel(flaggedCount)
 
         setDashboardData({
           todaysViolationsCount: res.todays_violations_count || 0,
@@ -66,19 +61,11 @@ const Dashboard = () => {
       }
     };
 
-    if (user.custom_id) {
-      fetchViolations();
-    }
-  }, [dispatch, user.name, user.custom_id]);
+    if (user.custom_id) fetchViolations()
+  }, [dispatch, user.name, user.custom_id])
 
-  const calculateOffenseLevel = (offenseCount) => {
-    if (offenseCount >= 3) return 3;
-    if (offenseCount >= 2) return 2;
-    if (offenseCount >= 1) return 1;
-    return 0;
-  };
+  const calculateOffenseLevel = (count) => (count >= 3 ? 3 : count)
 
-  // Get offense level info
   const getOffenseLevelInfo = (level) => {
     switch (level) {
       case 1:
@@ -112,41 +99,19 @@ const Dashboard = () => {
 
   const offenseInfo = getOffenseLevelInfo(dashboardData.offenseLevel);
 
-  // Process violations data for chart
   const processViolationsData = () => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const currentYear = new Date().getFullYear();
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    const currentYear = new Date().getFullYear()
+    const speedData = Array(12).fill(0)
+    const noiseData = Array(12).fill(0)
 
-    // Initialize data arrays
-    const speedData = Array(12).fill(0);
-    const noiseData = Array(12).fill(0);
-
-    // Count violations by month and type
     dashboardData.violations.forEach((violation) => {
-      const date = new Date(violation.detected_at);
+      if (!violation.detected_at) return
+      const date = new Date(violation.detected_at)
       if (date.getFullYear() === currentYear) {
-        const month = date.getMonth();
-
-        // Determine violation type (simplified logic - adjust as needed)
-        if (violation.speed > 30) {
-          speedData[month]++;
-        }
-        if (violation.decibel_level > 70) {
-          noiseData[month]++;
-        }
+        const month = date.getMonth()
+        if (violation.speed > 30) speedData[month]++
+        if (violation.decibel_level > 70) noiseData[month]++
       }
     });
 
@@ -162,36 +127,20 @@ const Dashboard = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f8fafc" }}>
       <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role="user" />
-
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          mt: "64px",
-          transition: theme.transitions.create(["margin", "width"], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
-        }}
-      >
+      <Box component="main" sx={{ flexGrow: 1, mt: "64px" }}>
         <Header onToggleSidebar={handleDrawerToggle} />
-
         <Container maxWidth="xl" sx={{ py: 4 }}>
-          {/* Welcome Section */}
           <Box
             sx={{
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
-              alignItems: { xs: "center", md: "flex-end" },
               justifyContent: "space-between",
+              alignItems: { xs: "center", md: "flex-end" },
               mb: 4,
             }}
           >
             <Box>
-              <Typography
-                variant="h4"
-                sx={{ fontWeight: "bold", mb: 0.5, color: "black" }}
-              >
+              <Typography variant="h4" fontWeight="bold" color="black" mb={0.5}>
                 Welcome back, {user.name || "User"}
               </Typography>
               <Typography variant="body1" color="text.secondary">
@@ -200,10 +149,10 @@ const Dashboard = () => {
             </Box>
             <Box
               sx={{
+                mt: { xs: 2, md: 0 },
                 display: "flex",
                 alignItems: "center",
                 gap: 1,
-                mt: { xs: 2, md: 0 },
                 px: 2,
                 py: 1,
                 borderRadius: 2,
@@ -222,215 +171,39 @@ const Dashboard = () => {
             </Box>
           </Box>
 
-          {/* Stat Cards */}
-          <Grid container spacing={3} sx={{ mb: 4 }}>
-            {/* Today's Violations */}
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "4px",
-                    bgcolor: "#0ea5e9",
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      color="text.secondary"
-                      fontWeight="medium"
-                    >
-                      Today's Violations
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(14, 165, 233, 0.1)",
-                        borderRadius: "50%",
-                        width: 48,
-                        height: 48,
-                      }}
-                    >
-                      <CalendarIcon sx={{ fontSize: 24, color: "#0ea5e9" }} />
-                    </Box>
-                  </Box>
-                  <Typography
-                    variant="h3"
-                    fontWeight="bold"
-                    sx={{ color: "#0f172a" }}
-                  >
-                    {dashboardData.todaysViolationsCount}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {dashboardData.todaysViolationsCount === 0
-                      ? "No violations detected today"
-                      : `${dashboardData.todaysViolationsCount} violation${
-                          dashboardData.todaysViolationsCount !== 1 ? "s" : ""
-                        } detected today`}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Total Violations */}
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "4px",
-                    bgcolor: "#f97316",
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      color="text.secondary"
-                      fontWeight="medium"
-                    >
-                      Total Violations
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: "rgba(249, 115, 22, 0.1)",
-                        borderRadius: "50%",
-                        width: 48,
-                        height: 48,
-                      }}
-                    >
-                      <WarningIcon sx={{ fontSize: 24, color: "#f97316" }} />
-                    </Box>
-                  </Box>
-                  <Typography
-                    variant="h3"
-                    fontWeight="bold"
-                    sx={{ color: "#0f172a" }}
-                  >
-                    {dashboardData.totalViolationsCount}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {dashboardData.totalViolationsCount === 0
-                      ? "No violations on record"
-                      : `Total violations on your record`}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-
-            {/* Offense Level */}
-            <Grid item xs={12} md={4}>
-              <Card
-                sx={{
-                  height: "100%",
-                  borderRadius: 3,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-                  position: "relative",
-                  overflow: "hidden",
-                  "&::before": {
-                    content: '""',
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "4px",
-                    bgcolor: offenseInfo.color,
-                  },
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      mb: 2,
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      color="text.secondary"
-                      fontWeight="medium"
-                    >
-                      Offense Level
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        bgcolor: `${offenseInfo.color}15`,
-                        borderRadius: "50%",
-                        width: 48,
-                        height: 48,
-                      }}
-                    >
-                      <InfoIcon
-                        sx={{ fontSize: 24, color: offenseInfo.color }}
-                      />
-                    </Box>
-                  </Box>
-                  <Typography
-                    variant="h3"
-                    fontWeight="bold"
-                    sx={{ color: "#0f172a" }}
-                  >
-                    {dashboardData.offenseLevel}
-                  </Typography>
-                  <Box sx={{ mt: 1 }}>
-                    <Typography
-                      variant="body2"
-                      fontWeight="medium"
-                      color={offenseInfo.color}
-                    >
+          <Stack direction={{ xs: "column", md: "row" }} spacing={3} sx={{ mb: 4 }}>
+            {[
+              {
+                title: "Today's Violations",
+                count: dashboardData.todaysViolationsCount,
+                icon: <CalendarIcon sx={{ fontSize: 24, color: "#0ea5e9" }} />,
+                color: "#0ea5e9",
+                bg: "rgba(14, 165, 233, 0.1)",
+                note:
+                  dashboardData.todaysViolationsCount === 0
+                    ? "No violations detected today"
+                    : `${dashboardData.todaysViolationsCount} violation${dashboardData.todaysViolationsCount !== 1 ? "s" : ""} detected today`,
+              },
+              {
+                title: "Total Violations",
+                count: dashboardData.totalViolationsCount,
+                icon: <WarningIcon sx={{ fontSize: 24, color: "#f97316" }} />,
+                color: "#f97316",
+                bg: "rgba(249, 115, 22, 0.1)",
+                note:
+                  dashboardData.totalViolationsCount === 0
+                    ? "No violations on record"
+                    : "Total violations on your record",
+              },
+              {
+                title: "Offense Level",
+                count: dashboardData.offenseLevel,
+                icon: <InfoIcon sx={{ fontSize: 24, color: offenseInfo.color }} />,
+                color: offenseInfo.color,
+                bg: `${offenseInfo.color}15`,
+                note: (
+                  <>
+                    <Typography variant="body2" fontWeight="medium" color={offenseInfo.color}>
                       {offenseInfo.action}
                     </Typography>
                     <Typography
@@ -440,20 +213,64 @@ const Dashboard = () => {
                     >
                       {offenseInfo.description}
                     </Typography>
+                  </>
+                ),
+              },
+            ].map(({ title, count, icon, color, bg, note }) => (
+              <Card
+                key={title}
+                sx={{
+                  flex: 1,
+                  borderRadius: 3,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+                  position: "relative",
+                  overflow: "hidden",
+                  "&::before": {
+                    content: '""',
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "4px",
+                    bgcolor: color,
+                  },
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+                    <Typography variant="h6" color="text.secondary">
+                      {title}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        bgcolor: bg,
+                        borderRadius: "50%",
+                        width: 48,
+                        height: 48,
+                      }}
+                    >
+                      {icon}
+                    </Box>
+                  </Box>
+                  <Typography variant="h3" fontWeight="bold" sx={{ color: "#0f172a" }}>
+                    {count}
+                  </Typography>
+                  <Box sx={{ mt: 1 }}>
+                    {typeof note === "string" ? (
+                      <Typography variant="body2" color="text.secondary">{note}</Typography>
+                    ) : (
+                      note
+                    )}
                   </Box>
                 </CardContent>
               </Card>
-            </Grid>
-          </Grid>
+            ))}
+          </Stack>
 
-          {/* Chart Section */}
-          <Card
-            sx={{
-              borderRadius: 3,
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              overflow: "hidden",
-            }}
-          >
+          <Card sx={{ borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)", overflow: "hidden" }}>
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
                 <Box
@@ -467,36 +284,11 @@ const Dashboard = () => {
                     Monthly Violations
                   </Typography>
                   <Box sx={{ display: "flex", gap: 2 }}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Box
-                        sx={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          bgcolor: "rgba(239, 68, 68, 0.7)",
-                        }}
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        Speed
-                      </Typography>
-                    </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Box
-                        sx={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: "50%",
-                          bgcolor: "rgba(245, 158, 11, 0.7)",
-                        }}
-                      />
-                      <Typography variant="caption" color="text.secondary">
-                        Noise
-                      </Typography>
-                    </Box>
+                    <LegendItem color="rgba(239, 68, 68, 0.7)" label="Speed" />
+                    <LegendItem color="rgba(245, 158, 11, 0.7)" label="Noise" />
                   </Box>
                 </Box>
               </Box>
-
               <Box sx={{ p: 3, height: 400 }}>
                 <MonthlyViolationsChartInline data={chartData} />
               </Box>
@@ -508,63 +300,33 @@ const Dashboard = () => {
   );
 };
 
-// Inline chart component to avoid external dependencies
+const LegendItem = ({ color, label }) => (
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ width: 12, height: 12, borderRadius: "50%", bgcolor: color }} />
+    <Typography variant="caption" color="text.secondary">{label}</Typography>
+  </Box>
+)
+
 const MonthlyViolationsChartInline = ({ data }) => {
   useEffect(() => {
+    let chart
     if (typeof window !== "undefined") {
-      import("chart.js").then(
-        ({
-          Chart,
-          CategoryScale,
-          LinearScale,
-          BarElement,
-          Title,
-          Tooltip,
-          Legend,
-        }) => {
-          Chart.register(
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Tooltip,
-            Legend
-          );
-
-          const ctx = document.getElementById("violationsChart");
-          if (ctx) {
-            const chartInstance = new Chart(ctx, {
-              type: "bar",
-              data: {
-                labels: data.labels,
-                datasets: [
-                  {
-                    label: "Speed Violations",
-                    data: data.speedData,
-                    backgroundColor: "rgba(239, 68, 68, 0.7)",
-                    borderColor: "rgba(239, 68, 68, 1)",
-                    borderWidth: 1,
-                  },
-                  {
-                    label: "Noise Violations",
-                    data: data.noiseData,
-                    backgroundColor: "rgba(245, 158, 11, 0.7)",
-                    borderColor: "rgba(245, 158, 11, 1)",
-                    borderWidth: 1,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                  tooltip: {
-                    mode: "index",
-                    intersect: false,
-                  },
+      import("chart.js").then(({ Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend }) => {
+        Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+        const ctx = document.getElementById("violationsChart")
+        if (ctx) {
+          if (chart) chart.destroy()
+          chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: data.labels,
+              datasets: [
+                {
+                  label: "Speed Violations",
+                  data: data.speedData,
+                  backgroundColor: "rgba(239, 68, 68, 0.7)",
+                  borderColor: "rgba(239, 68, 68, 1)",
+                  borderWidth: 1,
                 },
                 scales: {
                   y: {
@@ -583,23 +345,26 @@ const MonthlyViolationsChartInline = ({ data }) => {
                     },
                   },
                 },
-                interaction: {
-                  mode: "index",
-                  intersect: false,
-                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { display: false },
               },
-            });
-
-            return () => {
-              chartInstance.destroy();
-            };
-          }
+            },
+          })
         }
       );
     }
-  }, [data]);
 
-  return <canvas id="violationsChart" />;
-};
+    return () => {
+      if (chart) chart.destroy()
+    }
+  }, [data])
+
+  return <canvas id="violationsChart" style={{ width: "100%", height: "100%" }}></canvas>
+}
 
 export default Dashboard;

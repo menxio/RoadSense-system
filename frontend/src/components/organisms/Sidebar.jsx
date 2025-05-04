@@ -36,6 +36,9 @@ const Sidebar = ({ open = true, onClose, role, title = "App", logo = "/img/logo.
   const drawerWidth = collapsed ? 70 : 240;
 
   const toggleDrawer = () => {
+    if (collapsedProp != undefined) {
+      setCollapsedProp((prev) => !prev)
+    }
     setCollapsed((prev) => !prev);
   };
 

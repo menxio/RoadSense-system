@@ -8,8 +8,8 @@ from ultralytics.solutions import speed_estimation
 import easyocr
 
 # initialize video capture
-cap = cv2.VideoCapture(f"rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1")
-# cap = cv2.VideoCapture("training_5.mp4")
+#cap = cv2.VideoCapture(f"rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1")
+cap = cv2.VideoCapture("training_5.mp4")
 assert cap.isOpened(), "Error reading video file."
 
 w, h, fps = (
@@ -139,7 +139,7 @@ while True:
                     "custom_user_id": 0,
                     "detected_at": datetime.now().isoformat(),
                     "speed": round(float(speed), 2),
-                    "license_plate": license_plate_text or "unreadable",
+                    "plate_number": license_plate_text or "unreadable",
                     "status": "flagged",
                     "decibel_level": 0,
                     "updated_at": datetime.now().isoformat(),
