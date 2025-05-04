@@ -55,7 +55,7 @@ class ViolationController extends Controller
             'url' => '/violations/' . $violation->id,
         ]);
 
-        $admins = User::where('role', 'admin')->get(); // Assuming 'role' column exists
+        $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
             $admin->sendNotification([
                 'type' => 'Violation',
