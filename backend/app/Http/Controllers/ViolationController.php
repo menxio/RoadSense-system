@@ -48,7 +48,6 @@ class ViolationController extends Controller
             'status' => $validated['status'] ?? 'flagged',
         ]);
 
-        // Notify the user
         $user->sendNotification([
             'type' => 'Violation',
             'title' => 'Violation Notice',
@@ -56,7 +55,6 @@ class ViolationController extends Controller
             'url' => '/violations/' . $violation->id,
         ]);
 
-        // Notify the admin
         $admins = User::where('role', 'admin')->get(); // Assuming 'role' column exists
         foreach ($admins as $admin) {
             $admin->sendNotification([
