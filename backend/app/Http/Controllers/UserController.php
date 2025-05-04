@@ -95,14 +95,10 @@ class UserController extends Controller
         try {
             $user = $request->user();
 
-
-            \Log::info('Hello world');
-
             if (!$user) {
                 return response()->json(['error' => 'User not found'], 404);
             }
 
-            // Return the user's details
             return response()->json([
                 'name' => $user->name,
                 'email' => $user->email,

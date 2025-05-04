@@ -57,13 +57,18 @@ class AuthController extends Controller
     
             $user = Auth::user();
 
-            if ($user->status !== 'active') {
+            if ($user->status === 'pending') {
                 return response()->json([
                     'message' => 'Your account is not approved. Please contact the administrator.'
                 ], 403);
             }
-    
-            // Generate a token for the user
+
+            if ($user->status === 'suspended') {
+                return response()->json([
+                    'message' => 'Your account is suspended. Please contact the administrator.'
+                ], 403);
+            }
+
             $token = Str::random(60);
     
             $user->token = $token;
@@ -79,7 +84,6 @@ class AuthController extends Controller
         }
     }
 
-    // Logout method
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
