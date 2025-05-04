@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react";
 import { Box, Typography, Snackbar, Alert } from "@mui/material";
 import Sidebar from "@/components/organisms/Sidebar";
@@ -59,7 +57,7 @@ const Violations = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role='admin'/>
+      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role="admin" />
       <Header onToggleSidebar={handleDrawerToggle} />
 
       <Box

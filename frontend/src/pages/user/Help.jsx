@@ -1,6 +1,4 @@
-"use client"
-
-import { useState } from "react"
+import { useState } from "react";
 import {
   Typography,
   Box,
@@ -16,7 +14,7 @@ import {
   Paper,
   Card,
   CardContent,
-} from "@mui/material"
+} from "@mui/material";
 import {
   ExpandMore as ExpandMoreIcon,
   Dashboard as DashboardIcon,
@@ -31,22 +29,22 @@ import {
   Flag as FlagIcon,
   Refresh as RefreshIcon,
   QuestionAnswer as QuestionAnswerIcon,
-} from "@mui/icons-material"
+} from "@mui/icons-material";
 
-import Sidebar from "@/components/organisms/Sidebar"
-import Header from "@/components/organisms/Header"
+import Sidebar from "@/components/organisms/Sidebar";
+import Header from "@/components/organisms/Header";
 
 const HelpPage = () => {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [expanded, setExpanded] = useState("panel1")
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [expanded, setExpanded] = useState("panel1");
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleChange = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false)
-  }
+    setExpanded(isExpanded ? panel : false);
+  };
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f8fafc" }}>
@@ -81,22 +79,39 @@ const HelpPage = () => {
               </Typography>
             </Box>
             <Typography variant="body1" color="text.secondary">
-              Welcome to the Roadsense Traffic Monitoring System. This guide will help you understand how to use the
-              dashboard and interpret the information provided.
+              Welcome to the Roadsense Traffic Monitoring System. This guide
+              will help you understand how to use the dashboard and interpret
+              the information provided.
             </Typography>
           </Paper>
 
           {/* Help Content */}
-          <Card sx={{ borderRadius: 3, boxShadow: "0 4px 20px rgba(0,0,0,0.08)", mb: 4 }}>
+          <Card
+            sx={{
+              borderRadius: 3,
+              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+              mb: 4,
+            }}
+          >
             <CardContent sx={{ p: 3 }}>
               <Accordion
                 expanded={expanded === "panel1"}
                 onChange={handleChange("panel1")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel1" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel1"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <InfoIcon color="primary" />
@@ -107,13 +122,15 @@ const HelpPage = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography variant="body1" paragraph>
-                    This system allows you to view and monitor any traffic or policy violations recorded under your profile.
-                    You can track the status of your violations, understand your offense level, and respond to flagged
-                    incidents.
+                    This system allows you to view and monitor any traffic or
+                    policy violations recorded under your profile. You can track
+                    the status of your violations, understand your offense
+                    level, and respond to flagged incidents.
                   </Typography>
                   <Typography variant="body1">
-                    The dashboard provides real-time information about your violations, helping you stay informed about your
-                    status and any actions required from your end.
+                    The dashboard provides real-time information about your
+                    violations, helping you stay informed about your status and
+                    any actions required from your end.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -121,11 +138,21 @@ const HelpPage = () => {
               <Accordion
                 expanded={expanded === "panel2"}
                 onChange={handleChange("panel2")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel2" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel2"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <DashboardIcon color="primary" />
@@ -166,7 +193,10 @@ const HelpPage = () => {
                       />
                     </ListItem>
                     <Box sx={{ pl: 7, mt: 1 }}>
-                      <Typography variant="body2" sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
                         <Box
                           component="span"
                           sx={{
@@ -178,9 +208,13 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 0 (Low):</strong> 0 flagged or under review violations
+                        <strong>Level 0 (Low):</strong> 0 flagged or under
+                        review violations
                       </Typography>
-                      <Typography variant="body2" sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
                         <Box
                           component="span"
                           sx={{
@@ -192,9 +226,13 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 1 (Caution):</strong> 1-2 flagged or under review violations
+                        <strong>Level 1 (Caution):</strong> 1-2 flagged or under
+                        review violations
                       </Typography>
-                      <Typography variant="body2" sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center", mb: 1 }}
+                      >
                         <Box
                           component="span"
                           sx={{
@@ -206,9 +244,13 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 2 (Warning):</strong> 3-4 flagged or under review violations
+                        <strong>Level 2 (Warning):</strong> 3-4 flagged or under
+                        review violations
                       </Typography>
-                      <Typography variant="body2" sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ display: "flex", alignItems: "center" }}
+                      >
                         <Box
                           component="span"
                           sx={{
@@ -220,7 +262,8 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 3 (Critical):</strong> 5 or more flagged or under review violations
+                        <strong>Level 3 (Critical):</strong> 5 or more flagged
+                        or under review violations
                       </Typography>
                     </Box>
                     <Divider component="li" sx={{ mt: 2 }} />
@@ -240,11 +283,21 @@ const HelpPage = () => {
               <Accordion
                 expanded={expanded === "panel3"}
                 onChange={handleChange("panel3")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel3" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel3"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <FlagIcon color="primary" />
@@ -303,11 +356,21 @@ const HelpPage = () => {
               <Accordion
                 expanded={expanded === "panel4"}
                 onChange={handleChange("panel4")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel4" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel4"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <CheckCircleIcon color="primary" />
@@ -359,11 +422,21 @@ const HelpPage = () => {
               <Accordion
                 expanded={expanded === "panel5"}
                 onChange={handleChange("panel5")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel5" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel5"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <QuestionAnswerIcon color="primary" />
@@ -374,55 +447,82 @@ const HelpPage = () => {
                 </AccordionSummary>
                 <AccordionDetails>
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Q: Why is my offense level high?
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      A: It is based on the number of violations that are either flagged or under review. To lower your
-                      offense level, you need to address these violations by submitting appeals or following the required
-                      actions.
+                      A: It is based on the number of violations that are either
+                      flagged or under review. To lower your offense level, you
+                      need to address these violations by submitting appeals or
+                      following the required actions.
                     </Typography>
                   </Box>
 
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Q: Can I dispute a violation?
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      A: Yes, you can appeal flagged violations. Navigate to the Violations page, find the violation you
-                      wish to dispute, and click the "Appeal" button. You'll need to upload supporting documentation
-                      explaining why you believe the violation should be reviewed.
+                      A: Yes, you can appeal flagged violations. Navigate to the
+                      Violations page, find the violation you wish to dispute,
+                      and click the "Appeal" button. You'll need to upload
+                      supporting documentation explaining why you believe the
+                      violation should be reviewed.
                     </Typography>
                   </Box>
 
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Q: How often is the data updated?
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      A: The dashboard updates automatically whenever new data is available or upon refresh. For the most
-                      current information, you can manually refresh the page.
+                      A: The dashboard updates automatically whenever new data
+                      is available or upon refresh. For the most current
+                      information, you can manually refresh the page.
                     </Typography>
                   </Box>
 
                   <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Q: What happens when I reach Offense Level 3?
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      A: At Offense Level 3, your gatepass access will be suspended. You'll need to contact the
-                      administration to discuss the steps required to reinstate your access privileges.
+                      A: At Offense Level 3, your gatepass access will be
+                      suspended. You'll need to contact the administration to
+                      discuss the steps required to reinstate your access
+                      privileges.
                     </Typography>
                   </Box>
 
                   <Box>
-                    <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      gutterBottom
+                    >
                       Q: How long do violations stay on my record?
                     </Typography>
                     <Typography variant="body1" color="text.secondary">
-                      A: Cleared violations remain on your record for historical purposes but no longer affect your offense
-                      level. Flagged and under review violations will continue to impact your offense level until they are
-                      cleared.
+                      A: Cleared violations remain on your record for historical
+                      purposes but no longer affect your offense level. Flagged
+                      and under review violations will continue to impact your
+                      offense level until they are cleared.
                     </Typography>
                   </Box>
                 </AccordionDetails>
@@ -431,11 +531,21 @@ const HelpPage = () => {
               <Accordion
                 expanded={expanded === "panel6"}
                 onChange={handleChange("panel6")}
-                sx={{ mb: 2, boxShadow: "0 2px 8px rgba(0,0,0,0.05)", borderRadius: "8px !important" }}
+                sx={{
+                  mb: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                  borderRadius: "8px !important",
+                }}
               >
                 <AccordionSummary
                   expandIcon={<ExpandMoreIcon />}
-                  sx={{ borderRadius: "8px", bgcolor: expanded === "panel6" ? "rgba(14, 165, 233, 0.05)" : "transparent" }}
+                  sx={{
+                    borderRadius: "8px",
+                    bgcolor:
+                      expanded === "panel6"
+                        ? "rgba(14, 165, 233, 0.05)"
+                        : "transparent",
+                  }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                     <DirectionsCarIcon color="primary" />
@@ -495,10 +605,9 @@ const HelpPage = () => {
         </Container>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
-// Import this icon separately to avoid circular dependency
 const UploadIcon = ({ color }) => {
   return (
     <svg
@@ -517,7 +626,7 @@ const UploadIcon = ({ color }) => {
       <polyline points="17 8 12 3 7 8" />
       <line x1="12" y1="3" x2="12" y2="15" />
     </svg>
-  )
-}
+  );
+};
 
-export default HelpPage
+export default HelpPage;

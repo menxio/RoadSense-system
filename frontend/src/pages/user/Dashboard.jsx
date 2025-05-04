@@ -1,69 +1,82 @@
-"use client"
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  Typography,
+  Box,
+  useTheme,
+  useMediaQuery,
+  Grid,
+  Container,
+  Card,
+  CardContent,
+} from "@mui/material";
+import {
+  Warning as WarningIcon,
+  CalendarMonth as CalendarIcon,
+  Info as InfoIcon,
+} from "@mui/icons-material";
 
-import { useEffect, useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { Typography, Box, useTheme, useMediaQuery, Grid, Container, Card, CardContent } from "@mui/material"
-import { Warning as WarningIcon, CalendarMonth as CalendarIcon, Info as InfoIcon } from "@mui/icons-material"
-
-import Sidebar from "@/components/organisms/Sidebar"
-import Header from "@/components/organisms/Header"
-import { getViolationById } from "@/services/violation.service"
-import { fetchUserProfile } from "@/redux/slices/userSlice"
+import Sidebar from "@/components/organisms/Sidebar";
+import Header from "@/components/organisms/Header";
+import { getViolationById } from "@/services/violation.service";
+import { fetchUserProfile } from "@/redux/slices/userSlice";
 
 const Dashboard = () => {
-  const dispatch = useDispatch()
-  const user = useSelector((state) => state.user)
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"))
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [dashboardData, setDashboardData] = useState({
     todaysViolationsCount: 0,
     totalViolationsCount: 0,
     offenseLevel: 0,
     violations: [],
-  })
+  });
 
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   useEffect(() => {
     if (!user.name) {
-      dispatch(fetchUserProfile())
+      dispatch(fetchUserProfile());
     }
 
     const fetchViolations = async () => {
       try {
-        const res = await getViolationById(user.custom_id)
+        const res = await getViolationById(user.custom_id);
 
-        const flaggedCount = res.violations.filter((v) => v.status === "flagged" || v.status === "under review").length
-        const offenseLevel = calculateOffenseLevel(flaggedCount)
+        const flaggedCount = res.violations.filter(
+          (v) => v.status === "flagged" || v.status === "under review"
+        ).length;
+        const offenseLevel = calculateOffenseLevel(flaggedCount);
 
         setDashboardData({
           todaysViolationsCount: res.todays_violations_count || 0,
           totalViolationsCount: res.total_violations_count || 0,
           offenseLevel,
           violations: res.violations || [],
-        })
+        });
       } catch (error) {
-        console.error("Failed to fetch violations:", error)
+        console.error("Failed to fetch violations:", error);
       }
-    }
+    };
 
     if (user.custom_id) {
-      fetchViolations()
+      fetchViolations();
     }
-  }, [dispatch, user.name, user.custom_id])
+  }, [dispatch, user.name, user.custom_id]);
 
   const calculateOffenseLevel = (offenseCount) => {
-    if (offenseCount >= 3) return 3
-    if (offenseCount >= 2) return 2
-    if (offenseCount >= 1) return 1
-    return 0
-  }
+    if (offenseCount >= 3) return 3;
+    if (offenseCount >= 2) return 2;
+    if (offenseCount >= 1) return 1;
+    return 0;
+  };
 
   // Get offense level info
   const getOffenseLevelInfo = (level) => {
@@ -72,64 +85,79 @@ const Dashboard = () => {
         return {
           color: "#f59e0b",
           action: "Letter of apology required",
-          description: "Upload a letter of apology to change status to Under Review",
-        }
+          description:
+            "Upload a letter of apology to change status to Under Review",
+        };
       case 2:
         return {
           color: "#f97316",
           action: "Visit office required",
-          description: "You will receive an SMS and notification to visit the office",
-        }
+          description:
+            "You will receive an SMS and notification to visit the office",
+        };
       case 3:
         return {
           color: "#ef4444",
           action: "Gatepass suspended",
           description: "Your gatepass access has been disabled",
-        }
+        };
       default:
         return {
           color: "#10b981",
           action: "No action required",
           description: "You have no current offenses",
-        }
+        };
     }
-  }
+  };
 
-  const offenseInfo = getOffenseLevelInfo(dashboardData.offenseLevel)
+  const offenseInfo = getOffenseLevelInfo(dashboardData.offenseLevel);
 
   // Process violations data for chart
   const processViolationsData = () => {
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const currentYear = new Date().getFullYear()
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+    const currentYear = new Date().getFullYear();
 
     // Initialize data arrays
-    const speedData = Array(12).fill(0)
-    const noiseData = Array(12).fill(0)
+    const speedData = Array(12).fill(0);
+    const noiseData = Array(12).fill(0);
 
     // Count violations by month and type
     dashboardData.violations.forEach((violation) => {
-      const date = new Date(violation.detected_at)
+      const date = new Date(violation.detected_at);
       if (date.getFullYear() === currentYear) {
-        const month = date.getMonth()
+        const month = date.getMonth();
 
         // Determine violation type (simplified logic - adjust as needed)
         if (violation.speed > 30) {
-          speedData[month]++
+          speedData[month]++;
         }
         if (violation.decibel_level > 70) {
-          noiseData[month]++
+          noiseData[month]++;
         }
       }
-    })
+    });
 
     return {
       labels: months,
       speedData,
       noiseData,
-    }
-  }
+    };
+  };
 
-  const chartData = processViolationsData()
+  const chartData = processViolationsData();
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f8fafc" }}>
@@ -160,7 +188,10 @@ const Dashboard = () => {
             }}
           >
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: "bold", mb: 0.5, color: "black" }}>
+              <Typography
+                variant="h4"
+                sx={{ fontWeight: "bold", mb: 0.5, color: "black" }}
+              >
                 Welcome back, {user.name || "User"}
               </Typography>
               <Typography variant="body1" color="text.secondary">
@@ -214,8 +245,19 @@ const Dashboard = () => {
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                    <Typography variant="h6" color="text.secondary" fontWeight="medium">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      mb: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      color="text.secondary"
+                      fontWeight="medium"
+                    >
                       Today's Violations
                     </Typography>
                     <Box
@@ -232,10 +274,18 @@ const Dashboard = () => {
                       <CalendarIcon sx={{ fontSize: 24, color: "#0ea5e9" }} />
                     </Box>
                   </Box>
-                  <Typography variant="h3" fontWeight="bold" sx={{ color: "#0f172a" }}>
+                  <Typography
+                    variant="h3"
+                    fontWeight="bold"
+                    sx={{ color: "#0f172a" }}
+                  >
                     {dashboardData.todaysViolationsCount}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     {dashboardData.todaysViolationsCount === 0
                       ? "No violations detected today"
                       : `${dashboardData.todaysViolationsCount} violation${
@@ -267,8 +317,19 @@ const Dashboard = () => {
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                    <Typography variant="h6" color="text.secondary" fontWeight="medium">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      mb: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      color="text.secondary"
+                      fontWeight="medium"
+                    >
                       Total Violations
                     </Typography>
                     <Box
@@ -285,10 +346,18 @@ const Dashboard = () => {
                       <WarningIcon sx={{ fontSize: 24, color: "#f97316" }} />
                     </Box>
                   </Box>
-                  <Typography variant="h3" fontWeight="bold" sx={{ color: "#0f172a" }}>
+                  <Typography
+                    variant="h3"
+                    fontWeight="bold"
+                    sx={{ color: "#0f172a" }}
+                  >
                     {dashboardData.totalViolationsCount}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     {dashboardData.totalViolationsCount === 0
                       ? "No violations on record"
                       : `Total violations on your record`}
@@ -318,8 +387,19 @@ const Dashboard = () => {
                 }}
               >
                 <CardContent sx={{ p: 3 }}>
-                  <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 2 }}>
-                    <Typography variant="h6" color="text.secondary" fontWeight="medium">
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      mb: 2,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      color="text.secondary"
+                      fontWeight="medium"
+                    >
                       Offense Level
                     </Typography>
                     <Box
@@ -333,17 +413,31 @@ const Dashboard = () => {
                         height: 48,
                       }}
                     >
-                      <InfoIcon sx={{ fontSize: 24, color: offenseInfo.color }} />
+                      <InfoIcon
+                        sx={{ fontSize: 24, color: offenseInfo.color }}
+                      />
                     </Box>
                   </Box>
-                  <Typography variant="h3" fontWeight="bold" sx={{ color: "#0f172a" }}>
+                  <Typography
+                    variant="h3"
+                    fontWeight="bold"
+                    sx={{ color: "#0f172a" }}
+                  >
                     {dashboardData.offenseLevel}
                   </Typography>
                   <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" fontWeight="medium" color={offenseInfo.color}>
+                    <Typography
+                      variant="body2"
+                      fontWeight="medium"
+                      color={offenseInfo.color}
+                    >
                       {offenseInfo.action}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.5 }}
+                    >
                       {offenseInfo.description}
                     </Typography>
                   </Box>
@@ -362,7 +456,13 @@ const Dashboard = () => {
           >
             <CardContent sx={{ p: 0 }}>
               <Box sx={{ p: 3, borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <Typography variant="h6" fontWeight="bold">
                     Monthly Violations
                   </Typography>
@@ -405,84 +505,101 @@ const Dashboard = () => {
         </Container>
       </Box>
     </Box>
-  )
-}
+  );
+};
 
 // Inline chart component to avoid external dependencies
 const MonthlyViolationsChartInline = ({ data }) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
-      import("chart.js").then(({ Chart, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend }) => {
-        Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+      import("chart.js").then(
+        ({
+          Chart,
+          CategoryScale,
+          LinearScale,
+          BarElement,
+          Title,
+          Tooltip,
+          Legend,
+        }) => {
+          Chart.register(
+            CategoryScale,
+            LinearScale,
+            BarElement,
+            Title,
+            Tooltip,
+            Legend
+          );
 
-        const ctx = document.getElementById("violationsChart")
-        if (ctx) {
-          const chartInstance = new Chart(ctx, {
-            type: "bar",
-            data: {
-              labels: data.labels,
-              datasets: [
-                {
-                  label: "Speed Violations",
-                  data: data.speedData,
-                  backgroundColor: "rgba(239, 68, 68, 0.7)",
-                  borderColor: "rgba(239, 68, 68, 1)",
-                  borderWidth: 1,
+          const ctx = document.getElementById("violationsChart");
+          if (ctx) {
+            const chartInstance = new Chart(ctx, {
+              type: "bar",
+              data: {
+                labels: data.labels,
+                datasets: [
+                  {
+                    label: "Speed Violations",
+                    data: data.speedData,
+                    backgroundColor: "rgba(239, 68, 68, 0.7)",
+                    borderColor: "rgba(239, 68, 68, 1)",
+                    borderWidth: 1,
+                  },
+                  {
+                    label: "Noise Violations",
+                    data: data.noiseData,
+                    backgroundColor: "rgba(245, 158, 11, 0.7)",
+                    borderColor: "rgba(245, 158, 11, 1)",
+                    borderWidth: 1,
+                  },
+                ],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                  legend: {
+                    display: false,
+                  },
+                  tooltip: {
+                    mode: "index",
+                    intersect: false,
+                  },
                 },
-                {
-                  label: "Noise Violations",
-                  data: data.noiseData,
-                  backgroundColor: "rgba(245, 158, 11, 0.7)",
-                  borderColor: "rgba(245, 158, 11, 1)",
-                  borderWidth: 1,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      precision: 0,
+                    },
+                    grid: {
+                      drawBorder: false,
+                      color: "rgba(0, 0, 0, 0.05)",
+                    },
+                  },
+                  x: {
+                    grid: {
+                      display: false,
+                    },
+                  },
                 },
-              ],
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
+                interaction: {
                   mode: "index",
                   intersect: false,
                 },
               },
-              scales: {
-                y: {
-                  beginAtZero: true,
-                  ticks: {
-                    precision: 0,
-                  },
-                  grid: {
-                    drawBorder: false,
-                    color: "rgba(0, 0, 0, 0.05)",
-                  },
-                },
-                x: {
-                  grid: {
-                    display: false,
-                  },
-                },
-              },
-              interaction: {
-                mode: "index",
-                intersect: false,
-              },
-            },
-          })
+            });
 
-          return () => {
-            chartInstance.destroy()
+            return () => {
+              chartInstance.destroy();
+            };
           }
         }
-      })
+      );
     }
-  }, [data])
+  }, [data]);
 
-  return <canvas id="violationsChart" />
-}
+  return <canvas id="violationsChart" />;
+};
 
-export default Dashboard
+export default Dashboard;

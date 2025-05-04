@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Violation;
+use App\Notifications\RealTimeNotification;
+use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 
 class ViolationController extends Controller
@@ -13,7 +15,7 @@ class ViolationController extends Controller
     {
         return response()->json(Violation::all());
     }
-    
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -46,9 +48,28 @@ class ViolationController extends Controller
             'status' => $validated['status'] ?? 'flagged',
         ]);
 
-        return response()->json($violation, 201);
+        // Notify the user
+        $user->sendNotification([
+            'type' => 'Violation',
+            'title' => 'Violation Notice',
+            'message' => 'You have been flagged for a violation: ' . ($validated['speed'] ? 'Speeding' : 'Noise'),
+            'url' => '/violations/' . $violation->id,
+        ]);
+
+        // Notify the admin
+        $admins = User::where('role', 'admin')->get(); // Assuming 'role' column exists
+        foreach ($admins as $admin) {
+            $admin->sendNotification([
+                'type' => 'Violation',
+                'title' => 'New Violation Reported',
+                'message' => 'A new violation has been reported by user: ' . $user->name,
+                'url' => '/admin/violations/' . $violation->id,
+            ]);
+        }
+
+        return response()->json(['message' => 'Violation created and notifications sent.', 'violation' => $violation], 201);
     }
-    
+
     public function show($customUserId)
     {
         $violations = Violation::where('custom_user_id', $customUserId)->get();
@@ -61,8 +82,8 @@ class ViolationController extends Controller
         $endOfToday = Carbon::now()->endOfDay()->toIso8601String();
 
         $todaysViolationsCount = Violation::where('custom_user_id', $customUserId)
-            ->where('detected_at', '>=', $startOfToday) 
-            ->where('detected_at', '<=', $endOfToday)   
+            ->where('detected_at', '>=', $startOfToday)
+            ->where('detected_at', '<=', $endOfToday)
             ->count();
 
         $totalViolationsCount = Violation::where('custom_user_id', $customUserId)->count();

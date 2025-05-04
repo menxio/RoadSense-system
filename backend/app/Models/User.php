@@ -35,4 +35,18 @@ class User extends Model implements AuthenticatableContract
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function notifications()
+    {
+        return $this->hasMany(MongoNotification::class, 'notifiable_id');
+    }
+
+    public function sendNotification(array $data)
+    {
+        return $this->notifications()->create([
+            'type' => $data['type'] ?? 'default',
+            'data' => $data,
+            'read_at' => null,
+        ]);
+    }
 }

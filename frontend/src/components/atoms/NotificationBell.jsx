@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Badge,
   IconButton,
@@ -13,36 +14,39 @@ import {
   Avatar,
 } from "@mui/material";
 import { Notifications as NotificationsIcon } from "@mui/icons-material";
+import {
+  getNotifications,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+} from "@/services/notification.service";
+import { fetchUserProfile } from "@/redux/slices/userSlice";
 
 const NotificationBell = () => {
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.user);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: "New Violation Detected",
-      message: "A new speed violation has been detected.",
-      time: "5 minutes ago",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "User Registration",
-      message: "A new user has registered and needs approval.",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "System Update",
-      message: "System maintenance scheduled for tonight.",
-      time: "3 hours ago",
-      read: true,
-    },
-  ]);
+  const [notifications, setNotifications] = useState([]);
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read
-  ).length;
+  useEffect(() => {
+    if (!user.name) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, user.name]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (user.id) {
+        try {
+          const data = await getNotifications(user.id);
+          setNotifications(data);
+        } catch (error) {
+          console.error("Error fetching notifications:", error);
+        }
+      }
+    };
+
+    fetchNotifications();
+  }, [user.id]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -50,13 +54,30 @@ const NotificationBell = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
-    // Mark all as read when closing
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        read: true,
-      }))
-    );
+    markAllNotificationsAsRead(user.id)
+      .then(() => {
+        setNotifications((prev) =>
+          prev.map((notification) => ({ ...notification, read: true }))
+        );
+      })
+      .catch((error) =>
+        console.error("Error marking all notifications as read:", error)
+      );
+  };
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      await markNotificationAsRead(user.id, id);
+      setNotifications((prev) =>
+        prev.map((notification) =>
+          notification.id === id
+            ? { ...notification, read: true }
+            : notification
+        )
+      );
+    } catch (error) {
+      console.error(`Error marking notification ${id} as read:`, error);
+    }
   };
 
   const open = Boolean(anchorEl);
@@ -69,7 +90,10 @@ const NotificationBell = () => {
         onClick={handleClick}
         sx={{ color: "inherit", mr: 2 }}
       >
-        <Badge badgeContent={unreadCount} color="error">
+        <Badge
+          badgeContent={notifications.filter((n) => !n.read).length}
+          color="error"
+        >
           <NotificationsIcon />
         </Badge>
       </IconButton>
@@ -108,6 +132,7 @@ const NotificationBell = () => {
                       : "rgba(13, 27, 42, 0.05)",
                     py: 1.5,
                   }}
+                  onClick={() => handleMarkAsRead(notification.id)}
                 >
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: "#0d1b2a" }}>
@@ -152,15 +177,6 @@ const NotificationBell = () => {
             </Typography>
           </Box>
         )}
-        <Box sx={{ p: 1, textAlign: "center" }}>
-          <Typography
-            variant="body2"
-            color="primary"
-            sx={{ cursor: "pointer", fontWeight: "medium" }}
-          >
-            View all notifications
-          </Typography>
-        </Box>
       </Popover>
     </>
   );

@@ -1,9 +1,14 @@
-"use client"
-
-import { useState } from "react"
-import { Box, Card, CardContent, Typography, Tooltip, IconButton } from "@mui/material"
-import { Info as InfoIcon } from "@mui/icons-material"
-import OffenseLevelDialog from "./OffenseLevelDialog"
+import { useState } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
+import { Info as InfoIcon } from "@mui/icons-material";
+import OffenseLevelDialog from "./OffenseLevelDialog";
 
 const getOffenseLevelInfo = (level) => {
   switch (level) {
@@ -11,32 +16,34 @@ const getOffenseLevelInfo = (level) => {
       return {
         color: "#f59e0b",
         action: "Letter of apology required",
-        description: "Upload a letter of apology to change status to Under Review",
-      }
+        description:
+          "Upload a letter of apology to change status to Under Review",
+      };
     case 2:
       return {
         color: "#f97316",
         action: "Visit office required",
-        description: "You will receive an SMS and notification to visit the office",
-      }
+        description:
+          "You will receive an SMS and notification to visit the office",
+      };
     case 3:
       return {
         color: "#ef4444",
         action: "Gatepass suspended",
         description: "Your gatepass access has been disabled",
-      }
+      };
     default:
       return {
         color: "#10b981",
         action: "No action required",
         description: "You have no current offenses",
-      }
+      };
   }
-}
+};
 
 const OffenseLevelCard = ({ level = 0 }) => {
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const { color, action, description } = getOffenseLevelInfo(level)
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const { color, action, description } = getOffenseLevelInfo(level);
 
   return (
     <>
@@ -49,7 +56,13 @@ const OffenseLevelCard = ({ level = 0 }) => {
         }}
       >
         <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
               Offense Level
             </Typography>
@@ -59,7 +72,14 @@ const OffenseLevelCard = ({ level = 0 }) => {
               </IconButton>
             </Tooltip>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 1,
+            }}
+          >
             <Typography variant="h3" sx={{ fontWeight: "bold", color }}>
               {level}
             </Typography>
@@ -88,9 +108,12 @@ const OffenseLevelCard = ({ level = 0 }) => {
           </Box>
         </CardContent>
       </Card>
-      <OffenseLevelDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
+      <OffenseLevelDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      />
     </>
-  )
-}
+  );
+};
 
-export default OffenseLevelCard
+export default OffenseLevelCard;

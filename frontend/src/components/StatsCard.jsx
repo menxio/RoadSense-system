@@ -1,10 +1,25 @@
-"use client"
-import PropTypes from "prop-types"
-import { Card, CardContent, Typography, Button, Box, useMediaQuery, useTheme } from "@mui/material"
+import PropTypes from "prop-types";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Box,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 
-export const StatsCard = ({ icon, title, value, actionText, iconBgColor, actionTextColor, onAction }) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
+export const StatsCard = ({
+  icon,
+  title,
+  value,
+  actionText,
+  iconBgColor,
+  actionTextColor,
+  onAction,
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Card
@@ -21,7 +36,14 @@ export const StatsCard = ({ icon, title, value, actionText, iconBgColor, actionT
         borderRadius: 2,
       }}
     >
-      <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: isMobile ? 2 : 3 }}>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          p: isMobile ? 2 : 3,
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -89,8 +111,8 @@ export const StatsCard = ({ icon, title, value, actionText, iconBgColor, actionT
         </Box>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 StatsCard.propTypes = {
   icon: PropTypes.node.isRequired,
@@ -100,6 +122,6 @@ StatsCard.propTypes = {
   iconBgColor: PropTypes.string.isRequired,
   actionTextColor: PropTypes.string.isRequired,
   onAction: PropTypes.func.isRequired,
-}
+};
 
-export default StatsCard
+export default StatsCard;

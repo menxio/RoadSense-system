@@ -1,10 +1,8 @@
-"use client"
-
-import { useState } from "react"
-import PropTypes from "prop-types"
-import { Box, useTheme, useMediaQuery } from "@mui/material"
-import Sidebar from "./organisms/Sidebar"
-import Header from "./organisms/Header"
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
+import Sidebar from "./organisms/Sidebar";
+import Header from "./organisms/Header";
 
 export const DashboardLayout = ({
   children,
@@ -16,25 +14,29 @@ export const DashboardLayout = ({
   userRole,
   userAvatarUrl,
 }) => {
-  const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-  }
+    setMobileOpen(!mobileOpen);
+  };
 
   const user = {
     name: userName,
     role: userRole,
     avatarUrl: userAvatarUrl,
-  }
+  };
 
-  const drawerWidth = 240
+  const drawerWidth = 240;
 
   return (
     <>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role={user.role} />
+      <Sidebar
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        role={user.role}
+      />
 
       <Box
         component="main"
@@ -49,7 +51,11 @@ export const DashboardLayout = ({
           flexDirection: "column",
         }}
       >
-        <Header user={user} onToggleSidebar={handleDrawerToggle} drawerWidth={drawerWidth} />
+        <Header
+          user={user}
+          onToggleSidebar={handleDrawerToggle}
+          drawerWidth={drawerWidth}
+        />
 
         <Box
           sx={{
@@ -65,8 +71,8 @@ export const DashboardLayout = ({
         </Box>
       </Box>
     </>
-  )
-}
+  );
+};
 
 DashboardLayout.propTypes = {
   children: PropTypes.node.isRequired,
@@ -76,13 +82,13 @@ DashboardLayout.propTypes = {
       icon: PropTypes.node.isRequired,
       label: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
-    }),
+    })
   ).isRequired,
   activePath: PropTypes.string.isRequired,
   onNavigate: PropTypes.func.isRequired,
   userName: PropTypes.string.isRequired,
   userRole: PropTypes.string.isRequired,
   userAvatarUrl: PropTypes.string,
-}
+};
 
-export default DashboardLayout
+export default DashboardLayout;

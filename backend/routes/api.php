@@ -5,6 +5,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NotificationController;
 
 Route::get('/license_id_images/{filename}', function ($filename) {
     $path = storage_path('app/public/license_id_images/' . $filename);
@@ -14,6 +15,16 @@ Route::get('/license_id_images/{filename}', function ($filename) {
     }
 
     return response()->file($path);
+});
+
+Route::get('/send-notification', [NotificationController::class, 'sendNotification']);
+Route::prefix('notifications')->group(function () {
+    Route::get('/{userId}', [NotificationController::class, 'index']);
+    Route::post('/{userId}/{id}/read', [NotificationController::class, 'markAsRead']); 
+    Route::post('/{userId}/read-all', [NotificationController::class, 'markAllAsRead']); 
+    Route::delete('/{userId}/{id}', [NotificationController::class, 'delete']); 
+    Route::post('/send', [NotificationController::class, 'sendNotification']); 
+    Route::post('/user/{userId}', [NotificationController::class, 'notifyUser']);
 });
 
 Route::post('/register', [AuthController::class, 'register']);

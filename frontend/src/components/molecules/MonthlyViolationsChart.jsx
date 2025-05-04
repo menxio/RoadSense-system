@@ -1,21 +1,34 @@
-"use client"
+import { useEffect, useState } from "react";
+import { Card, CardContent, Typography, Box } from "@mui/material";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, Typography, Box } from "@mui/material"
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from "chart.js"
-import { Bar } from "react-chartjs-2"
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const MonthlyViolationsChart = ({ violations = [] }) => {
   const [chartData, setChartData] = useState({
     labels: [],
     datasets: [],
-  })
+  });
 
   useEffect(() => {
     // Process violations data to get monthly counts
-    const monthlyData = processViolationsData(violations)
+    const monthlyData = processViolationsData(violations);
 
     setChartData({
       labels: monthlyData.labels,
@@ -35,8 +48,8 @@ const MonthlyViolationsChart = ({ violations = [] }) => {
           borderWidth: 1,
         },
       ],
-    })
-  }, [violations])
+    });
+  }, [violations]);
 
   const options = {
     responsive: true,
@@ -57,10 +70,16 @@ const MonthlyViolationsChart = ({ violations = [] }) => {
         },
       },
     },
-  }
+  };
 
   return (
-    <Card sx={{ height: "100%", borderRadius: 2, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+    <Card
+      sx={{
+        height: "100%",
+        borderRadius: 2,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+      }}
+    >
       <CardContent sx={{ p: 3 }}>
         <Typography variant="h6" fontWeight="medium" gutterBottom>
           Monthly Violations
@@ -70,39 +89,52 @@ const MonthlyViolationsChart = ({ violations = [] }) => {
         </Box>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
 // Helper function to process violations data for the chart
 const processViolationsData = (violations) => {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-  const currentYear = new Date().getFullYear()
+  const months = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const currentYear = new Date().getFullYear();
 
   // Initialize data arrays
-  const speedData = Array(12).fill(0)
-  const noiseData = Array(12).fill(0)
+  const speedData = Array(12).fill(0);
+  const noiseData = Array(12).fill(0);
 
   // Count violations by month and type
   violations.forEach((violation) => {
-    const date = new Date(violation.detected_at)
+    const date = new Date(violation.detected_at);
     if (date.getFullYear() === currentYear) {
-      const month = date.getMonth()
+      const month = date.getMonth();
 
       // Determine violation type (simplified logic - adjust as needed)
       if (violation.speed > 30) {
-        speedData[month]++
+        speedData[month]++;
       }
       if (violation.decibel_level > 70) {
-        noiseData[month]++
+        noiseData[month]++;
       }
     }
-  })
+  });
 
   return {
     labels: months,
     speedData,
     noiseData,
-  }
-}
+  };
+};
 
-export default MonthlyViolationsChart
+export default MonthlyViolationsChart;

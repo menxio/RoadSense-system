@@ -10,7 +10,6 @@ trait HasMongoApiTokens
     {
         \Log::info('Creating token for user:', ['user_id' => $this->id]);
 
-        // Create the token in MongoDB
         $token = $this->tokens()->create([
             'name' => $name,
             'token' => hash('sha256', $plainTextToken = Str::random(40)),
