@@ -226,7 +226,7 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 1 (Caution):</strong> 1-2 flagged or under
+                        <strong>Level 1 (Caution):</strong> 1 flagged or under
                         review violations
                       </Typography>
                       <Typography
@@ -244,7 +244,7 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 2 (Warning):</strong> 3-4 flagged or under
+                        <strong>Level 2 (Warning):</strong> 2 flagged or under
                         review violations
                       </Typography>
                       <Typography
@@ -262,7 +262,7 @@ const HelpPage = () => {
                             mr: 1,
                           }}
                         />
-                        <strong>Level 3 (Critical):</strong> 5 or more flagged
+                        <strong>Level 3 (Critical):</strong> 3 flagged
                         or under review violations
                       </Typography>
                     </Box>
