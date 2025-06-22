@@ -48,21 +48,21 @@ class ViolationController extends Controller
             'status' => $validated['status'] ?? 'flagged',
         ]);
 
-        $user->sendNotification([
-            'type' => 'Violation',
+        $user->notify(new RealTimeNotification([
             'title' => 'Violation Notice',
-            'message' => 'You have been flagged for a violation: ' . ($validated['speed'] ? 'Speeding' : 'Noise'),
-            'url' => '/violations/' . $violation->id,
-        ]);
+            'message' => "You have been flagged for a violation: " . ($validated['speed'] ? "Speeding" : "Noise"),
+            'url' => "/violations/{$violation->id}",
+            'custom_id' => $user->custom_id,
+        ]));
 
         $admins = User::where('role', 'admin')->get();
         foreach ($admins as $admin) {
-            $admin->sendNotification([
-                'type' => 'Violation',
+            $admin->notify(new RealTimeNotification([
                 'title' => 'New Violation Reported',
-                'message' => 'A new violation has been reported by user: ' . $user->name,
-                'url' => '/admin/violations/' . $violation->id,
-            ]);
+                'message' => "A new violation has been reported by user: {$user->name}",
+                'url' => "/admin/violations/{$violation->id}",
+                'custom_id' => $admin->custom_id,
+            ]));
         }
 
         return response()->json(['message' => 'Violation created and notifications sent.', 'violation' => $violation], 201);
@@ -123,6 +123,19 @@ class ViolationController extends Controller
         }
 
         $violation->save();
+
+        $user = User::find($violation->custom_user_id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found']);
+        }
+
+        $user->notify(new RealTimeNotification([
+            'title' => 'Violation Update',
+            'message' => "Your violation is now " . $validated['status'],
+            'url' => "/violations/{$violation->id}",
+            'custom_id' => $user->custom_id,
+        ]));
 
         return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);
     }

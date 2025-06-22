@@ -10,4 +10,6 @@ const echo = new Echo({
   forceTLS: true,
 });
 
+window.Echo = echo;
+
 export default echo;

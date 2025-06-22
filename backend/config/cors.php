@@ -15,15 +15,10 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'api/broadcasting/auth', 'sanctum/csrf-cookie'],
     'allowed_methods' => ['*'],
-    // 'allowed_origins' => ['*'],
-    'allowed_origins' => [
-        'http://localhost:5173', // Frontend development server
-        'http://backend.test',   // Backend custom domain
-        'http://0.0.0.0:5173',
-		'http://192.168.1.27:5173',
-    ],
+    // Allow only the frontend dev server for CORS with credentials
+    'allowed_origins' => ['http://localhost:5173'],
     'allowed_origins_patterns' => ['*'],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

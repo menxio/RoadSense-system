@@ -188,38 +188,13 @@ const ViolationsTable = () => {
   };
 
   const tableColumns = [
-    <TableHeaderCell
-      key="user-id"
-      icon={<PersonIcon fontSize="small" color="action" />}
-    >
-      User ID
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="plate-number"
-      icon={<DirectionsCarIcon fontSize="small" color="action" />}
-    >
-      Plate Number
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="date"
-      icon={<CalendarTodayIcon fontSize="small" color="action" />}
-    >
-      Date
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="speed"
-      icon={<SpeedIcon fontSize="small" color="action" />}
-    >
-      Speed
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="decibel"
-      icon={<VolumeUpIcon fontSize="small" color="action" />}
-    >
-      Decibel Level
-    </TableHeaderCell>,
-    "Status",
-    "Actions",
+    { key: "user-id", label: "User ID", icon: <PersonIcon fontSize="small" color="action" /> },
+    { key: "plate-number", label: "Plate Number", icon: <DirectionsCarIcon fontSize="small" color="action" /> },
+    { key: "date", label: "Date", icon: <CalendarTodayIcon fontSize="small" color="action" /> },
+    { key: "speed", label: "Speed", icon: <SpeedIcon fontSize="small" color="action" /> },
+    { key: "decibel", label: "Decibel Level", icon: <VolumeUpIcon fontSize="small" color="action" /> },
+    { key: "status", label: "Status" },
+    { key: "actions", label: "Actions" },
   ];
 
   const renderViolationRow = (violation) => (

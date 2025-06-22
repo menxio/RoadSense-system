@@ -50,11 +50,22 @@ const DataTable = ({
         <Table>
           <TableHead sx={{ bgcolor: "#f5f7fa" }}>
             <TableRow>
-              {columns.map((column, index) => (
-                <TableCell key={index} sx={{ fontWeight: "bold" }}>
-                  {column}
-                </TableCell>
-              ))}
+              {columns.map((column, index) => {
+                if (typeof column === "string") {
+                  return (
+                    <TableCell key={index} sx={{ fontWeight: "bold" }}>
+                      {column}
+                    </TableCell>
+                  );
+                } else {
+                  return (
+                    <TableCell key={column.key || index} sx={{ fontWeight: "bold" }}>
+                      {column.icon && <span style={{ marginRight: 4 }}>{column.icon}</span>}
+                      {column.label}
+                    </TableCell>
+                  );
+                }
+              })}
             </TableRow>
           </TableHead>
           <TableBody>

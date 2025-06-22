@@ -20,6 +20,7 @@ import {
   markAllNotificationsAsRead,
 } from "@/services/notification.service";
 import { fetchUserProfile } from "@/redux/slices/userSlice";
+import echo from "@/utils/echo";
 
 const NotificationBell = () => {
   const dispatch = useDispatch();
@@ -32,6 +33,29 @@ const NotificationBell = () => {
       dispatch(fetchUserProfile());
     }
   }, [dispatch, user.name]);
+
+  useEffect(() => {
+    if (user.custom_id) {
+      console.log("Subscribing to channel:", `notifications.${user.custom_id}`);
+      const channel = echo.channel(`notifications.${user.custom_id}`);
+
+      channel.notification((notification) => {
+        console.log("Notification received (Echo .notification):", notification);
+        setNotifications((prev) => [
+          {
+            ...notification,
+            title: notification.title || notification.data?.title || "No Title",
+            message: notification.message || notification.data?.message || "No message",
+            url: notification.url || notification.data?.url || "",
+            time: notification.time || notification.data?.time || new Date().toLocaleString(),
+            read: false,
+            id: notification.id || notification.data?.id || Math.random().toString(36).substr(2, 9),
+          },
+          ...prev,
+        ]);
+      });
+    }
+  }, [user.custom_id]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
@@ -122,8 +146,8 @@ const NotificationBell = () => {
         <Divider />
         {notifications.length > 0 ? (
           <List sx={{ p: 0 }}>
-            {notifications.map((notification) => (
-              <React.Fragment key={notification.id}>
+            {notifications.map((notification, idx) => (
+              <React.Fragment key={notification.id || notification.title + notification.message + idx}>
                 <ListItem
                   alignItems="flex-start"
                   sx={{
@@ -136,13 +160,13 @@ const NotificationBell = () => {
                 >
                   <ListItemAvatar>
                     <Avatar sx={{ bgcolor: "#0d1b2a" }}>
-                      {notification.title.charAt(0)}
+                      {notification.title?.charAt(0) || "!"}
                     </Avatar>
                   </ListItemAvatar>
                   <ListItemText
                     primary={
                       <Typography variant="subtitle2" fontWeight="bold">
-                        {notification.title}
+                        {notification.title || "No Title"}
                       </Typography>
                     }
                     secondary={
@@ -153,14 +177,14 @@ const NotificationBell = () => {
                           color="text.primary"
                           sx={{ display: "block" }}
                         >
-                          {notification.message}
+                          {notification.message || "No message"}
                         </Typography>
                         <Typography
                           component="span"
                           variant="caption"
                           color="text.secondary"
                         >
-                          {notification.time}
+                          {notification.time || new Date().toLocaleString()}
                         </Typography>
                       </>
                     }

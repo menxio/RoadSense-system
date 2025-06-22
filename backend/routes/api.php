@@ -6,6 +6,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ViolationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::routes(['middleware' => ['auth:api']]);
 
 Route::get('/license_id_images/{filename}', function ($filename) {
     $path = storage_path('app/public/license_id_images/' . $filename);
@@ -20,10 +23,10 @@ Route::get('/license_id_images/{filename}', function ($filename) {
 Route::get('/send-notification', [NotificationController::class, 'sendNotification']);
 Route::prefix('notifications')->group(function () {
     Route::get('/{userId}', [NotificationController::class, 'index']);
-    Route::post('/{userId}/{id}/read', [NotificationController::class, 'markAsRead']); 
-    Route::post('/{userId}/read-all', [NotificationController::class, 'markAllAsRead']); 
-    Route::delete('/{userId}/{id}', [NotificationController::class, 'delete']); 
-    Route::post('/send', [NotificationController::class, 'sendNotification']); 
+    Route::post('/{userId}/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('/{userId}/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::delete('/{userId}/{id}', [NotificationController::class, 'delete']);
+    Route::post('/send', [NotificationController::class, 'sendNotification']);
     Route::post('/user/{userId}', [NotificationController::class, 'notifyUser']);
 });
 
@@ -41,7 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::prefix('users')->group(function() {
+Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
     Route::get('/{id}', [UserController::class, 'show']);
     Route::get('/user', [UserController::class, 'getCurrentUser']);
