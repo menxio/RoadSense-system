@@ -53,6 +53,7 @@ php artisan serve --host=0.0.0.0 --port=8000  # or use Herd if installed
 ```
 
 > Note: Ensure MongoDB credentials are correctly set in `.env`.
+> use env.example as a starting point!
 
 ### 2. React Frontend
 ```bash
@@ -64,7 +65,8 @@ npm run dev
 ### 3. Python YOLO Model
 ```bash
 source ~/yolov11-env/bin/activate
-cd roadsense/
+pip install opencv-python numpy ultralytics easyocr
+cd prediction_model/
 python stream_based_predictions.py #run on rtsp camera stream
 OR
 python video_based_predictions.py #run the script on a video file and write results to mp4 file
