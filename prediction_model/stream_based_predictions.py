@@ -6,7 +6,6 @@ import logging
 from datetime import datetime
 from ultralytics.solutions import speed_estimation
 import easyocr
-import sounddevice as sd
 import numpy as np
 from collections import deque
 import subprocess
