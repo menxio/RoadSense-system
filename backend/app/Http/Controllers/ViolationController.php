@@ -8,6 +8,7 @@ use App\Models\Violation;
 use App\Notifications\RealTimeNotification;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class ViolationController extends Controller
 {
@@ -111,6 +112,7 @@ class ViolationController extends Controller
         ]);
 
         if ($violation->status === 'under review' && !in_array($validated['status'], ['cleared', 'rejected'])) {
+            Log::info('Invalid status transition', ['current_status' => $violation->status, 'new_status' => $validated['status']]);
             return response()->json(['message' => 'Invalid status transition'], 403);
         }
 
@@ -124,18 +126,31 @@ class ViolationController extends Controller
 
         $violation->save();
 
-        $user = User::find($violation->custom_user_id);
+        $user = User::where('custom_id', $violation->custom_user_id)->first();
 
         if (!$user) {
+            Log::info('User not found for violation', ['custom_user_id' => $violation->custom_user_id]);
             return response()->json(['message' => 'User not found']);
         }
 
+        Log::info('About to notify user on update', ['user_id' => $user->id, 'custom_id' => $user->custom_id, 'violation_id' => $violation->id]);
         $user->notify(new RealTimeNotification([
             'title' => 'Violation Update',
             'message' => "Your violation is now " . $validated['status'],
             'url' => "/violations/{$violation->id}",
             'custom_id' => $user->custom_id,
         ]));
+
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            Log::info('Notifying admin', ['admin_id' => $admin->id, 'custom_id' => $admin->custom_id]);
+            $admin->notify(new RealTimeNotification([
+                'title' => 'Violation Updated',
+                'message' => "A violation for user: {$user->name} has been updated.",
+                'url' => "/admin/violations/{$violation->id}",
+                'custom_id' => $admin->custom_id,
+            ]));
+        }
 
         return response()->json(['message' => 'Violation updated successfully', 'violation' => $violation]);
     }
