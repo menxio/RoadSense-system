@@ -9,7 +9,7 @@ An AI-powered road monitoring and violation tracking system using YOLO for vehic
 **Frontend**: React.js + Vite + MUI + Tailwind CSS  
 **Backend**: Laravel (PHP 8.4+) + MongoDB PHP Library  
 **Database**: MongoDB Atlas  
-**AI Model**: YOLOv11 (Python)  
+**AI Model**: YOLOv11 (object detection & speed estimator) + yolov8 (license plate detection model)
 **RTC**: MediaMTX for WebRTC streaming  
 **Scripts**: Node.js for image/report uploads
 
@@ -53,6 +53,7 @@ php artisan serve --host=0.0.0.0 --port=8000  # or use Herd if installed
 ```
 
 > Note: Ensure MongoDB credentials are correctly set in `.env`.
+> use env.example as a starting point!
 
 ### 2. React Frontend
 ```bash
@@ -64,8 +65,11 @@ npm run dev
 ### 3. Python YOLO Model
 ```bash
 source ~/yolov11-env/bin/activate
-cd roadsense/
-python3 run_predictions.py
+pip install opencv-python numpy ultralytics easyocr
+cd prediction_model/
+python stream_based_predictions.py #run on rtsp camera stream
+OR
+python video_based_predictions.py #run the script on a video file and write results to mp4 file
 ```
 
 ### 4. Node.js Violation Logger
@@ -80,13 +84,6 @@ mediamtx
 ```
 
 ---
-
-## 🔁 All-in-One Scripts
-
-```bash
-./start_services.sh  # Starts YOLO, logger, RTC
-./stop_services.sh   # Stops everything
-```
 
 Logs are written to `.log` files silently.
 
