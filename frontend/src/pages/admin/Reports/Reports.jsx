@@ -267,37 +267,12 @@ const Reports = () => {
   const monthlyAverage = Math.round(totalViolations / (filterMonth ? 1 : 12));
 
   const tableColumns = [
-    <TableHeaderCell
-      key="user-id"
-      icon={<PersonIcon fontSize="small" color="action" />}
-    >
-      User ID
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="plate-number"
-      icon={<CarIcon fontSize="small" color="action" />}
-    >
-      Plate Number
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="date"
-      icon={<CalendarIcon fontSize="small" color="action" />}
-    >
-      Date
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="speed"
-      icon={<SpeedIcon fontSize="small" color="action" />}
-    >
-      Speed (km/h)
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="decibel"
-      icon={<VolumeUpIcon fontSize="small" color="action" />}
-    >
-      Decibel Level (dB)
-    </TableHeaderCell>,
-    "Status",
+    { key: "user-id", label: "User ID", icon: <PersonIcon fontSize="small" color="action" /> },
+    { key: "plate-number", label: "Plate Number", icon: <CarIcon fontSize="small" color="action" /> },
+    { key: "date", label: "Date", icon: <CalendarIcon fontSize="small" color="action" /> },
+    { key: "speed", label: "Speed (km/h)", icon: <SpeedIcon fontSize="small" color="action" /> },
+    { key: "decibel", label: "Decibel Level (dB)", icon: <VolumeUpIcon fontSize="small" color="action" /> },
+    { key: "status", label: "Status" },
   ];
 
   const renderViolationRow = (violation) => (

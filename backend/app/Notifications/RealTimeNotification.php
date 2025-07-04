@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Broadcasting\Channel;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -20,6 +21,7 @@ class RealTimeNotification extends Notification
     public function __construct($data)
     {
         $this->data = $data;
+        \Log::info('RealTimeNotification initialized with data:', $data);
     }
 
     /**
@@ -41,6 +43,23 @@ class RealTimeNotification extends Notification
             ->line($this->data['message'])
             ->action('View Details', url($this->data['url']))
             ->line('Thank you for using our application!');
+    }
+
+    /**
+     * Specify the broadcast channel.
+     */
+    public function broadcastOn(): array
+    {
+        if (!isset($this->data['custom_id'])) {
+            \Log::error('Missing custom_id in notification data', $this->data);
+            return [];
+        }
+
+        \Log::info('Broadcasting on public channel:', ['channel' => 'notifications.' . $this->data['custom_id']]);
+
+        return [
+            new Channel('notifications.' . $this->data['custom_id']),
+        ];
     }
 
     /**

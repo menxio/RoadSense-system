@@ -195,38 +195,13 @@ const UsersTable = ({ users, onEdit, onDelete }) => {
   };
 
   const tableColumns = [
-    <TableHeaderCell
-      key="user-id"
-      icon={<PersonIcon fontSize="small" color="action" />}
-    >
-      User ID
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="name"
-      icon={<PersonIcon fontSize="small" color="action" />}
-    >
-      Name
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="plate-number"
-      icon={<DirectionsCarIcon fontSize="small" color="action" />}
-    >
-      Plate Number
-    </TableHeaderCell>,
-    <TableHeaderCell
-      key="role"
-      icon={<VerifiedUserIcon fontSize="small" color="action" />}
-    >
-      Role
-    </TableHeaderCell>,
-    "Status",
-    <TableHeaderCell
-      key="registered-at"
-      icon={<CalendarTodayIcon fontSize="small" color="action" />}
-    >
-      Registered At
-    </TableHeaderCell>,
-    "Actions",
+    { key: "user-id", label: "User ID", icon: <PersonIcon fontSize="small" color="action" /> },
+    { key: "name", label: "Name", icon: <PersonIcon fontSize="small" color="action" /> },
+    { key: "plate-number", label: "Plate Number", icon: <DirectionsCarIcon fontSize="small" color="action" /> },
+    { key: "role", label: "Role", icon: <VerifiedUserIcon fontSize="small" color="action" /> },
+    { key: "status", label: "Status" },
+    { key: "registered-at", label: "Registered At", icon: <CalendarTodayIcon fontSize="small" color="action" /> },
+    { key: "actions", label: "Actions" },
   ];
 
   const renderUserRow = (user) => (
