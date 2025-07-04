@@ -11,6 +11,7 @@ const Register = () => {
       const formData = new FormData()
       formData.append("name", values.username)
       formData.append("email", values.email)
+      formData.append("phone_number", values.phone_number)
       formData.append("plate_number", values.plate_number)
       formData.append("password", values.password)
       formData.append("school_id", values.school_id)

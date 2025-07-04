@@ -18,6 +18,7 @@ class User extends Model implements AuthenticatableContract
         'custom_id', 
         'name',
         'email',
+        'phone_number',
         'plate_number',
         'password',
         'role',

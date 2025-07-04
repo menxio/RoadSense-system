@@ -48,6 +48,10 @@ class ViolationController extends Controller
             'status' => $validated['status'] ?? 'flagged',
         ]);
 
+        // Calculate offense count and dispatch event
+        $offenseCount = Violation::where('custom_user_id', $user->custom_id)->count();
+        event(new \App\Events\ViolationCreated($violation, $offenseCount));
+
         $user->sendNotification([
             'type' => 'Violation',
             'title' => 'Violation Notice',
