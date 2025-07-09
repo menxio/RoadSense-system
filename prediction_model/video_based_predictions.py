@@ -277,7 +277,7 @@ while True:
                     "speed": round(float(speed), 2),
                     "plate_number": violation_plate_text or "unreadable",
                     "status": "flagged",
-                    "decibel_level": round(current_frame_volume, 3),
+                    "decibel_level": round(float(current_frame_volume), 3),
                     "updated_at": datetime.now().isoformat(),
                     "created_at": datetime.now().isoformat(),
                 }
