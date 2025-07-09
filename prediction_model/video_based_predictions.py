@@ -10,6 +10,7 @@ import numpy as np
 from collections import deque
 import subprocess
 from ultralytics import YOLO
+import math
 
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
@@ -124,7 +125,7 @@ def trigger_horn_event(volume):
             "speed": None,
             "plate_number": None,
             "status": "flagged",
-            "decibel_level": float(volume),
+            "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
             "updated_at": datetime.now().isoformat(),
             "created_at": datetime.now().isoformat(),
         }
@@ -206,7 +207,7 @@ while True:
         process_audio_volume(audio_data)
 
         # Overlay volume text
-    label_text = f"Volume: {current_frame_volume:.3f}"
+    label_text = f"Volume: {(current_frame_volume * 100):.3f}"
     cv2.putText(
         frame,
         label_text,
@@ -277,7 +278,10 @@ while True:
                     "speed": round(float(speed), 2),
                     "plate_number": violation_plate_text or "unreadable",
                     "status": "flagged",
-                    "decibel_level": round(float(current_frame_volume), 3),
+                    "decibel_level": math.trunc(
+                        round(float(current_frame_volume), 3) * 1000
+                    )
+                    / 10,
                     "updated_at": datetime.now().isoformat(),
                     "created_at": datetime.now().isoformat(),
                 }
