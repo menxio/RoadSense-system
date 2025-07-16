@@ -16,6 +16,9 @@ const Register = () => {
       formData.append("password", values.password)
       formData.append("school_id", values.school_id)
       formData.append("license_id_image", values.license_id_image)
+      formData.append("vehicle_type", values.vehicle_type)
+      formData.append("vehicle_color", values.vehicle_color)
+      formData.append("position", values.position)
 
       const response = await api.post("/register", formData, {
         headers: {

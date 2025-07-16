@@ -9,6 +9,7 @@ use App\Notifications\RealTimeNotification;
 use Illuminate\Support\Facades\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Events\ViolationCreated;
 
 class ViolationController extends Controller
 {
@@ -48,6 +49,10 @@ class ViolationController extends Controller
             'letter_path' => $letterPath,
             'status' => $validated['status'] ?? 'flagged',
         ]);
+
+        // Count the user's offenses (for the event)
+        $offenseCount = Violation::where('custom_user_id', $user->custom_id)->count();
+        event(new ViolationCreated($violation, $offenseCount));
 
         $user->notify(new RealTimeNotification([
             'title' => 'Violation Notice',
