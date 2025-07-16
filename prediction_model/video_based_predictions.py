@@ -10,6 +10,7 @@ import numpy as np
 from collections import deque
 import subprocess
 from ultralytics import YOLO
+import math
 
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
@@ -44,7 +45,7 @@ speed_estimator = speed_estimation.SpeedEstimator(
     line_width=3,
     classes=[2, 3, 5, 7],
 )
-plate_detector = YOLO("license_plate_detector_openvino_model") 
+plate_detector = YOLO("license_plate_detector_openvino_model")
 ocr_reader = easyocr.Reader(["en"], gpu=False)
 
 # params
@@ -66,13 +67,18 @@ current_frame_volume = 0.0
 
 ffmpeg_audio_cmd = [
     "ffmpeg",
-    "-i", "video_main.mp4",
+    "-i",
+    "video_main.mp4",
     "-vn",
-    "-f", "s16le",
-    "-acodec", "pcm_s16le",
-    "-ac", "1",
-    "-ar", str(AUDIO_SAMPLE_RATE),
-    "-"
+    "-f",
+    "s16le",
+    "-acodec",
+    "pcm_s16le",
+    "-ac",
+    "1",
+    "-ar",
+    str(AUDIO_SAMPLE_RATE),
+    "-",
 ]
 
 audio_process = subprocess.Popen(
@@ -103,6 +109,7 @@ logged_vehicles = {}
 pending_saves = {}
 pending_ids = set()
 
+
 def trigger_horn_event(volume):
     global frame, frame_index
     try:
@@ -118,7 +125,7 @@ def trigger_horn_event(volume):
             "speed": None,
             "plate_number": None,
             "status": "flagged",
-            "decibel_level": float(volume),
+            "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
             "updated_at": datetime.now().isoformat(),
             "created_at": datetime.now().isoformat(),
         }
@@ -159,6 +166,7 @@ def process_audio_volume(audio_data):
         last_horn_event_time = current_time
         trigger_horn_event(volume)
 
+
 def detect_and_read_plate(image):
     try:
         plate_results = plate_detector(image, verbose=False)[0]
@@ -180,6 +188,7 @@ def detect_and_read_plate(image):
         logging.error(f"LPR failed: {e}")
     return None, None
 
+
 while True:
     success, frame = cap.read()
     if not success:
@@ -190,15 +199,15 @@ while True:
     fg_mask = motion_detector.apply(gray_frame)
     motion_pixels = cv2.countNonZero(fg_mask)
 
-    samples_per_frame = AUDIO_SAMPLE_RATE / fps  
+    samples_per_frame = AUDIO_SAMPLE_RATE / fps
     chunk_bytes_per_frame = int(samples_per_frame) * BYTES_PER_SAMPLE
-    
+
     audio_data = read_audio_chunk(audio_process, chunk_bytes_per_frame)
     if audio_data is not None:
         process_audio_volume(audio_data)
 
         # Overlay volume text
-    label_text = f"Volume: {current_frame_volume:.3f}"
+    label_text = f"Volume: {(current_frame_volume * 100):.3f}"
     cv2.putText(
         frame,
         label_text,
@@ -207,7 +216,7 @@ while True:
         1.0,
         (0, 255, 255),
         2,
-        cv2.LINE_AA
+        cv2.LINE_AA,
     )
 
     if motion_pixels > motion_sensitivity:
@@ -231,7 +240,7 @@ while True:
                     0.9,
                     (0, 255, 0),
                     2,
-                    cv2.LINE_AA
+                    cv2.LINE_AA,
                 )
         for track_id in list(pending_saves.keys()):
             event, json_path, image_path = pending_saves[track_id]
@@ -242,37 +251,43 @@ while True:
             logged_vehicles[track_id] = frame_index
             del pending_saves[track_id]
             pending_ids.discard(track_id)
-                
+
         for track_id, speed in speed_estimator.spd.items():
-            
-                if speed > SPEED_THRESHOLD:
-                    if track_id in pending_ids:
-                        continue
 
-                    last_logged = logged_vehicles.get(track_id)
-                    if last_logged is not None and (frame_index - last_logged) <= COOLDOWN_FRAMES:
-                        continue
+            if speed > SPEED_THRESHOLD:
+                if track_id in pending_ids:
+                    continue
 
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename_base = f"event_{frame_index}_id{track_id}_{timestamp}"
-                    json_path = os.path.join(output_dir, filename_base + ".json")
-                    image_path = os.path.join(output_dir, filename_base + ".jpg")
+                last_logged = logged_vehicles.get(track_id)
+                if (
+                    last_logged is not None
+                    and (frame_index - last_logged) <= COOLDOWN_FRAMES
+                ):
+                    continue
 
-                    violation_plate_text, _ = detect_and_read_plate(frame)
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename_base = f"event_{frame_index}_id{track_id}_{timestamp}"
+                json_path = os.path.join(output_dir, filename_base + ".json")
+                image_path = os.path.join(output_dir, filename_base + ".jpg")
 
-                    event = {
-                        "custom_user_id": 0,
-                        "detected_at": datetime.now().isoformat(),
-                        "speed": round(float(speed), 2),
-                        "plate_number": violation_plate_text or "unreadable",
-                        "status": "flagged",
-                        "decibel_level": 0,
-                        "updated_at": datetime.now().isoformat(),
-                        "created_at": datetime.now().isoformat(),
-                    }
+                violation_plate_text, _ = detect_and_read_plate(frame)
 
-                    pending_saves[track_id] = (event, json_path, image_path)
-                    pending_ids.add(track_id)
+                event = {
+                    "custom_user_id": 0,
+                    "detected_at": datetime.now().isoformat(),
+                    "speed": round(float(speed), 2),
+                    "plate_number": violation_plate_text or "unreadable",
+                    "status": "flagged",
+                    "decibel_level": math.trunc(
+                        round(float(current_frame_volume), 3) * 1000
+                    )
+                    / 10,
+                    "updated_at": datetime.now().isoformat(),
+                    "created_at": datetime.now().isoformat(),
+                }
+
+                pending_saves[track_id] = (event, json_path, image_path)
+                pending_ids.add(track_id)
 
     else:
         logging.debug(
@@ -293,14 +308,19 @@ cv2.destroyAllWindows()
 final_output = "final_output_with_audio.mp4"
 ffmpeg_mux_cmd = [
     "ffmpeg",
-    "-y", 
-    "-i", "predictions.mp4",         
-    "-i", "video_main.mp4",        
-    "-c", "copy",
-    "-map", "0:v:0",
-    "-map", "1:a:0",
+    "-y",
+    "-i",
+    "predictions.mp4",
+    "-i",
+    "video_main.mp4",
+    "-c",
+    "copy",
+    "-map",
+    "0:v:0",
+    "-map",
+    "1:a:0",
     "-shortest",
-    final_output
+    final_output,
 ]
 
 try:

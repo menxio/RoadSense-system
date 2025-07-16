@@ -191,8 +191,8 @@ const ViolationsTable = ({ violations = [], onAppeal, isLoading = false }) => {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             variant="body2"
-            fontWeight={(violation.speed || 0) > 30 ? "bold" : "regular"}
-            color={(violation.speed || 0) > 30 ? "error.main" : "text.primary"}
+            fontWeight={(violation.speed || 0) > 10 ? "bold" : "regular"}
+            color={(violation.speed || 0) > 10 ? "error.main" : "text.primary"}
           >
             {violation.speed || "14.08"}
           </Typography>
@@ -205,8 +205,8 @@ const ViolationsTable = ({ violations = [], onAppeal, isLoading = false }) => {
         <Box sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             variant="body2"
-            fontWeight={(violation.decibel_level || 0) > 85 ? "bold" : "regular"}
-            color={(violation.decibel_level || 0) > 85 ? "error.main" : "text.primary"}
+            fontWeight={(violation.decibel_level || 0) > 91 ? "bold" : "regular"}
+            color={(violation.decibel_level || 0) > 91 ? "error.main" : "text.primary"}
           >
             {violation.decibel_level || "0"}
           </Typography>

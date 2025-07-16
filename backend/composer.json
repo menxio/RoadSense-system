@@ -17,6 +17,7 @@
         "mongodb/laravel-mongodb": "^5.4",
         "pusher/pusher-php-server": "^7.2",
         "spatie/laravel-permission": "^6.17",
+        "twilio/sdk": "^8.6",
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {

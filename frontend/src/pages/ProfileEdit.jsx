@@ -198,16 +198,26 @@ const ProfileEdit = () => {
         },
       });
 
+      // Use updated profile from backend if available
+      const updatedProfile = response.data || profile;
+
       setSnackbar({
         open: true,
         message: "Profile updated successfully!",
         severity: "success",
       });
 
-      setOriginalProfile({ ...profile });
+      setProfile(updatedProfile);
+      setOriginalProfile(updatedProfile);
       setAvatarFile(null);
+
+      // Optionally update Redux user state
+      dispatch(fetchUserProfile());
     } catch (error) {
-      console.error("Error updating profile:", error);
+      // Handle backend validation errors
+      if (error.response?.data?.errors) {
+        setFormErrors(error.response.data.errors);
+      }
       setSnackbar({
         open: true,
         message: error.response?.data?.message || "Failed to update profile.",

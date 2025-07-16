@@ -22,6 +22,7 @@ import {
   DirectionsCar as DirectionsCarIcon,
   Badge as BadgeIcon,
   CloudUpload as CloudUploadIcon,
+  Phone as PhoneIcon,
 } from "@mui/icons-material"
 import { Formik, Form, Field } from "formik"
 import * as Yup from "yup"
@@ -30,6 +31,9 @@ import { Link } from "react-router-dom"
 const validationSchema = Yup.object({
   username: Yup.string().required("Required"),
   email: Yup.string().email("Invalid email").required("Required"),
+  phone_number: Yup.string()
+    .matches(/^\+63[0-9]{10}$/, "Must be a valid Philippine mobile number (e.g., +639123456789)")
+    .required("Required"),
   plate_number: Yup.string().required("Required"),
   school_id: Yup.string().required("Required"),
   password: Yup.string().min(8, "Min 8 characters").required("Required"),
@@ -42,7 +46,6 @@ const validationSchema = Yup.object({
 const RegisterForm = ({ onSubmit }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [previewImage, setPreviewImage] = useState(null)
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword)
@@ -56,11 +59,6 @@ const RegisterForm = ({ onSubmit }) => {
     const file = event.currentTarget.files[0]
     if (file) {
       setFieldValue("license_id_image", file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviewImage(reader.result)
-      }
-      reader.readAsDataURL(file)
     }
   }
 
@@ -69,6 +67,7 @@ const RegisterForm = ({ onSubmit }) => {
       initialValues={{
         username: "",
         email: "",
+        phone_number: "",
         plate_number: "",
         school_id: "",
         password: "",
@@ -83,7 +82,7 @@ const RegisterForm = ({ onSubmit }) => {
           <Paper
             elevation={0}
             sx={{
-              p: 4,
+              p: { xs: 1.5, sm: 2 },
               width: "100%",
               maxWidth: 500,
               borderRadius: 2,
@@ -117,10 +116,11 @@ const RegisterForm = ({ onSubmit }) => {
               </Alert>
             )}
 
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 2, mb: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 0.5, mb: 0.5 }}>
               <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="username" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+                <InputLabel htmlFor="username" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                   Username
+                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
                 </InputLabel>
                 <Field name="username">
                   {({ field, meta }) => (
@@ -130,25 +130,26 @@ const RegisterForm = ({ onSubmit }) => {
                       id="username"
                       placeholder="Username"
                       variant="outlined"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText={meta.touched && meta.error}
                       size="small"
+                      error={meta.touched && Boolean(meta.error)}
+                      helperText=""
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <PersonIcon fontSize="small" color="action" />
+                            <PersonIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                           </InputAdornment>
                         ),
+                        sx: { fontSize: "0.8rem", height: 36 },
+                      }}
+                      inputProps={{
+                        style: { fontSize: "0.8rem" },
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            borderColor: "#1976d2",
-                          },
-                          "&.Mui-focused": {
-                            boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                          },
+                          fontSize: "0.8rem",
+                          height: 36,
+                          minHeight: 36,
+                          padding: 0,
                         },
                       }}
                     />
@@ -157,8 +158,9 @@ const RegisterForm = ({ onSubmit }) => {
               </Box>
 
               <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="email" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+                <InputLabel htmlFor="email" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                   Email
+                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
                 </InputLabel>
                 <Field name="email">
                   {({ field, meta }) => (
@@ -168,25 +170,26 @@ const RegisterForm = ({ onSubmit }) => {
                       id="email"
                       placeholder="Email"
                       variant="outlined"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText={meta.touched && meta.error}
                       size="small"
+                      error={meta.touched && Boolean(meta.error)}
+                      helperText=""
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <EmailIcon fontSize="small" color="action" />
+                            <EmailIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                           </InputAdornment>
                         ),
+                        sx: { fontSize: "0.8rem", height: 36 },
+                      }}
+                      inputProps={{
+                        style: { fontSize: "0.8rem"},
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            borderColor: "#1976d2",
-                          },
-                          "&.Mui-focused": {
-                            boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                          },
+                          fontSize: "0.8rem",
+                          height: 36,
+                          minHeight: 36,
+                          padding: 0,
                         },
                       }}
                     />
@@ -195,10 +198,53 @@ const RegisterForm = ({ onSubmit }) => {
               </Box>
             </Box>
 
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 2, mb: 2 }}>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}>
               <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="plate_number" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+                <InputLabel htmlFor="phone_number" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
+                  Phone Number
+                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
+                </InputLabel>
+                <Field name="phone_number">
+                  {({ field, meta }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      id="phone_number"
+                      placeholder="+639123456789"
+                      variant="outlined"
+                      error={meta.touched && Boolean(meta.error)}
+                      helperText=""
+                      size="small"
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <PhoneIcon fontSize="small" color="action" sx={{ pl: 0.5 }} />
+                          </InputAdornment>
+                        ),
+                        sx: { fontSize: "0.8rem", height: 36 },
+                      }}
+                      inputProps={{
+                        style: { fontSize: "0.8rem", padding: "6px 8px" },
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          fontSize: "0.8rem",
+                          height: 36,
+                          minHeight: 36,
+                          padding: 0,
+                        },
+                      }}
+                    />
+                  )}
+                </Field>
+              </Box>
+            </Box>
+
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 0.5, mb: 0.5 }}>
+              <Box sx={{ flex: 1 }}>
+                <InputLabel htmlFor="plate_number" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                   Plate Number
+                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
                 </InputLabel>
                 <Field name="plate_number">
                   {({ field, meta }) => (
@@ -208,25 +254,26 @@ const RegisterForm = ({ onSubmit }) => {
                       id="plate_number"
                       placeholder="Plate Number"
                       variant="outlined"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText={meta.touched && meta.error}
                       size="small"
+                      error={meta.touched && Boolean(meta.error)}
+                      helperText=""
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <DirectionsCarIcon fontSize="small" color="action" />
+                            <DirectionsCarIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                           </InputAdornment>
                         ),
+                        sx: { fontSize: "0.8rem", height: 36 },
+                      }}
+                      inputProps={{
+                        style: { fontSize: "0.8rem" },
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            borderColor: "#1976d2",
-                          },
-                          "&.Mui-focused": {
-                            boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                          },
+                          fontSize: "0.8rem",
+                          height: 36,
+                          minHeight: 36,
+                          padding: 0,
                         },
                       }}
                     />
@@ -235,8 +282,9 @@ const RegisterForm = ({ onSubmit }) => {
               </Box>
 
               <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="school_id" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+                <InputLabel htmlFor="school_id" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                   School ID
+                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
                 </InputLabel>
                 <Field name="school_id">
                   {({ field, meta }) => (
@@ -246,25 +294,26 @@ const RegisterForm = ({ onSubmit }) => {
                       id="school_id"
                       placeholder="School ID"
                       variant="outlined"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText={meta.touched && meta.error}
                       size="small"
+                      error={meta.touched && Boolean(meta.error)}
+                      helperText=""
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            <BadgeIcon fontSize="small" color="action" />
+                            <BadgeIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                           </InputAdornment>
                         ),
+                        sx: { fontSize: "0.8rem", height: 36 },
+                      }}
+                      inputProps={{
+                        style: { fontSize: "0.8rem" },
                       }}
                       sx={{
                         "& .MuiOutlinedInput-root": {
-                          transition: "all 0.2s",
-                          "&:hover": {
-                            borderColor: "#1976d2",
-                          },
-                          "&.Mui-focused": {
-                            boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                          },
+                          fontSize: "0.8rem",
+                          height: 36,
+                          minHeight: 36,
+                          padding: 0,
                         },
                       }}
                     />
@@ -274,8 +323,9 @@ const RegisterForm = ({ onSubmit }) => {
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <InputLabel htmlFor="password" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+              <InputLabel htmlFor="password" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                 Password
+                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
               </InputLabel>
               <Field name="password">
                 {({ field, meta }) => (
@@ -286,13 +336,13 @@ const RegisterForm = ({ onSubmit }) => {
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
                     variant="outlined"
-                    error={meta.touched && Boolean(meta.error)}
-                    helperText={meta.touched && meta.error}
                     size="small"
+                    error={meta.touched && Boolean(meta.error)}
+                    helperText=""
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LockIcon fontSize="small" color="action" />
+                          <LockIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                         </InputAdornment>
                       ),
                       endAdornment: (
@@ -303,20 +353,21 @@ const RegisterForm = ({ onSubmit }) => {
                             edge="end"
                             size="small"
                           >
-                            {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                            {showPassword ? <VisibilityOff fontSize="small" sx={{ pr: 1 }} /> : <Visibility fontSize="small" sx={{ pr: 1 }} />}
                           </IconButton>
                         </InputAdornment>
                       ),
+                      sx: { fontSize: "0.8rem", height: 36 },
+                    }}
+                    inputProps={{
+                      style: { fontSize: "0.8rem" },
                     }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          borderColor: "#1976d2",
-                        },
-                        "&.Mui-focused": {
-                          boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                        },
+                        fontSize: "0.8rem",
+                        height: 36,
+                        minHeight: 36,
+                        padding: 0,
                       },
                     }}
                   />
@@ -325,8 +376,9 @@ const RegisterForm = ({ onSubmit }) => {
             </Box>
 
             <Box sx={{ mb: 2 }}>
-              <InputLabel htmlFor="confirmPassword" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+              <InputLabel htmlFor="confirmPassword" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                 Confirm Password
+                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
               </InputLabel>
               <Field name="confirmPassword">
                 {({ field, meta }) => (
@@ -337,13 +389,13 @@ const RegisterForm = ({ onSubmit }) => {
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm Password"
                     variant="outlined"
-                    error={meta.touched && Boolean(meta.error)}
-                    helperText={meta.touched && meta.error}
                     size="small"
+                    error={meta.touched && Boolean(meta.error)}
+                    helperText=""
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <LockIcon fontSize="small" color="action" />
+                          <LockIcon fontSize="small" color="action" sx={{ pl: 1 }} />
                         </InputAdornment>
                       ),
                       endAdornment: (
@@ -355,23 +407,24 @@ const RegisterForm = ({ onSubmit }) => {
                             size="small"
                           >
                             {showConfirmPassword ? (
-                              <VisibilityOff fontSize="small" />
+                              <VisibilityOff fontSize="small" sx={{ pr: 1 }} />
                             ) : (
-                              <Visibility fontSize="small" />
+                              <Visibility fontSize="small" sx={{ pr: 1 }} />
                             )}
                           </IconButton>
                         </InputAdornment>
                       ),
+                      sx: { fontSize: "0.8rem", height: 36 },
+                    }}
+                    inputProps={{
+                      style: { fontSize: "0.8rem" },
                     }}
                     sx={{
                       "& .MuiOutlinedInput-root": {
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          borderColor: "#1976d2",
-                        },
-                        "&.Mui-focused": {
-                          boxShadow: "0 0 0 2px rgba(25, 118, 210, 0.2)",
-                        },
+                        fontSize: "0.8rem",
+                        height: 36,
+                        minHeight: 36,
+                        padding: 0,
                       },
                     }}
                   />
@@ -380,8 +433,9 @@ const RegisterForm = ({ onSubmit }) => {
             </Box>
 
             <Box sx={{ mb: 3 }}>
-              <InputLabel htmlFor="license_id" sx={{ mb: 0.5, fontSize: "0.75rem", color: "text.secondary" }}>
+              <InputLabel htmlFor="license_id" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
                 License ID Image
+                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
               </InputLabel>
               <Box>
                 <input
@@ -414,37 +468,28 @@ const RegisterForm = ({ onSubmit }) => {
                     Upload License ID
                   </Button>
                 </label>
-                <Typography variant="caption" display="block" sx={{ mt: 0.5, color: "text.secondary" }}>
-                  Upload a clear image of your license ID
+                {values.license_id_image && (
+                  <Typography variant="caption" sx={{ mt: 1, mb: 2, display: "block", textAlign: "center" }}>
+                    {values.license_id_image.name}
+                  </Typography>
+                )}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    mt: 0.25,
+                    mb: 1,
+                    display: "block",
+                    textAlign: "center",
+                    color: "text.secondary",
+                    fontSize: "0.7rem"
+                  }}
+                >
+                  Filename format: <b>LASTNAME_FIRSTNAME_MI.jpg</b>
                 </Typography>
                 {touched.license_id_image && errors.license_id_image && (
                   <FormHelperText error>{errors.license_id_image}</FormHelperText>
                 )}
               </Box>
-
-              {previewImage && (
-                <Fade in={Boolean(previewImage)}>
-                  <Box
-                    sx={{
-                      border: "1px solid #e0e0e0",
-                      borderRadius: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      backgroundColor: "rgba(0, 0, 0, 0.02)",
-                    }}
-                  >
-                    <img
-                      src={previewImage || "/placeholder.svg"}
-                      alt="License ID Preview"
-                      style={{ maxWidth: "100%", maxHeight: "70px", objectFit: "contain" }}
-                    />
-                    <Typography variant="caption" sx={{ mt: 1, color: "text.secondary" }}>
-                      {values.license_id_image?.name || "License ID image"}
-                    </Typography>
-                  </Box>
-                </Fade>
-              )}
             </Box>
 
             <Button

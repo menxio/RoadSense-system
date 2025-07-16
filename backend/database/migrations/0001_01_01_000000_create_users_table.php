@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('custom_id')->unique();
             $table->string('email')->unique();
+            $table->string('phone_number')->unique();
             $table->string('plate_number')->unique();
             $table->string('license_id_image');
             $table->string('school_id')->unique();

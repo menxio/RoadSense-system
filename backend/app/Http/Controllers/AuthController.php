@@ -12,6 +12,12 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validated = $request->validate([
+            'phone_number' => [
+            'required',
+            'string',
+            'unique:users,phone_number',
+            'regex:/^(09\d{9}|\+639\d{9})$/'
+            ],
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'plate_number' => 'required|string|unique:users,plate_number',

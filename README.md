@@ -39,9 +39,9 @@ mediamtx.yml -> add camera IP to paths:cam:source
 
 prediction_model/run_full_predictions.py -> add camera IP as cv2.videoCapture() parameter
 
-frontend/src/utils/api.js -> add raspi IP to BASEURL
+frontend/.env-> add local machine IP to as BASE_URL
 
-frontend/src/components/CamViewer.jsx -> add raspi IP to iframe's src attribute
+frontend/.env -> add local machine IP to .env file as VITE_RTSP_STREAM_ADDRESS:8889
 ### 1. Laravel Backend
 ```bash
 cd backend
