@@ -19,6 +19,7 @@ return [
     'allowed_methods' => ['*'],
     // Allow only the frontend dev server for CORS with credentials
     'allowed_origins' => [
+        'http://192.168.38.200:5173',
         'http://localhost:5173',
         'http://backend.test',
     ],

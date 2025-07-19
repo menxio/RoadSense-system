@@ -36,7 +36,7 @@ class ViolationController extends Controller
 
         $letterPath = null;
         if ($request->hasFile('letter')) {
-            $letterPath = $request->file('letter')->store('letters', 'public');
+            $letterPath = $request->file('letter')->store('letters');
         }
 
         $violation = Violation::create([
