@@ -24,6 +24,9 @@ class AuthController extends Controller
             'password' => 'required|string|min:6',
             'license_id_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'school_id' => 'required|string:unique:users,school_id',
+            'vehicle_type' => 'required|string',
+            'vehicle_color' => 'required|string',
+            'position' => 'required|string',
         ]);
 
         if ($request->hasFile('license_id_image')) {

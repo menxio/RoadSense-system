@@ -59,3 +59,4 @@ Route::prefix('violations')->group(function () {
     Route::put('/{id}', [ViolationController::class, 'update']);
     Route::delete('/{id}', [ViolationController::class, 'destroy']);
 });
+

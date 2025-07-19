@@ -2,530 +2,516 @@ import { useState } from "react"
 import {
   Box,
   Button,
+  Stepper,
+  Step,
+  StepLabel,
   TextField,
-  Typography,
-  InputAdornment,
-  IconButton,
-  Paper,
-  Alert,
-  FormHelperText,
-  CircularProgress,
+  Select,
+  MenuItem,
   InputLabel,
-  Fade,
+  FormControl,
+  Typography,
+  Paper,
+  Grid,
+  InputAdornment,
+  Alert,
 } from "@mui/material"
 import {
-  Visibility,
-  VisibilityOff,
   Person as PersonIcon,
   Email as EmailIcon,
   Lock as LockIcon,
-  DirectionsCar as DirectionsCarIcon,
-  Badge as BadgeIcon,
-  CloudUpload as CloudUploadIcon,
   Phone as PhoneIcon,
+  DriveEta as DriveEtaIcon,
+  DirectionsCar as CarIcon,
+  Palette as PaletteIcon,
+  CloudUpload as CloudUploadIcon,
 } from "@mui/icons-material"
-import { Formik, Form, Field } from "formik"
-import * as Yup from "yup"
-import { Link } from "react-router-dom"
 
-const validationSchema = Yup.object({
-  username: Yup.string().required("Required"),
-  email: Yup.string().email("Invalid email").required("Required"),
-  phone_number: Yup.string()
-    .matches(/^\+63[0-9]{10}$/, "Must be a valid Philippine mobile number (e.g., +639123456789)")
-    .required("Required"),
-  plate_number: Yup.string().required("Required"),
-  school_id: Yup.string().required("Required"),
-  password: Yup.string().min(8, "Min 8 characters").required("Required"),
-  confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Passwords must match")
-    .required("Required"),
-  license_id_image: Yup.mixed().required("Required"),
-})
+const steps = [
+  "Personal Info",
+  "License Upload",
+  "Vehicle Info",
+]
+
+const initialForm = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  phone: "",
+  position: "",
+  license: null,
+  vehicleType: "",
+  plateNumber: "",
+  vehicleColor: "",
+}
 
 const RegisterForm = ({ onSubmit }) => {
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [activeStep, setActiveStep] = useState(0)
+  const [form, setForm] = useState(initialForm)
+  const [licenseName, setLicenseName] = useState("")
+  const [errors, setErrors] = useState({})
+  const [apiError, setApiError] = useState("")
+  const [submitting, setSubmitting] = useState(false)
 
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword)
+  const handleChange = (e) => {
+    const { name, value, files } = e.target
+    if (name === "license") {
+      setForm({ ...form, license: files[0] })
+      setLicenseName(files[0]?.name || "")
+    } else {
+      setForm({ ...form, [name]: value })
+    }
   }
 
-  const handleClickShowConfirmPassword = () => {
-    setShowConfirmPassword(!showConfirmPassword)
+  const validateStep = () => {
+    let stepErrors = {}
+    if (activeStep === 0) {
+      if (!form.firstName) stepErrors.firstName = "Required"
+      if (!form.lastName) stepErrors.lastName = "Required"
+      if (!form.email) stepErrors.email = "Required"
+      if (!form.password) stepErrors.password = "Required"
+      if (!form.confirmPassword) stepErrors.confirmPassword = "Required"
+      else if (form.password !== form.confirmPassword) stepErrors.confirmPassword = "Passwords do not match"
+      if (!form.phone) stepErrors.phone = "Required"
+      if (!form.position) stepErrors.position = "Required"
+    }
+    if (activeStep === 1) {
+      if (!form.license) stepErrors.license = "Required"
+    }
+    if (activeStep === 2) {
+      if (!form.vehicleType) stepErrors.vehicleType = "Required"
+      if (!form.plateNumber) stepErrors.plateNumber = "Required"
+      if (!form.vehicleColor) stepErrors.vehicleColor = "Required"
+    }
+    setErrors(stepErrors)
+    return Object.keys(stepErrors).length === 0
   }
 
-  const handleImageChange = (event, setFieldValue) => {
-    const file = event.currentTarget.files[0]
-    if (file) {
-      setFieldValue("license_id_image", file)
+  const handleNext = () => {
+    if (validateStep()) setActiveStep((prev) => prev + 1)
+  }
+
+  const handleBack = () => setActiveStep((prev) => prev - 1)
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!validateStep()) return
+    setSubmitting(true)
+    setApiError("")
+    try {
+      // Compose values for API
+      const values = {
+        username: form.firstName + " " + form.lastName,
+        email: form.email,
+        phone_number: form.phone,
+        plate_number: form.plateNumber,
+        password: form.password,
+        school_id: form.schoolId,
+        position: form.position,
+        license_id_image: form.license,
+        vehicle_type: form.vehicleType,
+        vehicle_color: form.vehicleColor,
+      }
+      await onSubmit(values, {
+        setSubmitting,
+        setErrors: (errs) => setApiError(errs.apiError),
+        resetForm: () => {
+          setForm(initialForm)
+          setActiveStep(0)
+          setLicenseName("")
+        },
+      })
+    } catch (err) {
+      setApiError("An error occurred during registration")
+    } finally {
+      setSubmitting(false)
     }
   }
 
   return (
-    <Formik
-      initialValues={{
-        username: "",
-        email: "",
-        phone_number: "",
-        plate_number: "",
-        school_id: "",
-        password: "",
-        confirmPassword: "",
-        license_id_image: null,
+    <Paper
+      elevation={0}
+      sx={{
+        p: 3,
+        width: "100%",
+        maxWidth: 500, // reduced from 600
+        mx: "auto",
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        borderRadius: 2,
+        bgcolor: "white",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        position: "relative",
+        overflow: "hidden",
+        "&::after": {
+          content: '""',
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "4px",
+          background: "linear-gradient(90deg, #1976d2, #64b5f6)",
+        },
       }}
-      validationSchema={validationSchema}
-      onSubmit={onSubmit}
     >
-      {({ errors, touched, isSubmitting, setFieldValue, values }) => (
-        <Form>
-          <Paper
-            elevation={0}
-            sx={{
-              p: { xs: 1.5, sm: 2 },
-              width: "100%",
-              maxWidth: 500,
-              borderRadius: 2,
-              bgcolor: "white",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-              position: "relative",
-              overflow: "hidden",
-              "&::after": {
-                content: '""',
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "4px",
-                background: "linear-gradient(90deg, #1976d2, #64b5f6)",
-              },
-            }}
-          >
-            <Box sx={{ mb: 3, textAlign: "center" }}>
-              <Typography variant="h4" fontWeight="bold" color="#1976d2" gutterBottom>
-                Create Account
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Register to access the Roadsense Traffic Monitoring System
-              </Typography>
-            </Box>
-
-            {errors.apiError && (
-              <Alert severity="error" sx={{ mb: 3 }}>
-                {errors.apiError}
-              </Alert>
-            )}
-
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 0.5, mb: 0.5 }}>
-              <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="username" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                  Username
-                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-                </InputLabel>
-                <Field name="username">
-                  {({ field, meta }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      id="username"
-                      placeholder="Username"
-                      variant="outlined"
-                      size="small"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText=""
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <PersonIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                          </InputAdornment>
-                        ),
-                        sx: { fontSize: "0.8rem", height: 36 },
-                      }}
-                      inputProps={{
-                        style: { fontSize: "0.8rem" },
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          fontSize: "0.8rem",
-                          height: 36,
-                          minHeight: 36,
-                          padding: 0,
-                        },
-                      }}
-                    />
-                  )}
-                </Field>
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="email" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                  Email
-                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-                </InputLabel>
-                <Field name="email">
-                  {({ field, meta }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      id="email"
-                      placeholder="Email"
-                      variant="outlined"
-                      size="small"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText=""
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <EmailIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                          </InputAdornment>
-                        ),
-                        sx: { fontSize: "0.8rem", height: 36 },
-                      }}
-                      inputProps={{
-                        style: { fontSize: "0.8rem"},
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          fontSize: "0.8rem",
-                          height: 36,
-                          minHeight: 36,
-                          padding: 0,
-                        },
-                      }}
-                    />
-                  )}
-                </Field>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 1, mb: 1 }}>
-              <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="phone_number" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                  Phone Number
-                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-                </InputLabel>
-                <Field name="phone_number">
-                  {({ field, meta }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      id="phone_number"
-                      placeholder="+639123456789"
-                      variant="outlined"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText=""
-                      size="small"
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <PhoneIcon fontSize="small" color="action" sx={{ pl: 0.5 }} />
-                          </InputAdornment>
-                        ),
-                        sx: { fontSize: "0.8rem", height: 36 },
-                      }}
-                      inputProps={{
-                        style: { fontSize: "0.8rem", padding: "6px 8px" },
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          fontSize: "0.8rem",
-                          height: 36,
-                          minHeight: 36,
-                          padding: 0,
-                        },
-                      }}
-                    />
-                  )}
-                </Field>
-              </Box>
-            </Box>
-
-            <Box sx={{ display: "flex", flexDirection: "row", gap: 0.5, mb: 0.5 }}>
-              <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="plate_number" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                  Plate Number
-                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-                </InputLabel>
-                <Field name="plate_number">
-                  {({ field, meta }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      id="plate_number"
-                      placeholder="Plate Number"
-                      variant="outlined"
-                      size="small"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText=""
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <DirectionsCarIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                          </InputAdornment>
-                        ),
-                        sx: { fontSize: "0.8rem", height: 36 },
-                      }}
-                      inputProps={{
-                        style: { fontSize: "0.8rem" },
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          fontSize: "0.8rem",
-                          height: 36,
-                          minHeight: 36,
-                          padding: 0,
-                        },
-                      }}
-                    />
-                  )}
-                </Field>
-              </Box>
-
-              <Box sx={{ flex: 1 }}>
-                <InputLabel htmlFor="school_id" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                  School ID
-                  <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-                </InputLabel>
-                <Field name="school_id">
-                  {({ field, meta }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      id="school_id"
-                      placeholder="School ID"
-                      variant="outlined"
-                      size="small"
-                      error={meta.touched && Boolean(meta.error)}
-                      helperText=""
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <BadgeIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                          </InputAdornment>
-                        ),
-                        sx: { fontSize: "0.8rem", height: 36 },
-                      }}
-                      inputProps={{
-                        style: { fontSize: "0.8rem" },
-                      }}
-                      sx={{
-                        "& .MuiOutlinedInput-root": {
-                          fontSize: "0.8rem",
-                          height: 36,
-                          minHeight: 36,
-                          padding: 0,
-                        },
-                      }}
-                    />
-                  )}
-                </Field>
-              </Box>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <InputLabel htmlFor="password" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                Password
-                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-              </InputLabel>
-              <Field name="password">
-                {({ field, meta }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    variant="outlined"
-                    size="small"
-                    error={meta.touched && Boolean(meta.error)}
-                    helperText=""
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleClickShowPassword}
-                            edge="end"
-                            size="small"
-                          >
-                            {showPassword ? <VisibilityOff fontSize="small" sx={{ pr: 1 }} /> : <Visibility fontSize="small" sx={{ pr: 1 }} />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      sx: { fontSize: "0.8rem", height: 36 },
-                    }}
-                    inputProps={{
-                      style: { fontSize: "0.8rem" },
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        fontSize: "0.8rem",
-                        height: 36,
-                        minHeight: 36,
-                        padding: 0,
-                      },
-                    }}
-                  />
-                )}
-              </Field>
-            </Box>
-
-            <Box sx={{ mb: 2 }}>
-              <InputLabel htmlFor="confirmPassword" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                Confirm Password
-                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-              </InputLabel>
-              <Field name="confirmPassword">
-                {({ field, meta }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Confirm Password"
-                    variant="outlined"
-                    size="small"
-                    error={meta.touched && Boolean(meta.error)}
-                    helperText=""
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <LockIcon fontSize="small" color="action" sx={{ pl: 1 }} />
-                        </InputAdornment>
-                      ),
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="toggle password visibility"
-                            onClick={handleClickShowConfirmPassword}
-                            edge="end"
-                            size="small"
-                          >
-                            {showConfirmPassword ? (
-                              <VisibilityOff fontSize="small" sx={{ pr: 1 }} />
-                            ) : (
-                              <Visibility fontSize="small" sx={{ pr: 1 }} />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                      sx: { fontSize: "0.8rem", height: 36 },
-                    }}
-                    inputProps={{
-                      style: { fontSize: "0.8rem" },
-                    }}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        fontSize: "0.8rem",
-                        height: 36,
-                        minHeight: 36,
-                        padding: 0,
-                      },
-                    }}
-                  />
-                )}
-              </Field>
-            </Box>
-
-            <Box sx={{ mb: 3 }}>
-              <InputLabel htmlFor="license_id" sx={{ mb: 0.25, fontSize: "0.7rem", color: "text.secondary" }}>
-                License ID Image
-                <Box component="span" sx={{ color: "error.main", ml: 0.5 }}>*</Box>
-              </InputLabel>
-              <Box>
-                <input
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  id="license-id-upload"
-                  type="file"
-                  onChange={(event) => handleImageChange(event, setFieldValue)}
-                />
-                <label htmlFor="license-id-upload">
-                  <Button
-                    variant="outlined"
-                    component="span"
-                    startIcon={<CloudUploadIcon />}
-                    fullWidth
-                    size="medium"
-                    color={touched.license_id_image && errors.license_id_image ? "error" : "primary"}
-                    sx={{
-                      textTransform: "none",
-                      py: 0.75,
-                      border: "1px dashed",
-                      backgroundColor: "rgba(25, 118, 210, 0.04)",
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        backgroundColor: "rgba(25, 118, 210, 0.08)",
-                        transform: "translateY(-1px)",
-                      },
-                    }}
-                  >
-                    Upload License ID
-                  </Button>
-                </label>
-                {values.license_id_image && (
-                  <Typography variant="caption" sx={{ mt: 1, mb: 2, display: "block", textAlign: "center" }}>
-                    {values.license_id_image.name}
-                  </Typography>
-                )}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    mt: 0.25,
-                    mb: 1,
-                    display: "block",
-                    textAlign: "center",
-                    color: "text.secondary",
-                    fontSize: "0.7rem"
-                  }}
-                >
-                  Filename format: <b>LASTNAME_FIRSTNAME_MI.jpg</b>
-                </Typography>
-                {touched.license_id_image && errors.license_id_image && (
-                  <FormHelperText error>{errors.license_id_image}</FormHelperText>
-                )}
-              </Box>
-            </Box>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={isSubmitting}
-              sx={{
-                py: 1.2,
-                fontWeight: "bold",
-                textTransform: "none",
-                borderRadius: 1,
-                boxShadow: "0 4px 12px rgba(25, 118, 210, 0.15)",
-                transition: "all 0.2s",
-                "&:hover": {
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 16px rgba(25, 118, 210, 0.2)",
-                },
-              }}
-            >
-              {isSubmitting ? <CircularProgress size={24} color="inherit" /> : "Register"}
-            </Button>
-
-            <Box sx={{ mt: 2, textAlign: "center" }}>
-              <Typography variant="body2" color="text.secondary">
-                Already have an account?{" "}
-                <Link to="/login" style={{ color: "#1976d2", textDecoration: "none", fontWeight: 500 }}>
-                  Sign In
-                </Link>
-              </Typography>
-            </Box>
-          </Paper>
-        </Form>
+      <Box sx={{ mb: 3, textAlign: "center" }}>
+        <Typography variant="h4" fontWeight="bold" color="#1976d2" gutterBottom>
+          Create Account
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          Register to access the Roadsense Traffic Monitoring System
+        </Typography>
+      </Box>
+      {apiError && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {apiError}
+        </Alert>
       )}
-    </Formik>
+      <Stepper activeStep={activeStep} alternativeLabel sx={{ mb: 3 }}>
+        {steps.map((label) => (
+          <Step key={label}>
+            <StepLabel>{label}</StepLabel>
+          </Step>
+        ))}
+      </Stepper>
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', flexDirection: 'column', height: 1 }}>
+        <Box sx={{ flex: 1, minHeight: 360, display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+          {activeStep === 0 && (
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Personal Information
+              </Typography>
+              {/* First Name | Last Name */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="First Name"
+                  name="firstName"
+                  value={form.firstName}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.firstName}
+                  // helperText={errors.firstName}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Last Name"
+                  name="lastName"
+                  value={form.lastName}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.lastName}
+                  // helperText={errors.lastName}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              {/* Email Address */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Email Address"
+                  name="email"
+                  type="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.email}
+                  // helperText={errors.email}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EmailIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              {/* Password | Confirm Password */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Password"
+                  name="password"
+                  type="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.password}
+                  // helperText={errors.password}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+                <TextField
+                  fullWidth
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  type="password"
+                  value={form.confirmPassword || ''}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.confirmPassword}
+                  // helperText={errors.confirmPassword}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <LockIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              {/* Phone Number */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Phone Number"
+                  name="phone"
+                  value={form.phone}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.phone}
+                  // helperText={errors.phone}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PhoneIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              {/* School ID */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="School ID"
+                  name="schoolId"
+                  value={form.schoolId || ''}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.schoolId}
+                  // helperText={errors.schoolId}
+                  size="small"
+                  sx={{ height: 40 }}
+                />
+              </Box>
+              {/* Position Dropdown */}
+              <Box sx={{ mb: 2 }}>
+                <FormControl fullWidth required error={!!errors.position} size="small" sx={{ height: 40 }}>
+                  <InputLabel>Position</InputLabel>
+                  <Select
+                    name="position"
+                    value={form.position}
+                    label="Position"
+                    onChange={handleChange}
+                  >
+                    <MenuItem value="Faculty">Faculty</MenuItem>
+                    <MenuItem value="Student">Student</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            </Box>
+          )}
+          {activeStep === 1 && (
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                License Upload
+              </Typography>
+              <Button
+                variant="outlined"
+                component="label"
+                startIcon={<CloudUploadIcon />}
+                fullWidth
+                sx={{ py: 2, fontSize: 12, borderStyle: "dashed" }}
+                color={errors.license ? "error" : "primary"}
+              >
+                Upload License ID Image
+                <input
+                  type="file"
+                  name="license"
+                  accept="image/png, image/jpeg"
+                  hidden
+                  onChange={handleChange}
+                />
+              </Button>
+              {/* Helper text for sample format */}
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, mb: 2 }}>
+                Please upload a clear image of your license ID.<br />
+                <b>File name format:</b> <i>firstname_lastname_license.jpg</i> (e.g., <i>juan_dela_cruz_license.jpg</i>)<br />
+                <span style={{ color: '#888' }}>PNG, JPG up to 10MB. All details must be readable for admin verification.</span>
+              </Typography>
+              {/* Emphasized Image Preview with fixed height */}
+              <Box
+                sx={{
+                  mt: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  height: 140,
+                  justifyContent: 'center',
+                }}
+              >
+                {form.license ? (
+                  <>
+                    <img
+                      src={URL.createObjectURL(form.license)}
+                      alt="License Preview"
+                      style={{
+                        width: 150,
+                        height: 'auto',
+                        borderRadius: 10,
+                        border: '2px solid #1976d2',
+                        boxShadow: '0 2px 12px rgba(25, 118, 210, 0.15)',
+                        objectFit: 'cover',
+                        maxHeight: 150,
+                      }}
+                    />
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.75rem', wordBreak: 'break-all', textAlign: 'center' }}>
+                      {licenseName}
+                    </Typography>
+                  </>
+                ) : null}
+              </Box>
+              {errors.license && (
+                <Typography color="error" sx={{ mt: 1 }}>
+                  {errors.license}
+                </Typography>
+              )}
+            </Box>
+          )}
+          {activeStep === 2 && (
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Vehicle Information
+              </Typography>
+              {/* Vehicle Type | Vehicle Color side by side */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <FormControl fullWidth required error={!!errors.vehicleType} size="small" sx={{ width: '50%', height: 40 }}>
+                  <InputLabel>Vehicle Type</InputLabel>
+                  <Select
+                    name="vehicleType"
+                    value={form.vehicleType}
+                    label="Vehicle Type"
+                    onChange={handleChange}
+                    startAdornment={
+                      <InputAdornment position="start">
+                        <DriveEtaIcon />
+                      </InputAdornment>
+                    }
+                  >
+                    <MenuItem value="Motorcycle">Motorcycle</MenuItem>
+                    <MenuItem value="Vehicle">Vehicle</MenuItem>
+                  </Select>
+                </FormControl>
+                <TextField
+                  fullWidth
+                  label="Vehicle Color"
+                  name="vehicleColor"
+                  value={form.vehicleColor}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.vehicleColor}
+                  helperText={errors.vehicleColor}
+                  size="small"
+                  sx={{ width: '50%', height: 40 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PaletteIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+              {/* Plate Number (full width) */}
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Plate Number"
+                  name="plateNumber"
+                  value={form.plateNumber}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      plateNumber: e.target.value.toUpperCase(),
+                    })
+                  }
+                  required
+                  error={!!errors.plateNumber}
+                  helperText={errors.plateNumber}
+                  size="small"
+                  sx={{ height: 40 }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CarIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+            </Box>
+          )}
+        </Box>
+        {/* Navigation Buttons */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", }}>
+          <Button
+            disabled={activeStep === 0 || submitting}
+            onClick={handleBack}
+            variant="outlined"
+          >
+            Previous
+          </Button>
+          {activeStep < steps.length - 1 ? (
+            <Button onClick={handleNext} variant="contained" disabled={submitting}>
+              Next
+            </Button>
+          ) : (
+            <Button type="submit" variant="contained" disabled={submitting}>
+              {submitting ? "Creating..." : "Create Account"}
+            </Button>
+          )}
+        </Box>
+        <Typography align="center" sx={{ mt: 2 }}>
+          Already have an account?{" "}
+          <Button href="/login" variant="text">
+            Sign in here
+          </Button>
+        </Typography>
+      </Box>
+    </Paper>
   )
 }
 
