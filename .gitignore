@@ -5,3 +5,4 @@ violation_logging/speed_events
 *.log
 mediamtx
 LICENSE
+node_modules
