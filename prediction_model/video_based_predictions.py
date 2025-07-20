@@ -15,14 +15,14 @@ import math
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
 # cap = cv2.VideoCapture(rtsp_url)
-cap = cv2.VideoCapture("video_main.mp4")
+video = "Video_6.mp4"
+
+cap = cv2.VideoCapture(video, cv2.CAP_FFMPEG)
 assert cap.isOpened(), "Error reading video file."
 
-w, h, fps = (
-    int(cap.get(x))
-    for x in (cv2.CAP_PROP_FRAME_WIDTH, cv2.CAP_PROP_FRAME_HEIGHT, cv2.CAP_PROP_FPS)
-)
-
+fps = cap.get(cv2.CAP_PROP_FPS) or 20.0
+w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 # w, h, fps = (
 #     int(cap.get(x))
 #     for x in (1920, 1080, cv2.CAP_PROP_FPS)
@@ -68,7 +68,7 @@ current_frame_volume = 0.0
 ffmpeg_audio_cmd = [
     "ffmpeg",
     "-i",
-    "video_main.mp4",
+    video,
     "-vn",
     "-f",
     "s16le",
@@ -122,8 +122,8 @@ def trigger_horn_event(volume):
         event = {
             "custom_user_id": 0,
             "detected_at": datetime.now().isoformat(),
-            "speed": None,
-            "plate_number": None,
+            "speed": round(float(speed), 2),
+            "plate_number": violation_plate_text or "unreadable",
             "status": "flagged",
             "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
             "updated_at": datetime.now().isoformat(),
@@ -302,7 +302,7 @@ cap.release()
 audio_process.terminate()
 audio_process.wait()
 video_writer.release()
-cv2.destroyAllWindows()
+# cv2.destroyAllWindows()
 
 # mux
 final_output = "final_output_with_audio.mp4"
@@ -312,7 +312,7 @@ ffmpeg_mux_cmd = [
     "-i",
     "predictions.mp4",
     "-i",
-    "video_main.mp4",
+    video,
     "-c",
     "copy",
     "-map",

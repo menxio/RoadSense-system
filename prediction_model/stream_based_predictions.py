@@ -3,36 +3,70 @@ import json
 import os
 import time
 import logging
+import math
+import numpy as np
+import subprocess
+import threading
 from datetime import datetime
 from ultralytics.solutions import speed_estimation
-import easyocr
-import numpy as np
-from collections import deque
-import subprocess
 from ultralytics import YOLO
+import easyocr
+from collections import deque
 
-rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
+# Configuration
+rtsp_url = "rtsp://roadsense:roadsense@192.168.1.6:554/stream1"
+AUDIO_SAMPLE_RATE = 16000
+AUDIO_BLOCK_DURATION = 0.5
+HORN_VOLUME_THRESHOLD = 0.8
+BYTES_PER_SAMPLE = 2
+AUDIO_CHUNK_SIZE = int(AUDIO_SAMPLE_RATE * AUDIO_BLOCK_DURATION)
+CHUNK_BYTES = AUDIO_CHUNK_SIZE * BYTES_PER_SAMPLE
 
-ffmpeg_video_cmd = [
-    "ffmpeg",
-    "-rtsp_transport", "tcp",
-    "-i", rtsp_url,
-    "-f", "image2pipe",
-    "-pix_fmt", "bgr24",
-    "-vcodec", "rawvideo",
-    "-"
-]
+# Thresholds
+SPEED_THRESHOLD = 15.0
+COOLDOWN_FRAMES = 200
+HORN_THRESHOLD = 3
+HORN_WINDOW_SECONDS = 5
+motion_sensitivity = 5000
 
-video_process = subprocess.Popen(
-    ffmpeg_video_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8
+# State
+horn_timestamps = deque()
+last_horn_event_time = 0
+current_frame_volume = 0.0
+frame_index = 0
+running = True
+
+# Init logging
+log_file = "../run_predictions.log"
+logging.basicConfig(
+    filename=log_file,
+    filemode="a",
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.DEBUG,
 )
 
-w, h, fps = 1920, 1080, 20  # Set resolution and FPS manually or probe with ffprobe
-frame_size = w * h * 3
+# Init directories
+output_dir = "../violation_logging/speed_events"
+os.makedirs(output_dir, exist_ok=True)
 
-# speed estimator init
+# Init models
+plate_detector = YOLO("license_plate_detector_openvino_model")
+ocr_reader = easyocr.Reader(["en"], gpu=False)
+logged_vehicles = {}
+pending_saves = {}
+pending_ids = set()
+
+# Start OpenCV video
+cap = cv2.VideoCapture(rtsp_url, cv2.CAP_FFMPEG)
+if not cap.isOpened():
+    raise RuntimeError("Failed to open RTSP stream")
+
+fps = cap.get(cv2.CAP_PROP_FPS) or 20.0
+w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+# Init speed estimator
 speed_estimator = speed_estimation.SpeedEstimator(
-    # show=True,
     conf=0.4,
     fps=fps,
     meter_per_pixel=0.05,
@@ -43,65 +77,12 @@ speed_estimator = speed_estimation.SpeedEstimator(
     line_width=3,
     classes=[2, 3, 5, 7],
 )
-plate_detector = YOLO("license_plate_detector_openvino_model") 
-ocr_reader = easyocr.Reader(["en"], gpu=False)
 
-# params
-frame_index = 0
-SPEED_THRESHOLD = 15.0
-COOLDOWN_FRAMES = 200
-HORN_THRESHOLD = 3
-HORN_WINDOW_SECONDS = 5
-AUDIO_SAMPLE_RATE = 16000
-AUDIO_BLOCK_DURATION = 0.5  # seconds
-HORN_VOLUME_THRESHOLD = 0.008
-AUDIO_CHUNK_SIZE = AUDIO_SAMPLE_RATE // 2
-BYTES_PER_SAMPLE = 2
-CHUNK_BYTES = AUDIO_CHUNK_SIZE * BYTES_PER_SAMPLE
-
-horn_timestamps = deque()
-last_horn_event_time = 0
-current_frame_volume = 0.0
-
-ffmpeg_audio_cmd = [
-    "ffmpeg",
-    "-i", rtsp_url,
-    "-vn",
-    "-f", "s16le",
-    "-acodec", "pcm_s16le",
-    "-ac", "1",
-    "-ar", str(AUDIO_SAMPLE_RATE),
-    "-"
-]
-
-
-audio_process = subprocess.Popen(
-    ffmpeg_audio_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, bufsize=10**8
-)
-
-# report output directory
-output_dir = "../violation_logging/speed_events"
-os.makedirs(output_dir, exist_ok=True)
-
-# motion detection
+# Init motion detector
 motion_detector = cv2.createBackgroundSubtractorMOG2(
     history=100, varThreshold=50, detectShadows=False
 )
-motion_sensitivity = 5000
 
-# logging config
-log_file = "../run_predictions.log"
-logging.basicConfig(
-    filename=log_file,
-    filemode="a",
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
-)
-
-# trackers
-logged_vehicles = {}
-pending_saves = {}
-pending_ids = set()
 
 def trigger_horn_event(volume):
     global frame, frame_index
@@ -115,10 +96,10 @@ def trigger_horn_event(volume):
         event = {
             "custom_user_id": 0,
             "detected_at": datetime.now().isoformat(),
-            "speed": None,
-            "plate_number": None,
+            "speed": round(float(speed), 2),
+            "plate_number": violation_plate_text or "unreadable",
             "status": "flagged",
-            "decibel_level": float(volume),
+            "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
             "updated_at": datetime.now().isoformat(),
             "created_at": datetime.now().isoformat(),
         }
@@ -129,35 +110,6 @@ def trigger_horn_event(volume):
     except Exception as e:
         logging.error(f"Failed to log horn event: {e}")
 
-
-def read_audio_chunk(stream, chunk_size):
-    raw_audio = stream.stdout.read(chunk_size)
-    if not raw_audio:
-        return None
-    audio_data = np.frombuffer(raw_audio, np.int16).astype(np.float32) / 32768.0
-    return audio_data
-
-
-def process_audio_volume(audio_data):
-    global horn_timestamps, last_horn_event_time, frame, frame_index, current_frame_volume
-
-    volume = np.linalg.norm(audio_data) / len(audio_data)
-    current_frame_volume = volume  # Store for overlay
-
-    current_time = time.time()
-
-    if volume >= HORN_VOLUME_THRESHOLD:
-        horn_timestamps.append(current_time)
-
-    while horn_timestamps and current_time - horn_timestamps[0] > HORN_WINDOW_SECONDS:
-        horn_timestamps.popleft()
-
-    if (
-        len(horn_timestamps) >= HORN_THRESHOLD
-        and current_time - last_horn_event_time > HORN_WINDOW_SECONDS
-    ):
-        last_horn_event_time = current_time
-        trigger_horn_event(volume)
 
 def detect_and_read_plate(image):
     try:
@@ -180,31 +132,86 @@ def detect_and_read_plate(image):
         logging.error(f"LPR failed: {e}")
     return None, None
 
-while True:    
-    raw_frame = video_process.stdout.read(frame_size)
-    if len(raw_frame) != frame_size:
+
+def audio_loop():
+    global current_frame_volume, last_horn_event_time, horn_timestamps, running
+
+    ffmpeg_audio_cmd = [
+        "ffmpeg",
+        "-rtsp_transport",
+        "tcp",
+        "-i",
+        rtsp_url,
+        "-vn",
+        "-f",
+        "s16le",
+        "-acodec",
+        "pcm_s16le",
+        "-ac",
+        "1",
+        "-ar",
+        str(AUDIO_SAMPLE_RATE),
+        "-loglevel",
+        "quiet",
+        "-",
+    ]
+
+    proc = subprocess.Popen(
+        ffmpeg_audio_cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL
+    )
+
+    while running:
+        raw_audio = proc.stdout.read(CHUNK_BYTES)
+        if not raw_audio:
+            logging.warning("No audio data received.")
+            break
+
+        audio_np = np.frombuffer(raw_audio, dtype=np.int16).astype(np.float32) / 32768.0
+        volume = (np.linalg.norm(audio_np) / len(audio_np)) * 1000
+        current_frame_volume = volume
+
+        logging.debug(f"[AUDIO] Volume: {volume:.2f}")
+        now = time.time()
+
+        if volume >= HORN_VOLUME_THRESHOLD:
+            logging.info(f"[AUDIO] Volume threshold exceeded (volume={volume:.2f})")
+            horn_timestamps.append(now)
+
+        while horn_timestamps and now - horn_timestamps[0] > HORN_WINDOW_SECONDS:
+            horn_timestamps.popleft()
+
+        if (
+            len(horn_timestamps) >= HORN_THRESHOLD
+            and now - last_horn_event_time > HORN_WINDOW_SECONDS
+        ):
+            last_horn_event_time = now
+            logging.info(f"[AUDIO] Horn event triggered (volume={volume:.2f})")
+            trigger_horn_event(volume)
+
+    proc.terminate()
+    proc.wait()
+    logging.info("Audio stream closed.")
+
+
+# Start audio thread
+audio_thread = threading.Thread(target=audio_loop, daemon=True)
+audio_thread.start()
+
+# Main loop
+while True:
+    ret, frame = cap.read()
+    if not ret:
         logging.warning(f"[WARNING] Frame read failed at index {frame_index}.")
         break
-    
-    if(frame_index % 2 == 1):
-        frame_index + 1
-        continue
-    
-    frame = np.frombuffer(raw_frame, np.uint8).reshape((h, w, 3))
 
+    if frame_index % 3 == 1:
+        frame_index += 1
+        continue
 
     gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     fg_mask = motion_detector.apply(gray_frame)
     motion_pixels = cv2.countNonZero(fg_mask)
 
-    samples_per_frame = AUDIO_SAMPLE_RATE / fps  
-    chunk_bytes_per_frame = int(samples_per_frame) * BYTES_PER_SAMPLE
-    
-    audio_data = read_audio_chunk(audio_process, chunk_bytes_per_frame)
-    if audio_data is not None:
-        process_audio_volume(audio_data)
-
-        # Overlay volume text
     label_text = f"Volume: {current_frame_volume:.3f}"
     cv2.putText(
         frame,
@@ -214,7 +221,7 @@ while True:
         1.0,
         (0, 255, 255),
         2,
-        cv2.LINE_AA
+        cv2.LINE_AA,
     )
 
     if motion_pixels > motion_sensitivity:
@@ -238,8 +245,9 @@ while True:
                     0.9,
                     (0, 255, 0),
                     2,
-                    cv2.LINE_AA
+                    cv2.LINE_AA,
                 )
+
         for track_id in list(pending_saves.keys()):
             event, json_path, image_path = pending_saves[track_id]
             cv2.imwrite(image_path, frame)
@@ -249,48 +257,52 @@ while True:
             logged_vehicles[track_id] = frame_index
             del pending_saves[track_id]
             pending_ids.discard(track_id)
-                
+
         for track_id, speed in speed_estimator.spd.items():
-            
-                if speed > SPEED_THRESHOLD:
-                    if track_id in pending_ids:
-                        continue
+            if speed > SPEED_THRESHOLD:
+                if track_id in pending_ids:
+                    continue
+                last_logged = logged_vehicles.get(track_id)
+                if (
+                    last_logged is not None
+                    and (frame_index - last_logged) <= COOLDOWN_FRAMES
+                ):
+                    continue
 
-                    last_logged = logged_vehicles.get(track_id)
-                    if last_logged is not None and (frame_index - last_logged) <= COOLDOWN_FRAMES:
-                        continue
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename_base = f"event_{frame_index}_id{track_id}_{timestamp}"
+                json_path = os.path.join(output_dir, filename_base + ".json")
+                image_path = os.path.join(output_dir, filename_base + ".jpg")
 
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    filename_base = f"event_{frame_index}_id{track_id}_{timestamp}"
-                    json_path = os.path.join(output_dir, filename_base + ".json")
-                    image_path = os.path.join(output_dir, filename_base + ".jpg")
+                violation_plate_text, _ = detect_and_read_plate(frame)
 
-                    violation_plate_text, _ = detect_and_read_plate(frame)
+                event = {
+                    "custom_user_id": 0,
+                    "detected_at": datetime.now().isoformat(),
+                    "speed": round(float(speed), 2),
+                    "plate_number": violation_plate_text or "unreadable",
+                    "status": "flagged",
+                    "decibel_level": math.trunc(
+                        round(float(current_frame_volume), 3) * 1000
+                    )
+                    / 10,
+                    "updated_at": datetime.now().isoformat(),
+                    "created_at": datetime.now().isoformat(),
+                }
 
-                    event = {
-                        "custom_user_id": 0,
-                        "detected_at": datetime.now().isoformat(),
-                        "speed": round(float(speed), 2),
-                        "plate_number": violation_plate_text or "unreadable",
-                        "status": "flagged",
-                        "decibel_level": 0,
-                        "updated_at": datetime.now().isoformat(),
-                        "created_at": datetime.now().isoformat(),
-                    }
-
-                    pending_saves[track_id] = (event, json_path, image_path)
-                    pending_ids.add(track_id)
+                pending_saves[track_id] = (event, json_path, image_path)
+                pending_ids.add(track_id)
 
     else:
         logging.debug(
             f"No significant motion or inference skipped at frame {frame_index}."
         )
 
-
     frame_index += 1
 
-video_process.terminate()
-video_process.wait()
-audio_process.terminate()
-audio_process.wait()
+# Cleanup
+running = False
+cap.release()
 cv2.destroyAllWindows()
+audio_thread.join()
+logging.info("Processing terminated.")
