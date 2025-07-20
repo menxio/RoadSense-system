@@ -52,7 +52,7 @@ const Header = ({ onToggleSidebar }) => {
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <NotificationBell />
-          <AvatarNavDropdown user={user} />
+          <AvatarNavDropdown />
         </Box>
       </Toolbar>
     </AppBar>

@@ -29,6 +29,7 @@ class User extends Model implements AuthenticatableContract
         'vehicle_type',
         'vehicle_color',
         'position',
+        'avatarUrl',
     ];
 
     protected $hidden = [

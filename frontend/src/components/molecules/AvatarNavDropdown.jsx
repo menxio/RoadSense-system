@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -14,9 +15,14 @@ import {
   Logout as LogoutIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { fetchUserProfile } from "@/redux/slices/userSlice";
 
-const AvatarNavDropdown = ({ user = {} }) => {
+const API_URL = `${import.meta.env.VITE_APP_URL}` || "";
+
+const AvatarNavDropdown = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.user);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -57,10 +63,26 @@ const AvatarNavDropdown = ({ user = {} }) => {
     return "U";
   };
 
+  const getAvatarSrc = () => {
+    if (user?.avatarUrl) {
+      if (user.avatarUrl.startsWith("blob:")) {
+        return user.avatarUrl;
+      }
+      return `${API_URL}/storage/${user.avatarUrl}`;
+    }
+    return "";
+  };
+
   const displayName =
     user.firstName && user.lastName
       ? `${user.firstName} ${user.lastName}`
       : user.name || "User";
+
+  useEffect(() => {
+    if (!user.name) {
+      dispatch(fetchUserProfile());
+    }
+  }, [dispatch, user.name]);
 
   return (
     <Box>
@@ -84,6 +106,7 @@ const AvatarNavDropdown = ({ user = {} }) => {
           </Typography>
         </Box>
         <Avatar
+          src={getAvatarSrc()}
           sx={{
             bgcolor: "#6C63FF",
             color: "white",
@@ -91,7 +114,7 @@ const AvatarNavDropdown = ({ user = {} }) => {
             height: 40,
           }}
         >
-          {getInitials()}
+          {!user.avatarUrl && getInitials()}
         </Avatar>
       </Box>
 

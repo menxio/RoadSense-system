@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Typography,
@@ -19,6 +19,18 @@ import Sidebar from "@/components/organisms/Sidebar";
 import Header from "@/components/organisms/Header";
 import { getViolationById } from "@/services/violation.service";
 import { fetchUserProfile } from "@/redux/slices/userSlice";
+import {
+  Chart,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+
+Chart.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
   const dispatch = useDispatch();
@@ -34,6 +46,7 @@ const Dashboard = () => {
   });
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [apiError, setApiError] = useState(null);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -45,6 +58,16 @@ const Dashboard = () => {
     const fetchViolations = async () => {
       try {
         const res = await getViolationById(user.custom_id);
+        if (!res) {
+          setApiError("No violation data found for this user.");
+          setDashboardData({
+            todaysViolationsCount: 0,
+            totalViolationsCount: 0,
+            offenseLevel: 0,
+            violations: [],
+          });
+          return;
+        }
         const flaggedCount = res.violations.filter(
           (v) => v.status === "flagged" || v.status === "under review"
         ).length;
@@ -56,8 +79,15 @@ const Dashboard = () => {
           offenseLevel,
           violations: res.violations || [],
         });
+        setApiError(null);
       } catch (error) {
-        console.error("Failed to fetch violations:", error);
+        setApiError("Failed to fetch violations. Please try again later.");
+        setDashboardData({
+          todaysViolationsCount: 0,
+          totalViolationsCount: 0,
+          offenseLevel: 0,
+          violations: [],
+        });
       }
     };
 
@@ -333,7 +363,17 @@ const Dashboard = () => {
                 </Box>
               </Box>
               <Box sx={{ p: 3, height: 400 }}>
-                <MonthlyViolationsChartInline data={chartData} />
+                {apiError ? (
+                  <Typography color="error" align="center">
+                    {apiError}
+                  </Typography>
+                ) : chartData.labels && chartData.labels.length > 0 ? (
+                  <MonthlyViolationsChartInline data={chartData} />
+                ) : (
+                  <Typography align="center" color="text.secondary">
+                    No chart data available
+                  </Typography>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -353,91 +393,54 @@ const LegendItem = ({ color, label }) => (
 );
 
 const MonthlyViolationsChartInline = ({ data }) => {
-  useEffect(() => {
-    let chart;
-    if (typeof window !== "undefined") {
-      import("chart.js").then(
-        ({
-          Chart,
-          CategoryScale,
-          LinearScale,
-          BarElement,
-          Title,
-          Tooltip,
-          Legend,
-        }) => {
-          Chart.register(
-            CategoryScale,
-            LinearScale,
-            BarElement,
-            Title,
-            Tooltip,
-            Legend
-          );
-          const ctx = document.getElementById("violationsChart");
-          if (ctx) {
-            if (chart) chart.destroy();
-            chart = new Chart(ctx, {
-              type: "bar",
-              data: {
-                labels: data.labels,
-                datasets: [
-                  {
-                    label: "Speed Violations",
-                    data: data.speedData,
-                    backgroundColor: "rgba(239, 68, 68, 0.7)",
-                    borderColor: "rgba(239, 68, 68, 1)",
-                    borderWidth: 1,
-                  },
-                  {
-                    label: "Noise Violations",
-                    data: data.noiseData,
-                    backgroundColor: "rgba(245, 158, 11, 0.7)",
-                    borderColor: "rgba(245, 158, 11, 1)",
-                    borderWidth: 1,
-                  },
-                ],
-              },
-              options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                  legend: { display: true },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      precision: 0,
-                    },
-                    grid: {
-                      drawBorder: false,
-                      color: "rgba(0, 0, 0, 0.05)",
-                    },
-                  },
-                  x: {
-                    grid: {
-                      display: false,
-                    },
-                  },
-                },
-              },
-            });
-          }
-        }
-      );
-    }
-
-    return () => {
-      if (chart) chart.destroy();
-    };
-  }, [data]);
-
+  // Prepare chart.js data and options
+  const chartData = {
+    labels: data.labels,
+    datasets: [
+      {
+        label: "Speed Violations",
+        data: data.speedData,
+        backgroundColor: "rgba(239, 68, 68, 0.7)",
+        borderColor: "rgba(239, 68, 68, 1)",
+        borderWidth: 1,
+      },
+      {
+        label: "Noise Violations",
+        data: data.noiseData,
+        backgroundColor: "rgba(245, 158, 11, 0.7)",
+        borderColor: "rgba(245, 158, 11, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+        },
+        grid: {
+          drawBorder: false,
+          color: "rgba(0, 0, 0, 0.05)",
+        },
+      },
+      x: {
+        grid: {
+          display: false,
+        },
+      },
+    },
+  };
   return (
-    <canvas
-      id="violationsChart"
-      style={{ width: "100%", height: "100%" }}
-    ></canvas>
+    <div style={{ width: "100%", height: "100%" }}>
+      <Bar data={chartData} options={options} />
+    </div>
   );
 };
 

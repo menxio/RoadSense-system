@@ -15,6 +15,9 @@ export const getViolationById = async (id) => {
     const response = await api.get(`/violations/${id}`);
     return response.data;
   } catch (error) {
+    if (error.response && error.response.status === 404) {
+      return null;
+    }
     console.error(`Error fetching violation with ID ${id}:`, error);
     throw error;
   }

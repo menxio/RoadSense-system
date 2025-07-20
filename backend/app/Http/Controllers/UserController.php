@@ -60,18 +60,28 @@ class UserController extends Controller
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
             'password' => 'sometimes|string|min:8',
+            'phone_number' => 'sometimes|string|max:20',
             'plate_number' => 'sometimes|string|max:20',
             'role' => 'sometimes|string|in:user,admin',
             'status' => 'sometimes|string|in:pending,active,suspended',
+            'avatar' => 'sometimes|file|image|max:5120',
         ]);
+
+        if ($request->hasFile('avatar')) {
+            $avatar = $request->file('avatar');
+            $filePath = $avatar->store('avatars', 'public');
+            $validated['avatarUrl'] = $filePath;
+        }
 
         $user->update([
             'name' => $validated['name'] ?? $user->name,
             'email' => $validated['email'] ?? $user->email,
             'password' => isset($validated['password']) ? bcrypt($validated['password']) : $user->password,
+            'phone_number' => $validated['phone_number'] ?? $user->phone_number,
             'plate_number' => $validated['plate_number'] ?? $user->plate_number,
             'role' => $validated['role'] ?? $user->role,
             'status' => $validated['status'] ?? $user->status,
+            'avatarUrl' => $validated['avatarUrl'] ?? $user->avatarUrl,
         ]);
     
         return response()->json(['message' => 'User updated successfully', 'user' => $user]);

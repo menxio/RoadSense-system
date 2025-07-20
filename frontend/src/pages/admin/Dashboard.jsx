@@ -91,7 +91,11 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fa" }}>
-      <Sidebar open={mobileOpen} onClose={handleDrawerToggle} role={user.role} />
+      <Sidebar
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        role={user.role}
+      />
 
       <Box
         component="main"
@@ -135,7 +139,7 @@ const Dashboard = () => {
             <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Today's Violations"
-                value={stats.todayViolations}
+                value={loading ? "..." : stats.todayViolations}
                 icon={<CalendarIcon fontSize="large" />}
                 color="primary"
               />
@@ -143,7 +147,7 @@ const Dashboard = () => {
             <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Total Driver's Listed"
-                value={stats.totalUsers}
+                value={loading ? "..." : stats.totalUsers}
                 icon={<GroupIcon fontSize="large" />}
                 color="success"
               />
@@ -151,7 +155,7 @@ const Dashboard = () => {
             <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Total Traffic Violations"
-                value={stats.totalViolations}
+                value={loading ? "..." : stats.totalViolations}
                 icon={<WarningIcon fontSize="large" />}
                 color="warning"
               />
@@ -159,7 +163,7 @@ const Dashboard = () => {
             <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Speed Violations"
-                value={stats.speedViolations}
+                value={loading ? "..." : stats.speedViolations}
                 icon={<SpeedIcon fontSize="large" />}
                 color="error"
               />
@@ -167,7 +171,7 @@ const Dashboard = () => {
             <Grid item xs={12} sm={6} md={3}>
               <StatCard
                 title="Noise Violations"
-                value={stats.noiseViolations}
+                value={loading ? "..." : stats.noiseViolations}
                 icon={<VolumeUpIcon fontSize="large" />}
                 color="info"
               />
@@ -177,10 +181,18 @@ const Dashboard = () => {
           {/* Charts Section */}
           <Grid container spacing={3} sx={{ mb: 4 }}>
             <Grid item xs={12} md={6}>
-              <ChartCard title="Violation Distribution" />
+              <ChartCard title="Violation Distribution">
+                <Typography align="center" color="text.secondary">
+                  Chart data will be displayed here
+                </Typography>
+              </ChartCard>
             </Grid>
             <Grid item xs={12} md={6}>
-              <ChartCard title="Monthly Violations" />
+              <ChartCard title="Monthly Violations">
+                <Typography align="center" color="text.secondary">
+                  Chart data will be displayed here
+                </Typography>
+              </ChartCard>
             </Grid>
           </Grid>
 

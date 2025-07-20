@@ -36,7 +36,7 @@ import {
 } from "@mui/icons-material";
 import { updateUser } from "@/services/user.service";
 
-const UserDetailsModal = ({ open, onClose, user, apiUrl, onUpdateStatus }) => {
+const UserDetailsModal = ({ open, onClose, user, onUpdateStatus }) => {
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
@@ -44,6 +44,7 @@ const UserDetailsModal = ({ open, onClose, user, apiUrl, onUpdateStatus }) => {
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const apiUrl = `${import.meta.env.VITE_APP_URL}`;
   const theme = useTheme();
 
   if (!user) return null;

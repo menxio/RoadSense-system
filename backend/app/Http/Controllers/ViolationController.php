@@ -79,7 +79,11 @@ class ViolationController extends Controller
         $violations = Violation::where('custom_user_id', $customUserId)->get();
 
         if ($violations->isEmpty()) {
-            return response()->json(['message' => 'No violations found for this user'], 404);
+            return response()->json([
+                'violations' => [],
+                'todays_violations_count' => 0,
+                'total_violations_count' => 0,
+            ], 200);
         }
 
         $startOfToday = Carbon::now()->startOfDay()->toIso8601String();

@@ -4,6 +4,11 @@ import api from "@/utils/api";
 const initialState = {
   custom_id: "",
   name: "",
+  school_id: "",
+  avatarUrl: "",
+  plate_number: "",
+  vehicle_color: "",
+  vehicle_type: "",
   email: "",
   role: "",
   loading: false,
@@ -57,7 +62,13 @@ const userSlice = createSlice({
         state.name = action.payload.name;
         state.email = action.payload.email;
         state.role = action.payload.role;
-        state.custom_id = action.payload.custom_id; 
+        state.custom_id = action.payload.custom_id;
+        state.phone_number = action.payload.phone_number;
+        state.avatarUrl = action.payload.avatarUrl;
+        state.plate_number = action.payload.plate_number;
+        state.vehicle_color = action.payload.vehicle_color;
+        state.vehicle_type = action.payload.vehicle_type;
+        state.school_id = action.payload.school_id;
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
