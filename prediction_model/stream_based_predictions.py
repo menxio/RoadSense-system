@@ -94,10 +94,10 @@ def trigger_horn_event(volume):
         cv2.imwrite(image_path, frame)
 
         event = {
-            "custom_user_id": 0,
+            "custom_user_id": "0",
             "detected_at": datetime.now().isoformat(),
-            "speed": round(float(speed), 2),
-            "plate_number": violation_plate_text or "unreadable",
+            "speed": 0,
+            "plate_number": "N/A",
             "status": "flagged",
             "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
             "updated_at": datetime.now().isoformat(),
@@ -277,7 +277,7 @@ while True:
                 violation_plate_text, _ = detect_and_read_plate(frame)
 
                 event = {
-                    "custom_user_id": 0,
+                    "custom_user_id": "0",
                     "detected_at": datetime.now().isoformat(),
                     "speed": round(float(speed), 2),
                     "plate_number": violation_plate_text or "unreadable",

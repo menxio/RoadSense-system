@@ -20,10 +20,10 @@ const RaspiCamViewer = () => {
             height: "100%",
           }}
         >
-          <Sidebar collapsedProp={collapsed} setCollapsedProp={setCollapsed} />
+          <Sidebar collapsedProp={collapsed} setCollapsedProp={setCollapsed} role={"admin"} />
         </div>
         <iframe
-          src={`${import.meta.env.VITE_RTSP_STREAM_ADDRESS}/cam`}
+          src={`${import.meta.env.VITE_RTSP_STREAM_ADDRESS}`}
           style={{
             flex: 1,
             height: "100%",

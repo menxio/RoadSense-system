@@ -49,7 +49,7 @@ const Sidebar = ({ open = true, onClose, role, title = "App", logo = "/img/logo.
   // Define nav items based on the role (admin or user)
   const adminNavItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
-    { text: 'Live Cam', icon: <VideocamIcon />, path: '/admin/camera' },
+    { text: 'Live Cam', icon: <VideocamIcon />, path: '/admin/live' },
     { text: 'Manage Violations', icon: <WarningIcon />, path: '/admin/violations' },
     { text: 'Manage Users', icon: <PeopleIcon />, path: '/admin/users' },
     { text: 'Reports', icon: <AssessmentIcon />, path: '/admin/reports' },

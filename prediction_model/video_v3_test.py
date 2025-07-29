@@ -15,7 +15,7 @@ import math
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
 # cap = cv2.VideoCapture(rtsp_url)
-video = "videos/highway.mp4"
+video = "videos/4.mp4"
 
 cap = cv2.VideoCapture(video, cv2.CAP_FFMPEG)
 assert cap.isOpened(), "Error reading video file."
@@ -47,7 +47,6 @@ speed_estimator = speed_estimation.SpeedEstimator(
 )
 plate_detector = YOLO("license_plate_detector_openvino_model")
 ocr_reader = easyocr.Reader(["en"], gpu=False)
-
 # params
 frame_index = 0
 SPEED_THRESHOLD = 20.0
@@ -172,41 +171,33 @@ def process_audio_volume(audio_data):
 
 def detect_and_read_plate(image):
     try:
-        plate_results = plate_detector(image, verbose=False)[0]
+        plate_results = plate_detector(image, imgsz=640, verbose=False)[0]
         for box in plate_results.boxes:
             x1, y1, x2, y2 = map(int, box.xyxy[0].tolist())
             plate_region = image[y1:y2, x1:x2]
-
-            # print("plate region size: ", plate_region)
             if plate_region.size == 0:
                 continue
 
-            gray_plate = cv2.cvtColor(plate_region, cv2.COLOR_BGR2GRAY)
-
-            # _, plate_bin = cv2.threshold(
-            #     gray_plate, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU
-            # )
-            plate_bin = cv2.adaptiveThreshold(
-                gray_plate,
-                255,
-                cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                cv2.THRESH_BINARY_INV,
-                15,  # blockSize (odd)
-                4,  # C (subtract)
+            # Preprocess
+            gray = cv2.cvtColor(plate_region, cv2.COLOR_BGR2GRAY)
+            bin_img = cv2.adaptiveThreshold(
+                gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 17, 3
             )
-            # _, license_plate_crop_thresh = cv2.threshold(
-            #     gray_plate, 150, 255, cv2.THRESH_BINARY_INV
-            # )
-            ocr_results = ocr_reader.readtext(plate_bin)
-            print("ocr results: ", ocr_results)
-            for result in ocr_results:
-                bbox, text, conf = result
-                # text = result[1].strip()
-                conf = round(conf * 100, 1)
-                text = text.strip()
-                if 5 <= len(text) <= 12:
-                    # return text, (x1, y1, x2, y2)
-                    return text, (x1, y1, x2, y2), conf
+
+            # OCR
+            ocr_results = ocr_reader.readtext(bin_img)
+            valid_plates = []
+            for bbox, text, conf in ocr_results:
+                text = text.strip().upper()
+                text = "".join(filter(str.isalnum, text))
+                if 4 <= len(text) <= 12 and conf >= 0.3:
+                    valid_plates.append((text, conf))
+
+            if valid_plates:
+                valid_plates.sort(key=lambda x: -x[1])
+                best_text, best_conf = valid_plates[0]
+                return best_text, (x1, y1, x2, y2), round(best_conf * 100, 1)
+
     except Exception as e:
         logging.error(f"LPR failed: {e}")
     return None, None, None
