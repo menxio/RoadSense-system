@@ -15,7 +15,7 @@ import math
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
 # cap = cv2.VideoCapture(rtsp_url)
-video = "videos/4.mp4"
+video = "Video_6.mp4"
 
 cap = cv2.VideoCapture(video, cv2.CAP_FFMPEG)
 assert cap.isOpened(), "Error reading video file."
@@ -55,7 +55,7 @@ HORN_THRESHOLD = 3
 HORN_WINDOW_SECONDS = 5
 AUDIO_SAMPLE_RATE = 16000
 AUDIO_BLOCK_DURATION = 0.5  # seconds
-HORN_VOLUME_THRESHOLD = 0.8
+HORN_VOLUME_THRESHOLD = -45.0
 AUDIO_CHUNK_SIZE = AUDIO_SAMPLE_RATE // 2
 BYTES_PER_SAMPLE = 2
 CHUNK_BYTES = AUDIO_CHUNK_SIZE * BYTES_PER_SAMPLE
@@ -107,36 +107,28 @@ logging.basicConfig(
 logged_vehicles = {}
 pending_saves = {}
 pending_ids = set()
+pending_horn_event = None
 
 
 def trigger_horn_event(volume):
-    global frame, frame_index
-    try:
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename_base = f"horn_event_{frame_index}_{timestamp}"
-        json_path = os.path.join(output_dir, filename_base + ".json")
-        image_path = os.path.join(output_dir, filename_base + ".jpg")
-        cv2.imwrite(image_path, frame)
+    global frame_index, pending_horn_event
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename_base = f"horn_event_{frame_index}_{timestamp}"
+    json_path = os.path.join(output_dir, filename_base + ".json")
+    image_path = os.path.join(output_dir, filename_base + ".jpg")
 
-        # violation_plate_text, _ = detect_and_read_plate(frame)
-        # best_plate, _ = best_plates.get(track_id, (None, 0))
+    event = {
+        "custom_user_id": "0",
+        "detected_at": datetime.now().isoformat(),
+        "speed": "0",
+        "plate_number": "N/A",
+        "status": "flagged",
+        "decibel_level": round(float(volume), 1),
+        "updated_at": datetime.now().isoformat(),
+        "created_at": datetime.now().isoformat(),
+    }
 
-        event = {
-            "custom_user_id": "0",
-            "detected_at": datetime.now().isoformat(),
-            "speed": "0",
-            "plate_number": "N/A",
-            "status": "flagged",
-            "decibel_level": math.trunc(round(float(volume), 3) * 1000) / 10,
-            "updated_at": datetime.now().isoformat(),
-            "created_at": datetime.now().isoformat(),
-        }
-
-        with open(json_path, "w") as f:
-            json.dump(event, f, indent=4)
-        logging.info(f"Horn Event Logged: {event}")
-    except Exception as e:
-        logging.error(f"Failed to log horn event: {e}")
+    pending_horn_event = (event, json_path, image_path)
 
 
 def read_audio_chunk(stream, chunk_size):
@@ -151,11 +143,11 @@ def process_audio_volume(audio_data):
     global horn_timestamps, last_horn_event_time, frame, frame_index, current_frame_volume
 
     volume = np.linalg.norm(audio_data) / len(audio_data)
-    current_frame_volume = volume  # Store for overlay
+    current_frame_volume = 20 * np.log10(volume + 1e-6)
 
     current_time = time.time()
 
-    if volume >= HORN_VOLUME_THRESHOLD:
+    if current_frame_volume >= HORN_VOLUME_THRESHOLD:
         horn_timestamps.append(current_time)
 
     while horn_timestamps and current_time - horn_timestamps[0] > HORN_WINDOW_SECONDS:
@@ -166,7 +158,7 @@ def process_audio_volume(audio_data):
         and current_time - last_horn_event_time > HORN_WINDOW_SECONDS
     ):
         last_horn_event_time = current_time
-        trigger_horn_event(volume)
+        trigger_horn_event(current_frame_volume)
 
 
 def detect_and_read_plate(image):
@@ -221,7 +213,7 @@ while True:
         process_audio_volume(audio_data)
 
         # Overlay volume text
-    label_text = f"Volume: {(current_frame_volume * 100):.3f}"
+    label_text = f"Volume: {(current_frame_volume):.3f}"
     cv2.putText(
         frame,
         label_text,
@@ -320,16 +312,21 @@ while True:
                     "speed": round(float(speed), 2),
                     "plate_number": license_plate_text or "unreadable",
                     "status": "flagged",
-                    "decibel_level": math.trunc(
-                        round(float(current_frame_volume), 3) * 1000
-                    )
-                    / 10,
+                    "decibel_level": round(float(current_frame_volume), 1),
                     "updated_at": datetime.now().isoformat(),
                     "created_at": datetime.now().isoformat(),
                 }
 
                 pending_saves[track_id] = (event, json_path, image_path)
                 pending_ids.add(track_id)
+
+        if pending_horn_event:
+            event, json_path, image_path = pending_horn_event
+            cv2.imwrite(image_path, frame)
+            with open(json_path, "w") as f:
+                json.dump(event, f, indent=4)
+            logging.info(f"Horn Event Logged: {event}")
+            pending_horn_event = None
 
     else:
         logging.debug(
