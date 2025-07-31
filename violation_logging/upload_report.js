@@ -4,11 +4,12 @@ import fs from "fs"
 import mongoose from "mongoose"
 import chokidar from "chokidar"
 import dotenv from "dotenv"
+import { fileURLToPath } from "url"
 dotenv.config()
 
 const app = express()
 const PORT = 3000
-const __dirname = path.dirname(new URL(import.meta.url).pathname)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const EVENTS_DIR = path.join(__dirname, "speed_events")
 const MAX_FILES = 10
 
