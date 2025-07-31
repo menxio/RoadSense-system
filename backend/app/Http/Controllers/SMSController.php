@@ -110,31 +110,46 @@ class SMSController extends Controller
 
             $responseBody = $response->json();
 
-            if ($response->successful() && isset($responseBody[0]['status']) && $responseBody[0]['status'] === 'Success') {
-                Log::info('Violation SMS sent successfully via Semaphore', [
+            if ($response->successful() && is_array($responseBody) && isset($responseBody[0]['status'])) {
+                if (in_array($responseBody[0]['status'], ['Success', 'Pending'])) {
+                    Log::info('Violation SMS sent or pending via Semaphore', [
+                        'custom_id' => $user->custom_id,
+                        'phone' => $user->phone_number,
+                        'violation_type' => $request->violation_type,
+                        'offense_count' => $request->offense_count,
+                        'timestamp' => $request->timestamp,
+                        'response' => $responseBody
+                    ]);
+                    return response()->json([
+                        'message' => 'Violation SMS sent or pending via Semaphore',
+                        'data' => $responseBody
+                    ]);
+                } else {
+                    Log::warning('Semaphore responded but status not Success/Pending', [
+                        'custom_id' => $user->custom_id,
+                        'phone' => $user->phone_number,
+                        'violation_type' => $request->violation_type,
+                        'offense_count' => $request->offense_count,
+                        'timestamp' => $request->timestamp,
+                        'response' => $responseBody
+                    ]);
+                    return response()->json([
+                        'message' => 'Semaphore responded but status not Success/Pending: ' . ($responseBody[0]['message'] ?? 'Unknown error'),
+                        'details' => $responseBody
+                    ], 200);
+                }
+            } else {
+                Log::error('Unexpected Semaphore response structure', [
                     'custom_id' => $user->custom_id,
                     'phone' => $user->phone_number,
                     'violation_type' => $request->violation_type,
                     'offense_count' => $request->offense_count,
                     'timestamp' => $request->timestamp,
-                    'response' => $responseBody
-                ]);
-
-                return response()->json([
-                    'message' => 'Violation SMS sent successfully via Semaphore',
-                    'data' => $responseBody
-                ]);
-            } else {
-                Log::error('Failed to send violation SMS via Semaphore', [
-                    'custom_id' => $user->custom_id,
-                    'phone' => $user->phone_number,
-                    'error' => $responseBody[0]['message'] ?? 'Unknown error',
                     'response' => $responseBody,
                     'status_code' => $response->status()
                 ]);
-
                 return response()->json([
-                    'message' => 'Failed to send violation SMS via Semaphore: ' . ($responseBody[0]['message'] ?? 'Unknown error'),
+                    'message' => 'Unexpected Semaphore response structure',
                     'details' => $responseBody
                 ], $response->status());
             }

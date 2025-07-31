@@ -142,6 +142,27 @@ class ViolationController extends Controller
             return response()->json(['message' => 'User not found']);
         }
 
+        // Send SMS if violation is cleared
+        if ($violation->status === 'cleared') {
+            $message = "Your violation (ID: {$violation->id}) has been cleared. Thank you for your cooperation.";
+            try {
+                if ($user->phone_number) {
+                    $smsController = new \App\Http\Controllers\SMSController();
+                    $smsRequest = new \Illuminate\Http\Request([
+                        'to' => $user->phone_number,
+                        'message' => $message,
+                    ]);
+                    $smsController->sendSMS($smsRequest);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send cleared violation SMS', [
+                    'user_id' => $user->id ?? null,
+                    'violation_id' => $violation->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         Log::info('About to notify user on update', ['user_id' => $user->id, 'custom_id' => $user->custom_id, 'violation_id' => $violation->id]);
         $user->notify(new RealTimeNotification([
             'title' => 'Violation Update',
