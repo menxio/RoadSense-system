@@ -71,7 +71,7 @@ async function uploadEventToDatabase(filePath) {
       const normalizedPlate = event.plate_number
         .toUpperCase()
         .replace(/\s+/g, "")
-        .replace(/^([A-Z]+)(\d+)$/, "$1-$2")
+        .replace(/^([A-Z]+)(\d+)$/, "$1 $2")
 
       event.plate_number = normalizedPlate
 
