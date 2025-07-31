@@ -281,7 +281,7 @@ while True:
                                 (overlay_left, overlay_top - 10),
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 0.7,
-                                (0, 255, 255),  # Yellow
+                                (0, 255, 0),  # Yellow
                                 2,
                                 cv2.LINE_AA,
                             )
