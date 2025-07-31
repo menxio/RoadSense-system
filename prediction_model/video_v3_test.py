@@ -49,7 +49,7 @@ plate_detector = YOLO("license_plate_detector_openvino_model")
 ocr_reader = easyocr.Reader(["en"], gpu=False)
 # params
 frame_index = 0
-SPEED_THRESHOLD = 20.0
+SPEED_THRESHOLD = 10.0
 COOLDOWN_FRAMES = 50
 HORN_THRESHOLD = 3
 HORN_WINDOW_SECONDS = 5
