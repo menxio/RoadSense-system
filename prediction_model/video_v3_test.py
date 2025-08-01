@@ -85,7 +85,7 @@ audio_process = subprocess.Popen(
 )
 
 # report output directory
-output_dir = "../violation_logging/speed_events"
+output_dir = "../backend/storage/app/public/violation_images"
 os.makedirs(output_dir, exist_ok=True)
 
 # motion detection
