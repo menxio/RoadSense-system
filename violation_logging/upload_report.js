@@ -75,12 +75,21 @@ async function uploadEventToDatabase(filePath) {
 
       event.plate_number = normalizedPlate
 
-      const regexPlate = new RegExp(normalizedPlate.replace(/\s+/g, ""), "i")
+      console.log("Normalized:", normalizedPlate)
 
-      // Lookup user
+      // Use regex with space, but escape special characters
+      const regexPlate = new RegExp(
+        `^${normalizedPlate.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")}$`,
+        "i"
+      )
+
+      console.log("Regex:", regexPlate)
+
       const user = await User.findOne({
         plate_number: { $regex: regexPlate },
       })
+      console.log("User:", user)
+
       event.custom_user_id = user?.custom_id
     } else {
       event.custom_user_id = 0
