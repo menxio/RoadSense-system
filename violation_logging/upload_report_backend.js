@@ -10,7 +10,13 @@ dotenv.config()
 const app = express()
 const PORT = 3000
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const EVENTS_DIR = path.join(__dirname, "speed_events")
+console.log({ __dirname })
+const EVENTS_DIR = path.join(
+  __dirname,
+  "../backend/storage/app/public/violation_images"
+)
+console.log({ EVENTS_DIR })
+
 const MAX_FILES = 10
 
 const MONGO_URI = process.env.MONGODB_URI
@@ -24,6 +30,7 @@ const violationSchema = new mongoose.Schema({
   plate_number: String,
   updated_at: Date,
   created_at: Date,
+  violation_image_path: String,
 })
 
 const Violation = mongoose.model("Violation", violationSchema)
@@ -94,55 +101,21 @@ async function uploadEventToDatabase(filePath) {
     } else {
       event.custom_user_id = 0
     }
-
     const basename = path.basename(filePath, ".json")
-    // const imagePath = path.join(EVENTS_DIR, `${basename}.jpg`)
+    console.log({ basename })
 
-    // let imageBuffer = null
-
-    // if (fs.existsSync(imagePath)) {
-    //   imageBuffer = fs.readFileSync(imagePath)
-    // } else {
-    //   console.warn(`[WARN] Image file not found for: ${basename}`)
-    // }
+    event.violation_image_path = `/storage/app/public/violation_images/${basename}.jpg`
+    console.log(event.violation_image_path)
 
     const newEvent = new Violation(event)
 
-    // const newEventImg = new EventImage({
-    //   event_id: newEvent._id,
-    //   Image: imageBuffer,
-    // })
-
     await newEvent.save()
-
-    // if (imageBuffer) {
-    //   await newEventImg.save()
-    // }
 
     console.log(`[DB] Uploaded event: ${basename}`)
   } catch (err) {
     console.error(`[ERROR] Failed to upload event: ${err.message}`)
   }
 }
-
-// Keep only the 10 most recent files
-// function trimOldFiles() {
-//   const files = fs
-//     .readdirSync(EVENTS_DIR)
-//     .map((file) => ({
-//       name: file,
-//       time: fs.statSync(path.join(EVENTS_DIR, file)).mtime.getTime(),
-//     }))
-//     .sort((a, b) => b.time - a.time)
-
-//   if (files.length > MAX_FILES) {
-//     const filesToDelete = files.slice(MAX_FILES)
-//     for (const file of filesToDelete) {
-//       fs.unlinkSync(path.join(EVENTS_DIR, file.name))
-//       console.log(`[CLEANUP] Deleted old file: ${file.name}`)
-//     }
-//   }
-// }
 
 // Start server
 app.listen(PORT, async () => {
@@ -163,11 +136,7 @@ app.listen(PORT, async () => {
       if (filePath.endsWith(".json")) {
         console.log(`[WATCHER] New file detected: ${filePath}`)
         await uploadEventToDatabase(filePath)
-        trimOldFiles()
+        // trimOldFiles()
       }
     })
-})
-
-app.get("/", (req, res) => {
-  res.send("Speed Event Monitor Running")
 })
