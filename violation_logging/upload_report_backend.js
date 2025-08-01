@@ -104,7 +104,7 @@ async function uploadEventToDatabase(filePath) {
     const basename = path.basename(filePath, ".json")
     console.log({ basename })
 
-    event.violation_image_path = `/storage/app/public/violation_images/${basename}.jpg`
+    event.violation_image_path = `/violation_images/${basename}.jpg`
     console.log(event.violation_image_path)
 
     const newEvent = new Violation(event)
