@@ -75,8 +75,12 @@ async function uploadEventToDatabase(filePath) {
 
       event.plate_number = normalizedPlate
 
+      const regexPlate = new RegExp(normalizedPlate.replace(/\s+/g, ""), "i")
+
       // Lookup user
-      const user = await User.findOne({ plate_number: normalizedPlate })
+      const user = await User.findOne({
+        plate_number: { $regex: regexPlate },
+      })
       event.custom_user_id = user?.custom_id
     } else {
       event.custom_user_id = 0
