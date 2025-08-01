@@ -15,7 +15,7 @@ import math
 # initialize video capture
 # rtsp_url = "rtsp://RoadsenseAdmin:RoadSense@172.20.10.5:554/stream1"
 # cap = cv2.VideoCapture(rtsp_url)
-video = "Video_6.mp4"
+video = "KAU7381.mp4"
 
 cap = cv2.VideoCapture(video, cv2.CAP_FFMPEG)
 assert cap.isOpened(), "Error reading video file."

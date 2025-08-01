@@ -58,7 +58,7 @@ const ViolationsTable = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const apiUrl = "http://backend.test";
+  const apiUrl = `${import.meta.env.VITE_APP_URL}`;
 
   useEffect(() => {
     fetchViolations();
@@ -408,7 +408,7 @@ const ViolationsTable = () => {
                   color="primary"
                   startIcon={<DownloadIcon />}
                   component="a"
-                  href={`http://backend.test/storage/${selectedViolation.letter_path}`}
+                  href={apiUrl+ `/storage/${selectedViolation.letter_path}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
