@@ -54,6 +54,8 @@ const ViolationsTable = () => {
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertSeverity, setAlertSeverity] = useState("info");
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [selectedImageViolation, setSelectedImageViolation] = useState(null);
   // Pagination state
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -264,8 +266,12 @@ const ViolationsTable = () => {
       </TableCell>
       <TableCell>
         <Stack direction="row" spacing={1}>
-          <Tooltip title="View Details">
-            <IconButton size="small" color="primary">
+          <Tooltip title="View Event Image">
+            <IconButton
+              size="small"
+              color="info"
+              onDoubleClick={() => handleOpenImageDialog(violation)}
+            >
               <VisibilityIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -274,7 +280,7 @@ const ViolationsTable = () => {
               <IconButton
                 size="small"
                 color="secondary"
-                onClick={() => handleOpenDialog(violation)}
+                onClick={() => handleOpenDialog(violation)} 
               >
                 <DownloadIcon fontSize="small" />
               </IconButton>
@@ -309,6 +315,16 @@ const ViolationsTable = () => {
     },
     { value: "cleared", label: "Cleared", count: violationCounts.cleared },
   ];
+
+  const handleOpenImageDialog = (violation) => {
+    setSelectedImageViolation(violation);
+    setIsImageDialogOpen(true);
+  };
+
+  const handleCloseImageDialog = () => {
+    setSelectedImageViolation(null);
+    setIsImageDialogOpen(false);
+  };
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -465,6 +481,45 @@ const ViolationsTable = () => {
         user={selectedUser}
         apiUrl={apiUrl}
       />
+
+      <Dialog
+  open={isImageDialogOpen}
+  onClose={handleCloseImageDialog}
+  maxWidth="md"
+  PaperProps={{ sx: { borderRadius: 2 } }}
+  >
+    <DialogTitle
+      sx={{
+        bgcolor: "#f5f7fa",
+        borderBottom: "1px solid rgba(0,0,0,0.1)",
+      }}
+    >
+      Event Image
+    </DialogTitle>
+    <DialogContent sx={{ p: 3 }}>
+      {selectedImageViolation?.event_image_path ? (
+        <Box sx={{ textAlign: "center" }}>
+          <img
+            src={`${apiUrl}/storage/${selectedImageViolation.violation_image_path}`}
+            alt="Event"
+            style={{
+              maxWidth: "100%",
+              borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            }}
+          />
+        </Box>
+      ) : (
+        <Typography>No image available for this violation.</Typography>
+      )}
+    </DialogContent>
+    <DialogActions sx={{ p: 2 }}>
+      <Button onClick={handleCloseImageDialog} variant="outlined" color="primary">
+        Close
+      </Button>
+    </DialogActions>
+  </Dialog>
+
     </Box>
   );
 };
