@@ -222,7 +222,7 @@ playbackTrustedProxies: []
 # Global settings -> RTSP server
 
 # Enable publishing and reading streams with the RTSP protocol.
-rtsp: no
+rtsp: yes
 # List of enabled RTSP transport protocols.
 # UDP is the most performant, but doesn't work when there's a NAT/firewall between
 # server and clients, and doesn't support encryption.
@@ -711,7 +711,7 @@ pathDefaults:
 # ip dapat sa camera. check via tapo app
 paths:
   cam:
-    source: rtsp://roadsense:roadsense@192.168.1.6:554/stream1
+    source: rtsp://roadsense:roadsense@192.168.1.13:554/stream1
 
 
   # Settings under path "all_others" are applied to all paths that
